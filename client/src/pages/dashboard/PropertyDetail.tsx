@@ -30,7 +30,20 @@ export default function PropertyDetail() {
   const [, setLocation] = useLocation();
   const propertyId = params?.id ? parseInt(params.id) : 0;
   const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
   const formRef = useRef<PropertyDetailFormHandle>(null);
+
+  // Initialize editedTitle when entering edit mode
+  const handleEditClick = () => {
+    setEditedTitle(property?.title || "");
+    setIsEditing(true);
+  };
+
+  // Reset editedTitle when canceling
+  const handleCancelClick = () => {
+    setEditedTitle("");
+    setIsEditing(false);
+  };
 
   const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
     id: propertyId,
@@ -58,10 +71,23 @@ export default function PropertyDetail() {
   });
 
   const handleSave = (data: Partial<Property>) => {
+    // Remove title from form data to avoid duplication
+    const dataWithoutTitle: any = { ...data };
+    delete dataWithoutTitle.title;
+    
+    // Always use editedTitle if it exists (user is in edit mode)
+    const finalData = {
+      ...dataWithoutTitle,
+      title: editedTitle || property?.title,
+    };
+    
     updateMutation.mutate({
       id: propertyId,
-      data: data as any,
+      data: finalData as any,
     });
+    
+    // Reset editedTitle after successful save
+    setEditedTitle("");
   };
 
   const handleSaveClick = () => {
@@ -143,7 +169,17 @@ export default function PropertyDetail() {
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{property.title}</h1>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-2xl font-bold border-b-2 border-primary bg-transparent focus:outline-none w-auto min-w-[300px]"
+                      placeholder="Immobilientitel"
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-bold">{property.title}</h1>
+                  )}
                   {getStatusBadge(property.status)}
                   {/* Info Badges */}
                   <div className="flex gap-2">
@@ -177,7 +213,7 @@ export default function PropertyDetail() {
               <div className="flex gap-2">
                 {!isEditing ? (
                   <>
-                    <Button variant="outline" onClick={() => setIsEditing(true)}>
+                    <Button variant="outline" onClick={handleEditClick}>
                       <Edit className="h-4 w-4 mr-2" />
                       Bearbeiten
                     </Button>
@@ -202,7 +238,7 @@ export default function PropertyDetail() {
                       <Save className="h-4 w-4 mr-2" />
                       Speichern
                     </Button>
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>
+                    <Button variant="outline" onClick={handleCancelClick}>
                       <X className="h-4 w-4 mr-2" />
                       Abbrechen
                     </Button>

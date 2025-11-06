@@ -71,6 +71,13 @@
       "when": 1762446607111,
       "tag": "0009_useful_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1762460169785,
+      "tag": "0010_nostalgic_hedge_knight",
+      "breakpoints": true
     }
   ]
 }

@@ -80,7 +80,11 @@ export const appRouter = router({
         energyConsumption: z.number().optional(),
         heatingType: z.string().optional(),
         yearBuilt: z.number().optional(),
-        condition: z.enum(["new", "renovated", "good", "needs_renovation", "demolished"]).optional(),
+        condition: z.enum([
+          "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
+          "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
+          "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
+        ]).optional(),
         availableFrom: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -126,7 +130,11 @@ export const appRouter = router({
           energyConsumption: z.number().optional(),
           heatingType: z.string().optional(),
           yearBuilt: z.number().optional(),
-          condition: z.enum(["new", "renovated", "good", "needs_renovation", "demolished"]).optional(),
+          condition: z.enum([
+            "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
+            "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
+            "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
+          ]).optional(),
           availableFrom: z.date().optional(),
           landingPageSlug: z.string().optional(),
           landingPagePublished: z.boolean().optional(),

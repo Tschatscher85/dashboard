@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useState, useRef, useEffect, useImperativeHandle } from "react";
 import type { Property } from "../../../drizzle/schema";
+import { Save } from "lucide-react";
 
 export type { Property };
 import { Button } from "./ui/button";
@@ -33,7 +34,10 @@ export interface PropertyDetailFormHandle {
 
 export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyDetailFormProps>(
   ({ property, onSave, isEditing }, ref) => {
-  const [formData, setFormData] = useState<Partial<Property>>(property);
+  // Initialize formData without title (title is managed separately in header)
+  const propertyWithoutTitle: any = { ...property };
+  delete propertyWithoutTitle.title;
+  const [formData, setFormData] = useState<Partial<Property>>(propertyWithoutTitle);
   const streetInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
 
@@ -1035,7 +1039,23 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           handleChange={handleChange}
         />
       }
-    />
+    >
+      {/* Sticky Save Button - only visible in edit mode */}
+      {isEditing && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-t">
+          <div className="container py-4">
+            <Button 
+              onClick={handleSave}
+              className="w-full max-w-md mx-auto flex items-center justify-center gap-2"
+              size="lg"
+            >
+              <Save className="h-5 w-5" />
+              Jetzt speichern
+            </Button>
+          </div>
+        </div>
+      )}
+    </PropertyDetailFormLayout>
   );
 });
 

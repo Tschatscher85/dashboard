@@ -102,3 +102,6 @@
 - [x] Add homepage URL configuration (for sync target)
 
 - [x] Fix status badge to display German labels instead of English values (e.g., "Vermarktung" instead of "marketing")
+
+- [ ] Fix condition field validation error (invalid value being sent)
+- [ ] Make property title editable in edit mode (add input field for title in header)

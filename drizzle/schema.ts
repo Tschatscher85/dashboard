@@ -147,7 +147,11 @@ export const properties = mysqlTable("properties", {
   // Construction
   yearBuilt: int("yearBuilt"),
   lastModernization: int("lastModernization"), // Letzte Modernisierung (Jahr)
-  condition: mysqlEnum("condition", ["new", "renovated", "good", "needs_renovation", "demolished"]),
+  condition: mysqlEnum("condition", [
+    "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
+    "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
+    "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
+  ]),
   buildingPhase: varchar("buildingPhase", { length: 100 }), // Bauphase
   equipmentQuality: varchar("equipmentQuality", { length: 100 }), // Qualität der Ausstattung
   

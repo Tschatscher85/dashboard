@@ -1,0 +1,1 @@
+ALTER TABLE `properties` MODIFY COLUMN `condition` enum('erstbezug','erstbezug_nach_sanierung','neuwertig','saniert','teilsaniert','sanierungsbedürftig','baufällig','modernisiert','vollständig_renoviert','teilweise_renoviert','gepflegt','renovierungsbedürftig','nach_vereinbarung','abbruchreif');
