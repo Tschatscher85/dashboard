@@ -187,10 +187,26 @@ export default function PropertyDetail() {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
-                    <X className="h-4 w-4 mr-2" />
-                    Abbrechen
-                  </Button>
+                  <>
+                    <Button 
+                      variant="default" 
+                      onClick={() => {
+                        // The form will handle the save via handleSave
+                        // This is just a visual indicator that we're in edit mode
+                        const form = document.querySelector('form');
+                        if (form) {
+                          form.requestSubmit();
+                        }
+                      }}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Speichern
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      <X className="h-4 w-4 mr-2" />
+                      Abbrechen
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

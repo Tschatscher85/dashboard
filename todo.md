@@ -84,3 +84,5 @@
 - [ ] Multi-language support
 
 - [x] Replace Projekt and Etage columns with Typ and Vermarktung in properties overview table
+
+- [x] Add save button to property detail page when in edit mode
