@@ -86,3 +86,8 @@
 - [x] Replace Projekt and Etage columns with Typ and Vermarktung in properties overview table
 
 - [x] Add save button to property detail page when in edit mode
+
+- [x] Make contact name clickable in contacts list table to navigate to detail page
+
+- [x] Make status badge clickable in properties overview to change status inline
+- [x] Make contact name clickable in contacts list table to navigate to detail page (already completed)

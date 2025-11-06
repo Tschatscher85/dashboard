@@ -345,7 +345,12 @@ export default function Contacts() {
               {filteredContacts?.map((contact) => (
                 <TableRow key={contact.id}>
                   <TableCell className="font-medium">
-                    {contact.firstName} {contact.lastName}
+                    <button
+                      onClick={() => setLocation(`/dashboard/contacts/${contact.id}`)}
+                      className="text-left hover:underline hover:text-primary transition-colors"
+                    >
+                      {contact.firstName} {contact.lastName}
+                    </button>
                   </TableCell>
                   <TableCell>{getContactTypeBadge(contact.contactType)}</TableCell>
                   <TableCell>{contact.company || "-"}</TableCell>

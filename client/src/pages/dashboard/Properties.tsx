@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +39,8 @@ export default function Properties() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusChangePropertyId, setStatusChangePropertyId] = useState<number | null>(null);
+  const [newStatus, setNewStatus] = useState<string>("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -85,6 +87,17 @@ export default function Properties() {
     },
     onError: (error) => {
       toast.error("Fehler beim Löschen: " + error.message);
+    },
+  });
+
+  const updateMutation = trpc.properties.update.useMutation({
+    onSuccess: () => {
+      toast.success("Status erfolgreich geändert");
+      refetch();
+      setStatusChangePropertyId(null);
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Aktualisieren: " + error.message);
     },
   });
 
@@ -478,7 +491,34 @@ export default function Properties() {
                   <TableCell>{property.rooms || "-"}</TableCell>
                   <TableCell>{property.livingArea ? `${property.livingArea} m²` : "-"}</TableCell>
                   <TableCell>{formatPrice(property.price)}</TableCell>
-                  <TableCell>{getStatusBadge(property.status)}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={property.status}
+                      onValueChange={(value) => {
+                        updateMutation.mutate({
+                          id: property.id,
+                          data: {
+                            status: value as any,
+                          },
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="w-[140px] h-8">
+                        <SelectValue>
+                          {getStatusBadge(property.status)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="acquisition">Akquise</SelectItem>
+                        <SelectItem value="preparation">Vorbereitung</SelectItem>
+                        <SelectItem value="marketing">Vermarktung</SelectItem>
+                        <SelectItem value="negotiation">Verhandlung</SelectItem>
+                        <SelectItem value="sold">Verkauft</SelectItem>
+                        <SelectItem value="rented">Vermietet</SelectItem>
+                        <SelectItem value="inactive">Inaktiv</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
