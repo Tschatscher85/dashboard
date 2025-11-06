@@ -483,3 +483,187 @@ export async function getDashboardStats() {
     upcomingAppointments: Number(appointmentsCount.count),
   };
 }
+
+// ============ INSURANCES ============
+
+export async function getAllInsurances(filters?: { type?: string; status?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { insurancePolicies } = await import("../drizzle/schema");
+  
+  let query = db.select().from(insurancePolicies);
+  
+  const conditions = [];
+  if (filters?.type) conditions.push(sql`${insurancePolicies.insuranceType} = ${filters.type}`);
+  if (filters?.status) conditions.push(sql`${insurancePolicies.status} = ${filters.status}`);
+  
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as any;
+  }
+  
+  const result = await query.orderBy(desc(insurancePolicies.createdAt));
+  return result;
+}
+
+export async function getInsuranceById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const { insurancePolicies } = await import("../drizzle/schema");
+  
+  const result = await db.select().from(insurancePolicies).where(eq(insurancePolicies.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function createInsurance(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { insurancePolicies } = await import("../drizzle/schema");
+  
+  const result = await db.insert(insurancePolicies).values(data);
+  return result;
+}
+
+export async function updateInsurance(id: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { insurancePolicies } = await import("../drizzle/schema");
+  
+  const result = await db.update(insurancePolicies).set(updates).where(eq(insurancePolicies.id, id));
+  return result;
+}
+
+export async function deleteInsurance(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { insurancePolicies } = await import("../drizzle/schema");
+  
+  const result = await db.delete(insurancePolicies).where(eq(insurancePolicies.id, id));
+  return result;
+}
+
+// ============ PROPERTY MANAGEMENT ============
+
+export async function getAllPropertyManagementContracts() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { propertyManagementContracts } = await import("../drizzle/schema");
+  
+  const result = await db.select().from(propertyManagementContracts).orderBy(desc(propertyManagementContracts.createdAt));
+  return result;
+}
+
+export async function createPropertyManagementContract(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { propertyManagementContracts } = await import("../drizzle/schema");
+  
+  const result = await db.insert(propertyManagementContracts).values(data);
+  return result;
+}
+
+export async function updatePropertyManagementContract(id: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { propertyManagementContracts } = await import("../drizzle/schema");
+  
+  const result = await db.update(propertyManagementContracts).set(updates).where(eq(propertyManagementContracts.id, id));
+  return result;
+}
+
+export async function deletePropertyManagementContract(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { propertyManagementContracts } = await import("../drizzle/schema");
+  
+  const result = await db.delete(propertyManagementContracts).where(eq(propertyManagementContracts.id, id));
+  return result;
+}
+
+export async function getAllMaintenanceRecords() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { maintenanceRecords } = await import("../drizzle/schema");
+  
+  const result = await db.select().from(maintenanceRecords).orderBy(desc(maintenanceRecords.date));
+  return result;
+}
+
+export async function createMaintenanceRecord(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { maintenanceRecords } = await import("../drizzle/schema");
+  
+  const result = await db.insert(maintenanceRecords).values(data);
+  return result;
+}
+
+export async function updateMaintenanceRecord(id: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { maintenanceRecords } = await import("../drizzle/schema");
+  
+  const result = await db.update(maintenanceRecords).set(updates).where(eq(maintenanceRecords.id, id));
+  return result;
+}
+
+export async function deleteMaintenanceRecord(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { maintenanceRecords } = await import("../drizzle/schema");
+  
+  const result = await db.delete(maintenanceRecords).where(eq(maintenanceRecords.id, id));
+  return result;
+}
+
+export async function getAllUtilityBills() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { utilityBills } = await import("../drizzle/schema");
+  
+  const result = await db.select().from(utilityBills).orderBy(desc(utilityBills.year), desc(utilityBills.month));
+  return result;
+}
+
+export async function createUtilityBill(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { utilityBills } = await import("../drizzle/schema");
+  
+  const result = await db.insert(utilityBills).values(data);
+  return result;
+}
+
+export async function updateUtilityBill(id: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { utilityBills } = await import("../drizzle/schema");
+  
+  const result = await db.update(utilityBills).set(updates).where(eq(utilityBills.id, id));
+  return result;
+}
+
+export async function deleteUtilityBill(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { utilityBills } = await import("../drizzle/schema");
+  
+  const result = await db.delete(utilityBills).where(eq(utilityBills.id, id));
+  return result;
+}

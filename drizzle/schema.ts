@@ -447,11 +447,11 @@ export const insurancePolicies = mysqlTable("insurancePolicies", {
   propertyId: int("propertyId"), // insured property
   
   // Financial
-  premium: int("premium"), // in cents
-  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "quarterly", "yearly"]),
+  premium: int("premium").notNull(), // in cents
+  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "quarterly", "yearly"]).notNull(),
   
   // Dates
-  startDate: timestamp("startDate"),
+  startDate: timestamp("startDate").notNull(),
   endDate: timestamp("endDate"),
   
   // Status

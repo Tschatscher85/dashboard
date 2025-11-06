@@ -278,3 +278,88 @@
 - [x] Calculate driving time to nearest airport
 - [x] Show loading state during calculation
 - [x] Handle API errors gracefully
+
+## Versicherungen (Insurance) Module - UI Implementation
+
+### Navigation & Routing
+- [x] Add "Versicherungen" navigation item in DashboardLayout
+- [x] Create route /dashboard/insurances for insurance list
+- [x] Create route /dashboard/insurances/new for creating new policy
+- [x] Create route /dashboard/insurances/:id for editing policy
+
+### Insurance List Page
+- [x] Create Insurances.tsx list page
+- [x] Display all insurance policies in table
+- [x] Add filters: insurance type, status, property, contact
+- [x] Add search by policy number
+- [x] Add "Neue Versicherung" button
+- [x] Show policy details: number, type, provider, premium, dates
+- [x] Add edit and delete actions
+
+### Insurance Detail/Form Page
+- [x] Create InsuranceDetail.tsx page
+- [x] Add policy number field
+- [x] Add insurance type dropdown (7 types)
+- [x] Add provider/company field
+- [x] Add contact selection (Versicherungsnehmer)
+- [x] Add property selection (optional)
+- [x] Add start date and end date fields
+- [x] Add premium amount and payment interval
+- [x] Add status dropdown (active, expired, cancelled)
+- [x] Add notes textarea
+- [x] Implement save functionality
+
+### Backend Procedures
+- [x] Create insurances.list tRPC procedure
+- [x] Create insurances.getById procedure
+- [x] Create insurances.create procedure
+- [x] Create insurances.update procedure
+- [x] Create insurances.delete procedure
+- [x] Add filters and search to list procedure
+
+## Hausverwaltung (Property Management) Module - UI Implementation
+
+### Navigation & Routing
+- [x] Add "Hausverwaltung" navigation item in DashboardLayout
+- [x] Create route /dashboard/property-management for overview
+- [x] Create tabbed interface: Verträge, Instandhaltung, Nebenkosten
+
+### Verträge (Contracts) Tab
+- [x] Create PropertyManagementContracts component
+- [x] Display all management contracts in table
+- [x] Add "Neuer Vertrag" button
+- [x] Show contract details: number, property, manager, dates, fee
+- [x] Add contract form dialog
+- [x] Implement create/edit/delete operations
+
+### Instandhaltung (Maintenance) Tab
+- [x] Create MaintenanceRecords component
+- [x] Display maintenance records in table
+- [x] Add filters: property, category, status, date range
+- [x] Add "Neue Wartung" button
+- [x] Show maintenance details: date, description, cost, vendor
+- [x] Add maintenance form dialog
+- [x] Implement create/edit/delete operations
+
+### Nebenkosten (Utility Bills) Tab
+- [x] Create UtilityBills component
+- [x] Display utility bills in table
+- [x] Add filters: property, year, month, type
+- [x] Add "Neue Abrechnung" button
+- [x] Show bill details: period, type, amount, paid by
+- [x] Add utility bill form dialog
+- [x] Implement create/edit/delete operations
+
+### Backend Procedures
+- [x] Create propertyManagement.listContracts procedure
+- [x] Create propertyManagement.createContract procedure
+- [x] Create propertyManagement.updateContract procedure
+- [x] Create propertyManagement.deleteContract procedure
+- [x] Create propertyManagement.listMaintenance procedure
+- [x] Create propertyManagement.createMaintenance procedure
+- [x] Create propertyManagement.updateMaintenance procedure
+- [x] Create propertyManagement.deleteMaintenance procedure
+- [x] Create propertyManagement.listUtilityBills procedure
+- [x] Create propertyManagement.createUtilityBill procedure
+- [x] Create propertyManagement.updateUtilityBill procedure
+- [x] Create propertyManagement.deleteUtilityBill procedure

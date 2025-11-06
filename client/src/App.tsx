@@ -12,8 +12,11 @@ import PropertyDetail from "./pages/dashboard/PropertyDetail";
 import Contacts from "./pages/dashboard/Contacts";
 import ContactDetail from "./pages/dashboard/ContactDetail";
 import Leads from "./pages/dashboard/Leads";
+import Insurances from "./pages/dashboard/Insurances";
+import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
+import PropertyManagement from "./pages/dashboard/PropertyManagement";
 import PropertyLanding from "./pages/PropertyLanding";
-import { Building2, Users, Mail, Calendar, FileText, Settings } from "lucide-react";
+import { Building2, Users, Mail, Calendar, FileText, Settings, Shield, Wrench } from "lucide-react";
 
 const dashboardNavItems = [
   {
@@ -45,6 +48,16 @@ const dashboardNavItems = [
     title: "Dokumente",
     href: "/dashboard/documents",
     icon: FileText,
+  },
+  {
+    title: "Versicherungen",
+    href: "/dashboard/insurances",
+    icon: Shield,
+  },
+  {
+    title: "Hausverwaltung",
+    href: "/dashboard/property-management",
+    icon: Wrench,
   },
   {
     title: "Einstellungen",
@@ -112,6 +125,27 @@ function Router() {
               <h1 className="text-3xl font-bold">Dokumente</h1>
               <p className="text-muted-foreground">Dokumentenverwaltung kommt bald...</p>
             </div>
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/insurances/:id">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <InsuranceDetail />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/insurances">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <Insurances />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/property-management">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <PropertyManagement />
           </DashboardLayout>
         )}
       </Route>

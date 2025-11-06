@@ -646,6 +646,209 @@ export const appRouter = router({
       }),
   }),
 
+  // ============ INSURANCES ============
+  insurances: router({  list: protectedProcedure
+      .input(z.object({
+        type: z.string().optional(),
+        status: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllInsurances(input);
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getInsuranceById(input.id);
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        policyNumber: z.string(),
+        insuranceType: z.string(),
+        provider: z.string(),
+        contactId: z.number().nullable().optional(),
+        propertyId: z.number().nullable().optional(),
+        startDate: z.date(),
+        endDate: z.date().nullable().optional(),
+        premium: z.number(),
+        paymentInterval: z.string(),
+        status: z.enum(["active", "expired", "cancelled"]),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createInsurance(input);
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        policyNumber: z.string().optional(),
+        insuranceType: z.string().optional(),
+        provider: z.string().optional(),
+        contactId: z.number().nullable().optional(),
+        propertyId: z.number().nullable().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().nullable().optional(),
+        premium: z.number().optional(),
+        paymentInterval: z.string().optional(),
+        status: z.enum(["active", "expired", "cancelled"]).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateInsurance(id, data);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteInsurance(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ============ PROPERTY MANAGEMENT ============
+  propertyManagement: router({    listContracts: protectedProcedure
+      .input(z.object({}).optional())
+      .query(async () => {
+        return await db.getAllPropertyManagementContracts();
+      }),
+
+    createContract: protectedProcedure
+      .input(z.object({
+        contractNumber: z.string(),
+        propertyId: z.number().nullable().optional(),
+        managerId: z.number().nullable().optional(),
+        startDate: z.date(),
+        endDate: z.date().nullable().optional(),
+        monthlyFee: z.number(),
+        services: z.string().optional(),
+        status: z.enum(["active", "expired", "cancelled"]),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createPropertyManagementContract(input);
+        return { success: true };
+      }),
+
+    updateContract: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        contractNumber: z.string().optional(),
+        propertyId: z.number().nullable().optional(),
+        managerId: z.number().nullable().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().nullable().optional(),
+        monthlyFee: z.number().optional(),
+        services: z.string().optional(),
+        status: z.enum(["active", "expired", "cancelled"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updatePropertyManagementContract(id, data);
+        return { success: true };
+      }),
+
+    deleteContract: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deletePropertyManagementContract(input.id);
+        return { success: true };
+      }),
+
+    listMaintenance: protectedProcedure
+      .input(z.object({}).optional())
+      .query(async () => {
+        return await db.getAllMaintenanceRecords();
+      }),
+
+    createMaintenance: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        date: z.date(),
+        description: z.string(),
+        cost: z.number(),
+        category: z.string(),
+        vendor: z.string().optional(),
+        status: z.enum(["planned", "in_progress", "completed", "cancelled"]),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createMaintenanceRecord(input);
+        return { success: true };
+      }),
+
+    updateMaintenance: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        propertyId: z.number().optional(),
+        date: z.date().optional(),
+        description: z.string().optional(),
+        cost: z.number().optional(),
+        category: z.string().optional(),
+        vendor: z.string().optional(),
+        status: z.enum(["planned", "in_progress", "completed", "cancelled"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateMaintenanceRecord(id, data);
+        return { success: true };
+      }),
+
+    deleteMaintenance: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteMaintenanceRecord(input.id);
+        return { success: true };
+      }),
+
+    listUtilityBills: protectedProcedure
+      .input(z.object({}).optional())
+      .query(async () => {
+        return await db.getAllUtilityBills();
+      }),
+
+    createUtilityBill: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        year: z.number(),
+        month: z.number(),
+        type: z.string(),
+        amount: z.number(),
+        paidBy: z.string().optional(),
+        status: z.enum(["pending", "paid", "overdue"]),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createUtilityBill(input);
+        return { success: true };
+      }),
+
+    updateUtilityBill: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        propertyId: z.number().optional(),
+        year: z.number().optional(),
+        month: z.number().optional(),
+        type: z.string().optional(),
+        amount: z.number().optional(),
+        paidBy: z.string().optional(),
+        status: z.enum(["pending", "paid", "overdue"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateUtilityBill(id, data);
+        return { success: true };
+      }),
+
+    deleteUtilityBill: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteUtilityBill(input.id);
+        return { success: true };
+      }),
+  }),
+
   // ============ DASHBOARD ============
   dashboard: router({
     stats: protectedProcedure.query(async () => {
