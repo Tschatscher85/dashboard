@@ -52,11 +52,11 @@
 - [ ] Database migration guide
 
 ### Exposé & Landing Page Generation
-- [ ] Exposé template system (multiple designs)
-- [ ] PDF exposé generator with property data
-- [ ] Image gallery integration in exposés
-- [ ] Landing page builder for individual properties
-- [ ] Landing page templates (modern, classic, luxury)
+- [x] Exposé template system (multiple designs)
+- [x] PDF exposé generator with property data
+- [x] Image gallery integration in exposés
+- [x] Landing page builder for individual properties
+- [x] Landing page templates (modern, classic, luxury)
 - [ ] SEO metadata for landing pages
-- [ ] Public URL generation for property landing pages
-- [ ] Preview function for exposés and landing pages
+- [x] Public URL generation for property landing pages
+- [x] Preview function for exposés and landing pages

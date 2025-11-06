@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+import { generateExpose } from "./exposeGenerator";
 
 export const appRouter = router({
   system: systemRouter,
@@ -162,11 +163,30 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    deleteImage: protectedProcedure
+      deleteImage: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deletePropertyImage(input.id);
         return { success: true };
+      }),
+
+    generateExpose: protectedProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .mutation(async ({ input }) => {
+        const property = await db.getPropertyById(input.propertyId);
+        if (!property) {
+          throw new Error("Property not found");
+        }
+        
+        const images = await db.getPropertyImages(input.propertyId);
+        const pdfBytes = await generateExpose({
+          property,
+          images: images.map(img => ({ url: img.imageUrl, type: img.imageType || 'other' })),
+        });
+        
+        // Convert to base64 for transmission
+        const base64 = Buffer.from(pdfBytes).toString('base64');
+        return { pdf: base64 };
       }),
   }),
 

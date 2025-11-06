@@ -10,12 +10,14 @@ import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import Properties from "./pages/dashboard/Properties";
 import Contacts from "./pages/dashboard/Contacts";
 import Leads from "./pages/dashboard/Leads";
+import PropertyLanding from "./pages/PropertyLanding";
 import { Building2, Users, Mail, Calendar, FileText, Settings } from "lucide-react";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/property/:id" component={PropertyLanding} />
       
       {/* Dashboard Routes */}
       <Route path={"/dashboard"}>

@@ -28,8 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Eye, Building2 } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
@@ -83,6 +84,40 @@ export default function Properties() {
       toast.error("Fehler beim Löschen: " + error.message);
     },
   });
+
+  const generateExposeMutation = trpc.properties.generateExpose.useMutation({
+    onSuccess: (data) => {
+      // Convert base64 to blob and download
+      const binaryString = atob(data.pdf);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `expose-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Exposé erfolgreich generiert");
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Generieren: " + error.message);
+    },
+  });
+
+  const [, setLocation] = useLocation();
+
+  const handleGenerateExpose = (propertyId: number) => {
+    generateExposeMutation.mutate({ propertyId });
+  };
+
+  const handleViewLanding = (propertyId: number) => {
+    window.open(`/property/${propertyId}`, '_blank');
+  };
 
   const handleCreate = () => {
     createMutation.mutate({
@@ -360,6 +395,22 @@ export default function Properties() {
                   <TableCell>{getStatusBadge(property.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewLanding(property.id)}
+                        title="Landing Page öffnen"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleGenerateExpose(property.id)}
+                        title="Exposé generieren"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
