@@ -8,7 +8,9 @@ import Home from "./pages/Home";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import Properties from "./pages/dashboard/Properties";
+import PropertyDetail from "./pages/dashboard/PropertyDetail";
 import Contacts from "./pages/dashboard/Contacts";
+import ContactDetail from "./pages/dashboard/ContactDetail";
 import Leads from "./pages/dashboard/Leads";
 import PropertyLanding from "./pages/PropertyLanding";
 import { Building2, Users, Mail, Calendar, FileText, Settings } from "lucide-react";
@@ -63,7 +65,9 @@ function Router() {
           >
             <Switch>
               <Route path="/dashboard" component={DashboardOverview} />
+              <Route path="/dashboard/properties/:id" component={PropertyDetail} />
               <Route path="/dashboard/properties" component={Properties} />
+              <Route path="/dashboard/contacts/:id" component={ContactDetail} />
               <Route path="/dashboard/contacts" component={Contacts} />
               <Route path="/dashboard/leads" component={Leads} />
               <Route path="/dashboard/appointments">

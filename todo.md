@@ -61,3 +61,28 @@
 - [ ] SEO metadata for landing pages
 - [x] Public URL generation for property landing pages
 - [x] Preview function for exposés and landing pages
+
+### Propstack-Inspired Property Detail View
+- [x] Property detail page with tabbed interface (Details, Aktivitäten, Medien, Historie)
+- [ ] Contact linking with roles (Eigentümer, Käufer, Notar, Hausverwaltung, Mieter)
+- [ ] Activity timeline for property
+- [x] Comprehensive property data display (Stammdaten, Adresse, Preise, Flächen, Ausstattung)
+- [ ] Property description editor
+- [ ] Property status workflow (Akquise, Vorbereitung, Vermarktung, Reserviert, Abgeschlossen)
+- [x] Contact detail page with tabbed interface
+- [x] Navigation from list views to detail views
+
+### Google Calendar Integration
+- [ ] Appointment/Viewing scheduler
+- [ ] Google Calendar API integration
+- [ ] Sync appointments to Google Calendar
+- [ ] Appointment list view in dashboard
+- [ ] Link appointments to properties and contacts
+
+### Document Management with NAS
+- [ ] Document upload and storage
+- [ ] NAS connection configuration (SMB/CIFS, WebDAV, or file path)
+- [ ] Link documents to properties
+- [ ] Link documents to contacts
+- [ ] Image gallery for properties
+- [ ] Document browser in dashboard

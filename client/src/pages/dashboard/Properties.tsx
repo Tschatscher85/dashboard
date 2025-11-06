@@ -414,7 +414,8 @@ export default function Properties() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toast.info("Detailansicht kommt bald")}
+                        onClick={() => setLocation(`/dashboard/properties/${property.id}`)}
+                        title="Details anzeigen"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

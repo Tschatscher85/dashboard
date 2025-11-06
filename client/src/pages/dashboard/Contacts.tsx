@@ -28,12 +28,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, User, Upload, Users } from "lucide-react";
+import { Plus, Edit, Trash2, User, Upload, Users, Eye } from "lucide-react";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 export default function Contacts() {
+  const [, setLocation] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [formData, setFormData] = useState({
     contactType: "interested" as const,
@@ -312,6 +314,14 @@ export default function Contacts() {
                   <TableCell>{contact.phone || contact.mobile || "-"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setLocation(`/dashboard/contacts/${contact.id}`)}
+                        title="Details anzeigen"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
