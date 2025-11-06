@@ -382,3 +382,5 @@
 - [x] Rename "Immobilien" to "Objekte" in navigation and all UI
 
 - [x] Fix travel times calculation with Google Maps Distance Matrix API
+
+- [x] Make property title clickable in properties list table to navigate to detail page

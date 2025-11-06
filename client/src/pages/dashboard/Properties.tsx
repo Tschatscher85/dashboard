@@ -386,7 +386,14 @@ export default function Properties() {
             <TableBody>
               {properties?.map((property) => (
                 <TableRow key={property.id}>
-                  <TableCell className="font-medium">{property.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <button
+                      onClick={() => setLocation(`/dashboard/properties/${property.id}`)}
+                      className="text-left hover:underline hover:text-primary transition-colors"
+                    >
+                      {property.title}
+                    </button>
+                  </TableCell>
                   <TableCell>{getPropertyTypeLabel(property.propertyType)}</TableCell>
                   <TableCell>{getMarketingTypeLabel(property.marketingType)}</TableCell>
                   <TableCell>{property.city || "-"}</TableCell>
