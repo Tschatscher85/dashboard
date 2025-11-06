@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Switch } from "./ui/switch";
+import { MultiSelect } from "./ui/multi-select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
 
@@ -782,80 +783,51 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
 
           <div className="col-span-2">
             <Label className="mb-2 block">Bad</Label>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.bathShower || false}
-                  onCheckedChange={(checked) => handleChange("bathShower", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Dusche</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.bathTub || false}
-                  onCheckedChange={(checked) => handleChange("bathTub", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Wanne</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.bathWindow || false}
-                  onCheckedChange={(checked) => handleChange("bathWindow", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Fenster</Label>
-              </div>
-            </div>
+            <MultiSelect
+              options={[
+                { label: "Dusche", value: "Dusche" },
+                { label: "Wanne", value: "Wanne" },
+                { label: "Fenster", value: "Fenster" },
+                { label: "Bidet", value: "Bidet" },
+                { label: "Urinal", value: "Urinal" },
+              ]}
+              selected={formData.bathroomFeatures ? formData.bathroomFeatures.split(",").filter(Boolean) : []}
+              onChange={(values) => handleChange("bathroomFeatures", values.join(","))}
+              placeholder="Badausstattung wählen..."
+              disabled={!isEditing}
+            />
           </div>
 
           <Separator className="col-span-2 my-2" />
 
           <div className="col-span-2">
             <Label className="mb-2 block">Bodenbelag</Label>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.flooringTiles || false}
-                  onCheckedChange={(checked) => handleChange("flooringTiles", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Fliesen</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.flooringLaminate || false}
-                  onCheckedChange={(checked) => handleChange("flooringLaminate", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Laminat</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.flooringPVC || false}
-                  onCheckedChange={(checked) => handleChange("flooringPVC", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>PVC</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.flooringParquet || false}
-                  onCheckedChange={(checked) => handleChange("flooringParquet", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Parkett</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.flooringVinyl || false}
-                  onCheckedChange={(checked) => handleChange("flooringVinyl", checked)}
-                  disabled={!isEditing}
-                />
-                <Label>Vinylboden</Label>
-              </div>
-            </div>
+            <MultiSelect
+              options={[
+                { label: "Beton", value: "Beton" },
+                { label: "Epoxidharz", value: "Epoxidharz" },
+                { label: "Fliesen", value: "Fliesen" },
+                { label: "Dielen", value: "Dielen" },
+                { label: "Laminat", value: "Laminat" },
+                { label: "Parkett", value: "Parkett" },
+                { label: "PVC", value: "PVC" },
+                { label: "Teppichboden", value: "Teppichboden" },
+                { label: "Antistatischer Teppichboden", value: "Antistatischer Teppichboden" },
+                { label: "Stuhlrollenfeste Teppichfliesen", value: "Stuhlrollenfeste Teppichfliesen" },
+                { label: "Stein", value: "Stein" },
+                { label: "Linoleum", value: "Linoleum" },
+                { label: "Marmor", value: "Marmor" },
+                { label: "Terrakotta", value: "Terrakotta" },
+                { label: "Granit", value: "Granit" },
+                { label: "Vinylboden", value: "Vinylboden" },
+                { label: "Nach Wunsch", value: "Nach Wunsch" },
+                { label: "Ohne Bodenbelag", value: "Ohne Bodenbelag" },
+              ]}
+              selected={formData.flooringTypes ? formData.flooringTypes.split(",").filter(Boolean) : []}
+              onChange={(values) => handleChange("flooringTypes", values.join(","))}
+              placeholder="Bodenbelag wählen..."
+              disabled={!isEditing}
+            />
           </div>
         </CardContent>
       </Card>

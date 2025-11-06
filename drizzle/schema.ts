@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, json } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -119,17 +119,13 @@ export const properties = mysqlTable("properties", {
   parkingCount: int("parkingCount"), // Anzahl Parkplätze
   parkingType: varchar("parkingType", { length: 100 }), // Stellplatztyp (Garage, etc.)
   
-  // Bad
-  bathShower: boolean("bathShower").default(false), // Dusche
-  bathTub: boolean("bathTub").default(false), // Wanne
-  bathWindow: boolean("bathWindow").default(false), // Fenster
+  // Bad (Multi-select: Dusche, Wanne, Fenster, Bidet, Urinal)
+  // Stored as comma-separated values
+  bathroomFeatures: text("bathroomFeatures"),
   
-  // Bodenbelag
-  flooringTiles: boolean("flooringTiles").default(false), // Fliesen
-  flooringLaminate: boolean("flooringLaminate").default(false), // Laminat
-  flooringPVC: boolean("flooringPVC").default(false), // PVC
-  flooringParquet: boolean("flooringParquet").default(false), // Parkett
-  flooringVinyl: boolean("flooringVinyl").default(false), // Vinylboden
+  // Bodenbelag (Multi-select)
+  // Stored as comma-separated values
+  flooringTypes: text("flooringTypes"),
   
   // Energy certificate
   energyClass: varchar("energyClass", { length: 10 }), // A+, A, B, C, etc.

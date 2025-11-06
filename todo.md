@@ -103,3 +103,8 @@
 - [x] Apply consistent fonts from homepage
 - [x] Update application title and branding information
 - [x] Ensure consistent visual identity across all pages
+
+### Property Detail Form Improvements
+- [x] Replace bathroom checkboxes with multi-select dropdown (Dusche, Wanne, Fenster, Bidet, Urinal)
+- [x] Replace flooring checkboxes with multi-select dropdown (Beton, Epoxidharz, Fliesen, Dielen, Laminat, Parkett, PVC, Teppichboden, etc.)
+- [x] Update database schema to store bathroom and flooring as TEXT fields
