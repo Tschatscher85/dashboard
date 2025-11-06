@@ -440,8 +440,8 @@ export default function Properties() {
                 </TableHead>
                 <TableHead className="w-20">Bild</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Projekt</TableHead>
-                <TableHead>Etage</TableHead>
+                <TableHead>Typ</TableHead>
+                <TableHead>Vermarktung</TableHead>
                 <TableHead>Zimmer</TableHead>
                 <TableHead>Fläche</TableHead>
                 <TableHead>Preis</TableHead>
@@ -473,8 +473,8 @@ export default function Properties() {
                       {property.title}
                     </button>
                   </TableCell>
-                  <TableCell>{property.project || "-"}</TableCell>
-                  <TableCell>{property.floor || "-"}</TableCell>
+                  <TableCell>{getPropertyTypeLabel(property.propertyType)}</TableCell>
+                  <TableCell>{getMarketingTypeLabel(property.marketingType)}</TableCell>
                   <TableCell>{property.rooms || "-"}</TableCell>
                   <TableCell>{property.livingArea ? `${property.livingArea} m²` : "-"}</TableCell>
                   <TableCell>{formatPrice(property.price)}</TableCell>

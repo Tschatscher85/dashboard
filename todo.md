@@ -82,3 +82,5 @@
 - [ ] API documentation
 - [ ] Webhook support
 - [ ] Multi-language support
+
+- [x] Replace Projekt and Etage columns with Typ and Vermarktung in properties overview table
