@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { Plus, Edit, Trash2, User, Upload, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +77,15 @@ export default function Contacts() {
     },
     onError: (error) => {
       toast.error("Fehler beim Löschen: " + error.message);
+    },
+  });
+
+  const syncBrevoMutation = trpc.brevo.syncContact.useMutation({
+    onSuccess: () => {
+      toast.success("Kontakt erfolgreich zu Brevo synchronisiert");
+    },
+    onError: (error) => {
+      toast.error("Brevo-Sync fehlgeschlagen: " + error.message);
     },
   });
 
@@ -303,6 +312,14 @@ export default function Contacts() {
                   <TableCell>{contact.phone || contact.mobile || "-"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => syncBrevoMutation.mutate({ contactId: contact.id })}
+                        title="Zu Brevo synchronisieren"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"

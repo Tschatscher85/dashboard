@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mail, Trash2 } from "lucide-react";
+import { Mail, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,15 @@ export default function Leads() {
     },
     onError: (error) => {
       toast.error("Fehler beim Löschen: " + error.message);
+    },
+  });
+
+  const syncBrevoMutation = trpc.brevo.syncLead.useMutation({
+    onSuccess: () => {
+      toast.success("Lead erfolgreich zu Brevo synchronisiert");
+    },
+    onError: (error) => {
+      toast.error("Brevo-Sync fehlgeschlagen: " + error.message);
     },
   });
 
@@ -151,17 +160,27 @@ export default function Leads() {
                     })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        if (confirm("Möchten Sie diesen Lead wirklich löschen?")) {
-                          deleteMutation.mutate({ id: lead.id });
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => syncBrevoMutation.mutate({ leadId: lead.id })}
+                        title="Zu Brevo synchronisieren"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm("Möchten Sie diesen Lead wirklich löschen?")) {
+                            deleteMutation.mutate({ id: lead.id });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

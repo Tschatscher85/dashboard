@@ -5,6 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { generateExpose } from "./exposeGenerator";
+import { getBrevoClient } from "./brevoClient";
 
 export const appRouter = router({
   system: systemRouter,
@@ -405,6 +406,70 @@ export const appRouter = router({
           createdBy: ctx.user.id,
         });
         return { success: true };
+      }),
+  }),
+
+  // ============ BREVO SYNC ============
+  brevo: router({
+    syncLead: protectedProcedure
+      .input(z.object({ leadId: z.number() }))
+      .mutation(async ({ input }) => {
+        const lead = await db.getLeadById(input.leadId);
+        if (!lead) {
+          throw new Error("Lead not found");
+        }
+
+        const brevo = getBrevoClient();
+        
+        // Get property title if propertyId exists
+        let propertyTitle: string | undefined;
+        if (lead.propertyId) {
+          const property = await db.getPropertyById(lead.propertyId);
+          propertyTitle = property?.title;
+        }
+
+        await brevo.syncPropertyLead({
+          email: lead.email,
+          firstName: lead.firstName ?? undefined,
+          lastName: lead.lastName ?? undefined,
+          phone: lead.phone ?? undefined,
+          message: lead.message ?? undefined,
+          propertyTitle,
+          source: lead.source ?? undefined,
+        });
+
+        return { success: true };
+      }),
+
+    syncContact: protectedProcedure
+      .input(z.object({ contactId: z.number() }))
+      .mutation(async ({ input }) => {
+        const contact = await db.getContactById(input.contactId);
+        if (!contact) {
+          throw new Error("Contact not found");
+        }
+
+        if (!contact.email) {
+          throw new Error("Contact must have an email address for Brevo sync");
+        }
+
+        const brevo = getBrevoClient();
+        await brevo.syncContact({
+          email: contact.email,
+          firstName: contact.firstName ?? undefined,
+          lastName: contact.lastName ?? undefined,
+          phone: contact.phone ?? undefined,
+          contactType: contact.contactType ?? undefined,
+        });
+
+        return { success: true };
+      }),
+
+    getLists: protectedProcedure
+      .query(async () => {
+        const brevo = getBrevoClient();
+        const lists = await brevo.getLists();
+        return lists;
       }),
   }),
 

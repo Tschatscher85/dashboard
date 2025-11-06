@@ -26,10 +26,11 @@
 - [x] Lead management interface
 
 ### Brevo CRM Integration
-- [ ] Brevo API client setup
-- [ ] Contact synchronization to Brevo
+- [x] Brevo API client setup
+- [x] Contact synchronization to Brevo
+- [x] Lead synchronization to Brevo (Immobilienanfrage list)
 - [ ] Webhook handler for Brevo updates
-- [ ] Manual sync trigger in admin panel
+- [x] Manual sync trigger in admin panel
 
 ### Public Frontend
 - [ ] Public property listings page
