@@ -226,12 +226,16 @@
 
 ## Future Module Preparation
 
-### Contact Tagging System
+### Contact Tagging System - Enhanced
 - [x] Add tags field to contacts table (TEXT, JSON array)
-- [x] Create predefined tag list (Versicherungskunde, Makler-Lead, Hausverwaltung-Interessent, Käufer, Verkäufer, Mieter, Vermieter)
-- [x] Add tag multi-select component to contact detail view
-- [x] Add tag filter to contact list view
-- [x] Add tag badges display in contact cards
+- [x] Update contact tags with comprehensive categories:
+  - [x] Dienstleister: Architekt, Bauträger, Fotograf, Handwerker, Hausverwaltung, IT-Branche
+  - [x] Kunde: Eigennutzer, Eigentümer, Eigentümer Lead, Kapitalanleger, Kaufinteressent, Käufer, Mieter, Mietinteressent, Verkäufer, Vermieter
+  - [x] Partner: Finanzierung, Kooperation, Makler, Notar, Rechtsanwalt, Tippgeber
+- [x] Add contact status field with options: Sonstiges, Partner, Dienstleister, Kunde, Versicherung, Hausverwaltung, Objekteigentümer
+- [x] Update contact list filter to support new tag structure with categories
+- [x] Update contact detail view with new tag categories
+- [ ] Update contact form with status dropdown
 
 ### Versicherungen (Insurance) Module - Database Preparation
 - [x] Create insurancePolicies table
@@ -271,7 +275,9 @@
 ### Travel Time Calculation
 - [x] Clear default values from travel time fields
 - [x] Make travel time fields read-only
-- [x] Implement Google Maps Distance Matrix API integration
+- [ ] Fix Google Maps Distance Matrix API integration for travel time calculation
+- [ ] Ensure calculated values populate form fields correctly
+- [ ] Test that values persist after calculation
 - [x] Calculate walking time to nearest public transport
 - [x] Calculate driving time to nearest highway
 - [x] Calculate driving time to nearest main train station
@@ -363,3 +369,16 @@
 - [x] Create propertyManagement.createUtilityBill procedure
 - [x] Create propertyManagement.updateUtilityBill procedure
 - [x] Create propertyManagement.deleteUtilityBill procedure
+
+## Bug Fixes
+
+### Travel Time Calculation
+- [ ] Fix issue where calculated travel times are not populating form fields
+- [ ] Rewrite to use Google Maps JavaScript API in browser instead of server requests
+- [ ] Test that values persist after calculation
+
+### Navigation Improvements
+- [x] Reorder navigation: Kontakte after Übersicht, before Immobilien
+- [x] Rename "Immobilien" to "Objekte" in navigation and all UI
+
+- [x] Fix travel times calculation with Google Maps Distance Matrix API

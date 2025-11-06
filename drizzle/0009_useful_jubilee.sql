@@ -1,0 +1,1 @@
+ALTER TABLE `contacts` ADD `status` enum('sonstiges','partner','dienstleister','kunde','versicherung','hausverwaltung','objekteigentuemer') DEFAULT 'sonstiges';

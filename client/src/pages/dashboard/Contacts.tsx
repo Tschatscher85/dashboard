@@ -33,7 +33,7 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { CONTACT_TAG_OPTIONS } from "@/components/ContactTagsInput";
+import { CONTACT_TAG_OPTIONS, CONTACT_TAG_CATEGORIES } from "@/components/ContactTagsInput";
 
 export default function Contacts() {
   const [, setLocation] = useLocation();
@@ -167,15 +167,25 @@ export default function Contacts() {
         </div>
         <div className="flex gap-2">
           <Select value={selectedTagFilter} onValueChange={setSelectedTagFilter}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="Filter nach Tag" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[400px]">
               <SelectItem value="all">Alle Kontakte</SelectItem>
-              {CONTACT_TAG_OPTIONS.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag}
-                </SelectItem>
+              {Object.entries(CONTACT_TAG_CATEGORIES).map(([category, tags]) => (
+                <div key={category}>
+                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                    {category}
+                  </div>
+                  {tags.map((tag) => {
+                    const fullTag = `${category}: ${tag}`;
+                    return (
+                      <SelectItem key={fullTag} value={fullTag}>
+                        {tag}
+                      </SelectItem>
+                    );
+                  })}
+                </div>
               ))}
             </SelectContent>
           </Select>

@@ -254,7 +254,8 @@ export const contacts = mysqlTable("contacts", {
   // Additional info
   notes: text("notes"),
   source: varchar("source", { length: 100 }), // where did they come from
-  tags: text("tags"), // JSON array of tags: ["Versicherungskunde", "Makler-Lead", etc.]
+  status: mysqlEnum("status", ["sonstiges", "partner", "dienstleister", "kunde", "versicherung", "hausverwaltung", "objekteigentuemer"]).default("sonstiges"),
+  tags: text("tags"), // JSON array of tags with categories: ["Dienstleister: Architekt", "Kunde: Käufer", "Partner: Makler", etc.]
   
   // Brevo sync
   brevoContactId: varchar("brevoContactId", { length: 100 }),

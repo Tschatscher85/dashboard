@@ -10,19 +10,42 @@ import {
 } from "./ui/select";
 import { useState } from "react";
 
-// Predefined tag options
-export const CONTACT_TAG_OPTIONS = [
-  "Versicherungskunde",
-  "Makler-Lead",
-  "Hausverwaltung-Interessent",
-  "Käufer",
-  "Verkäufer",
-  "Mieter",
-  "Vermieter",
-  "Investor",
-  "Bauträger",
-  "Handwerker",
-] as const;
+// Comprehensive tag options with categories
+export const CONTACT_TAG_CATEGORIES = {
+  Dienstleister: [
+    "Architekt",
+    "Bauträger",
+    "Fotograf",
+    "Handwerker",
+    "Hausverwaltung",
+    "IT-Branche",
+  ],
+  Kunde: [
+    "Eigennutzer",
+    "Eigentümer",
+    "Eigentümer Lead",
+    "Kapitalanleger",
+    "Kaufinteressent",
+    "Käufer",
+    "Mieter",
+    "Mietinteressent",
+    "Verkäufer",
+    "Vermieter",
+  ],
+  Partner: [
+    "Finanzierung",
+    "Kooperation",
+    "Makler",
+    "Notar",
+    "Rechtsanwalt",
+    "Tippgeber",
+  ],
+} as const;
+
+// Flatten all tags for backwards compatibility
+export const CONTACT_TAG_OPTIONS = Object.entries(CONTACT_TAG_CATEGORIES).flatMap(
+  ([category, tags]) => tags.map((tag) => `${category}: ${tag}`)
+);
 
 export type ContactTag = typeof CONTACT_TAG_OPTIONS[number];
 
@@ -75,17 +98,30 @@ export function ContactTagsInput({ tags, onChange, disabled }: ContactTagsInputP
         </div>
       )}
 
-      {/* Tag selector */}
+      {/* Tag selector with categories */}
       {!disabled && availableTags.length > 0 && (
         <Select value={selectedTag} onValueChange={addTag}>
           <SelectTrigger>
             <SelectValue placeholder="Tag hinzufügen..." />
           </SelectTrigger>
-          <SelectContent>
-            {availableTags.map((tag) => (
-              <SelectItem key={tag} value={tag}>
-                {tag}
-              </SelectItem>
+          <SelectContent className="max-h-[400px]">
+            {Object.entries(CONTACT_TAG_CATEGORIES).map(([category, categoryTags]) => (
+              <div key={category}>
+                <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                  {category}
+                </div>
+                {categoryTags.map((tag) => {
+                  const fullTag = `${category}: ${tag}`;
+                  if (!tags.includes(fullTag)) {
+                    return (
+                      <SelectItem key={fullTag} value={fullTag}>
+                        {tag}
+                      </SelectItem>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
             ))}
           </SelectContent>
         </Select>

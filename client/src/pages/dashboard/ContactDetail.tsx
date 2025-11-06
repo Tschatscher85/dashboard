@@ -95,6 +95,19 @@ export default function ContactDetail() {
     return labels[type] || type;
   };
 
+  const getContactStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      sonstiges: "Sonstiges",
+      partner: "Partner",
+      dienstleister: "Dienstleister",
+      kunde: "Kunde",
+      versicherung: "Versicherung",
+      hausverwaltung: "Hausverwaltung",
+      objekteigentuemer: "Objekteigentümer",
+    };
+    return labels[status] || status;
+  };
+
   const getContactTypeBadge = (type: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       buyer: "default",
@@ -246,6 +259,10 @@ export default function ContactDetail() {
               <div>
                 <div className="text-sm text-muted-foreground">Kontakttyp</div>
                 <div>{getContactTypeBadge(contact.contactType)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Status</div>
+                <div className="font-semibold">{getContactStatusLabel(contact.status || "sonstiges")}</div>
               </div>
               {contact.source && (
                 <div>

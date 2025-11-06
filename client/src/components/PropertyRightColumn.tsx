@@ -44,57 +44,87 @@ export function PropertyRightColumn({
     const origin = `${formData.street} ${formData.houseNumber || ""}, ${formData.zipCode || ""} ${formData.city}, ${formData.country || "Deutschland"}`;
 
     try {
-      // Define destinations for each travel time type
-      const destinations = [
-        { type: "transit", query: "public transport station near " + origin, mode: "walking" },
-        { type: "highway", query: "highway entrance near " + origin, mode: "driving" },
-        { type: "train", query: "hauptbahnhof near " + origin, mode: "driving" },
-        { type: "airport", query: "airport near " + origin, mode: "driving" },
-      ];
-
-      // Use Google Maps Proxy via makeRequest
-      const { makeRequest } = await import("../../../server/_core/map");
-      
-      for (const dest of destinations) {
-        try {
-          // First, find the nearest place
-          const placesResponse = await fetch(`/api/map/places/textsearch?query=${encodeURIComponent(dest.query)}`);
-          const placesData = await placesResponse.json();
-          
-          if (placesData.results && placesData.results.length > 0) {
-            const destination = placesData.results[0].formatted_address;
-            
-            // Then calculate distance
-            const distanceResponse = await fetch(
-              `/api/map/distancematrix?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&mode=${dest.mode}`
-            );
-            const distanceData = await distanceResponse.json();
-            
-            if (distanceData.rows && distanceData.rows[0].elements[0].status === "OK") {
-              const element = distanceData.rows[0].elements[0];
-              const durationText = element.duration.text;
-              const distanceText = element.distance.text;
-              
-              // Update form data based on type
-              if (dest.type === "transit") {
-                handleChange("walkingTimeToPublicTransport", durationText);
-                handleChange("distanceToPublicTransport", distanceText);
-              } else if (dest.type === "highway") {
-                handleChange("drivingTimeToHighway", durationText);
-                handleChange("distanceToHighway", distanceText);
-              } else if (dest.type === "train") {
-                handleChange("drivingTimeToMainStation", durationText);
-                handleChange("distanceToMainStation", distanceText);
-              } else if (dest.type === "airport") {
-                handleChange("drivingTimeToAirport", durationText);
-                handleChange("distanceToAirport", distanceText);
-              }
-            }
-          }
-        } catch (err) {
-          console.error(`Error calculating ${dest.type}:`, err);
-        }
+      // Wait for Google Maps to be loaded with timeout
+      let attempts = 0;
+      while (attempts < 30 && (typeof (window as any).google === 'undefined' || !(window as any).google?.maps)) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
       }
+      
+      if (typeof (window as any).google === 'undefined' || !(window as any).google?.maps) {
+        toast.error("Google Maps konnte nicht geladen werden. Bitte laden Sie die Seite neu.");
+        setIsCalculating(false);
+        return;
+      }
+
+      const google = (window as any).google;
+      
+      // Check if Distance Matrix service is available
+      if (!google.maps.DistanceMatrixService || !google.maps.Geocoder) {
+        toast.error("Google Maps Services sind nicht verfügbar");
+        setIsCalculating(false);
+        return;
+      }
+
+      const service = new google.maps.DistanceMatrixService();
+      const geocoder = new google.maps.Geocoder();
+
+      // Helper function to calculate distance for a destination type
+      const calculateForDestination = (destType: string, query: string, mode: string): Promise<void> => {
+        return new Promise((resolve) => {
+          geocoder.geocode({ address: query }, (results: any, status: any) => {
+            if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
+              const destination = results[0].formatted_address;
+
+              service.getDistanceMatrix(
+                {
+                  origins: [origin],
+                  destinations: [destination],
+                  travelMode: mode,
+                  unitSystem: google.maps.UnitSystem.METRIC,
+                },
+                (response: any, matrixStatus: any) => {
+                  if (matrixStatus === google.maps.DistanceMatrixStatus.OK && 
+                      response.rows[0]?.elements[0]?.status === "OK") {
+                    const element = response.rows[0].elements[0];
+                    const durationText = element.duration.text;
+                    const distanceText = element.distance.text;
+
+                    // Update form data based on type
+                    if (destType === "transit") {
+                      handleChange("walkingTimeToPublicTransport", durationText);
+                      handleChange("distanceToPublicTransport", distanceText);
+                    } else if (destType === "highway") {
+                      handleChange("drivingTimeToHighway", durationText);
+                      handleChange("distanceToHighway", distanceText);
+                    } else if (destType === "train") {
+                      handleChange("drivingTimeToMainStation", durationText);
+                      handleChange("distanceToMainStation", distanceText);
+                    } else if (destType === "airport") {
+                      handleChange("drivingTimeToAirport", durationText);
+                      handleChange("distanceToAirport", distanceText);
+                    }
+                  } else {
+                    console.warn(`Could not calculate distance for ${destType}:`, matrixStatus);
+                  }
+                  resolve();
+                }
+              );
+            } else {
+              console.warn(`Geocoding failed for ${query}:`, status);
+              resolve();
+            }
+          });
+        });
+      };
+
+      // Calculate all distances
+      await Promise.all([
+        calculateForDestination("transit", `Haltestelle near ${origin}`, "WALKING"),
+        calculateForDestination("highway", `Autobahnauffahrt near ${origin}`, "DRIVING"),
+        calculateForDestination("train", `Hauptbahnhof ${formData.city}`, "DRIVING"),
+        calculateForDestination("airport", `Flughafen near ${formData.city}`, "DRIVING"),
+      ]);
       
       toast.success("Fahrzeiten erfolgreich berechnet");
     } catch (error) {
@@ -113,99 +143,80 @@ export function PropertyRightColumn({
           <CardTitle>Ansprechpartner</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div>
             <Label>Betreuer</Label>
-            <Select
-              value={formData.supervisorId?.toString() || ""}
-              onValueChange={(value) => handleChange("supervisorId", parseInt(value))}
-              disabled={!isEditing}
-            >
+            <Select disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Betreuer wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Sven Jaeger</SelectItem>
-                {/* TODO: Load from users table */}
+                <SelectItem value="user1">Sven Jaeger</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Eigentümer *</Label>
-              <Input
-                value={formData.ownerId?.toString() || ""}
-                onChange={(e) => handleChange("ownerId", e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!isEditing}
-                placeholder="Kontakt suchen"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Typ (optional)</Label>
-              <Input
-                value={formData.ownerType || ""}
-                onChange={(e) => handleChange("ownerType", e.target.value)}
-                disabled={!isEditing}
-                placeholder="Typ"
-              />
-            </div>
+          <div>
+            <Label>Eigentümer *</Label>
+            <Input
+              placeholder="Kontakt suchen"
+              disabled={!isEditing}
+            />
           </div>
 
-          <div className="space-y-2">
+          <div>
+            <Label>Typ (optional)</Label>
+            <Input
+              placeholder="Typ"
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div>
             <Label>Käufer</Label>
             <Input
-              value={formData.buyerId?.toString() || ""}
-              onChange={(e) => handleChange("buyerId", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing}
               placeholder="Kontakt suchen"
+              disabled={!isEditing}
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Notar</Label>
             <Input
-              value={formData.notaryId?.toString() || ""}
-              onChange={(e) => handleChange("notaryId", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing}
               placeholder="Kontakt suchen"
+              disabled={!isEditing}
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Hausverwaltung</Label>
             <Input
-              value={formData.propertyManagementId?.toString() || ""}
-              onChange={(e) => handleChange("propertyManagementId", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing}
               placeholder="Kontakt suchen"
+              disabled={!isEditing}
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Mieter</Label>
             <Input
-              value={formData.tenantId?.toString() || ""}
-              onChange={(e) => handleChange("tenantId", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing}
               placeholder="Kontakt suchen"
+              disabled={!isEditing}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Verknüpfte Kontakte</Label>
-              <Input
-                disabled={!isEditing}
-                placeholder="Kontakt suchen"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Typ (optional)</Label>
-              <Input
-                disabled={!isEditing}
-                placeholder="Typ"
-              />
-            </div>
+          <div>
+            <Label>Verknüpfte Kontakte</Label>
+            <Input
+              placeholder="Kontakt suchen"
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div>
+            <Label>Typ (optional)</Label>
+            <Input
+              placeholder="Typ"
+              disabled={!isEditing}
+            />
           </div>
         </CardContent>
       </Card>
@@ -216,148 +227,100 @@ export function PropertyRightColumn({
           <CardTitle>Portale</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Portal-Export (3)</Label>
+            <Button size="sm" variant="outline" disabled={!isEditing}>
+              <Globe className="h-4 w-4 mr-2" />
+              Überall veröffentlichen
+            </Button>
+          </div>
+
+          {/* Portal List */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Portal-Export (3)</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!isEditing}
-                onClick={() => toast.info("Überall veröffentlichen...")}
-              >
-                <Globe className="h-4 w-4 mr-2" />
-                Überall veröffentlichen
-              </Button>
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">allianzjaeger</span>
+                <Button size="sm" variant="outline" disabled={!isEditing}>
+                  <Globe className="h-4 w-4 mr-1" />
+                  Veröffentlichen
+                </Button>
+              </div>
             </div>
 
-            {/* Portal List */}
-            <div className="space-y-2 border rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">allianzjaeger</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!isEditing}
-                  onClick={() => toast.info("Veröffentlichen...")}
-                >
-                  <Globe className="h-3 w-3 mr-1" />
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">Allianz Jaeger - Versicherung - Immobilien</span>
+                <Button size="sm" variant="outline" disabled={!isEditing}>
+                  <Globe className="h-4 w-4 mr-1" />
                   Veröffentlichen
                 </Button>
               </div>
+            </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Allianz Jaeger - Versicherung - Immobilien</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!isEditing}
-                  onClick={() => toast.info("Veröffentlichen...")}
-                >
-                  <Globe className="h-3 w-3 mr-1" />
-                  Veröffentlichen
-                </Button>
+            <div className="p-3 border rounded-lg bg-green-50">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="font-medium">ImmoScout24</span>
+                  <span className="text-sm text-muted-foreground ml-2">29.10.2025 15:07</span>
+                </div>
               </div>
-
-              <div className="space-y-2 border-t pt-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">ImmoScout24</span>
-                  <span className="text-xs text-muted-foreground">29.10.2025 15:07</span>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-green-600 border-green-600"
-                    disabled={!isEditing}
-                    onClick={() => toast.success("Aktualisiert")}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Aktualisieren
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-yellow-600 border-yellow-600"
-                    disabled={!isEditing}
-                    onClick={() => toast.info("Deaktiviert")}
-                  >
-                    <Ban className="h-3 w-3 mr-1" />
-                    Deaktivieren
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600 border-red-600"
-                    disabled={!isEditing}
-                    onClick={() => toast.error("Gelöscht")}
-                  >
-                    <Trash2 className="h-3 w-3 mr-1" />
-                    Löschen
-                  </Button>
-                </div>
-                <div className="bg-cyan-50 border border-cyan-200 rounded p-2">
-                  <span className="text-xs font-medium text-cyan-700">TIPP</span>
-                  <p className="text-xs text-cyan-900 mt-1">
-                    Kontaktanfragen erhöhen: Spitzenplatzierung buchen.
-                  </p>
-                  <Button
-                    className="w-full mt-2 bg-cyan-500 hover:bg-cyan-600 text-white"
-                    size="sm"
-                    disabled={!isEditing}
-                  >
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Jetzt buchen
-                  </Button>
-                </div>
+              <div className="flex gap-2 mt-2">
+                <Button size="sm" variant="outline" className="text-green-600" disabled={!isEditing}>
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Aktualisieren
+                </Button>
+                <Button size="sm" variant="outline" className="text-yellow-600" disabled={!isEditing}>
+                  <Ban className="h-4 w-4 mr-1" />
+                  Deaktivieren
+                </Button>
+                <Button size="sm" variant="outline" className="text-red-600" disabled={!isEditing}>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Löschen
+                </Button>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-sm font-medium mb-2">TIPP</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Kontaktanfragen erhöhen: Spitzenplatzierung buchen.
+            </p>
+            <Button size="sm" className="bg-teal-500 hover:bg-teal-600" disabled={!isEditing}>
+              Jetzt buchen
+            </Button>
+          </div>
+
+          <div>
             <Label>IS24-Ansprechpartner</Label>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Select
-                value={formData.is24ContactPerson || ""}
-                onValueChange={(value) => handleChange("is24ContactPerson", value)}
-                disabled={!isEditing}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sven Jaeger" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sven">Sven Jaeger</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select disabled={!isEditing}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sven Jaeger" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sven">Sven Jaeger</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>IS24-ID</Label>
             <Input
-              value={formData.is24Id || ""}
-              onChange={(e) => handleChange("is24Id", e.target.value)}
-              disabled={!isEditing}
               placeholder="158820057"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>IS24-Gruppen-Nr.</Label>
-            <Input
-              value={formData.is24GroupNumber || ""}
-              onChange={(e) => handleChange("is24GroupNumber", e.target.value)}
               disabled={!isEditing}
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
+            <Label>IS24-Gruppen-Nr.</Label>
+            <Input disabled={!isEditing} />
+          </div>
+
+          <div>
             <Label>Übersetzungen</Label>
             <Input
-              disabled={!isEditing}
               placeholder="Übersetzungen"
+              disabled={!isEditing}
             />
           </div>
         </CardContent>
@@ -369,56 +332,41 @@ export function PropertyRightColumn({
           <CardTitle>Auftrag</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div>
             <Label>Auftragsart</Label>
-            <Select
-              value={formData.assignmentType || ""}
-              onValueChange={(value) => handleChange("assignmentType", value)}
-              disabled={!isEditing}
-            >
+            <Select disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Auswählen..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Alleinauftrag">Alleinauftrag</SelectItem>
-                <SelectItem value="Einfacher Auftrag">Einfacher Auftrag</SelectItem>
-                <SelectItem value="Qualifizierter Alleinauftrag">Qualifizierter Alleinauftrag</SelectItem>
+                <SelectItem value="alleinauftrag">Alleinauftrag</SelectItem>
+                <SelectItem value="einfach">Einfacher Auftrag</SelectItem>
+                <SelectItem value="qualifiziert">Qualifizierter Alleinauftrag</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Laufzeit</Label>
-            <Select
-              value={formData.assignmentDuration || ""}
-              onValueChange={(value) => handleChange("assignmentDuration", value)}
-              disabled={!isEditing}
-            >
+            <Select disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Auswählen..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Unbefristet">Unbefristet</SelectItem>
-                <SelectItem value="Befristet">Befristet</SelectItem>
+                <SelectItem value="unbefristet">Unbefristet</SelectItem>
+                <SelectItem value="befristet">Befristet</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Auftrag von bis</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                type="datetime-local"
-                value={formData.assignmentFrom ? new Date(formData.assignmentFrom).toISOString().slice(0, 16) : ""}
-                onChange={(e) => handleChange("assignmentFrom", e.target.value ? new Date(e.target.value) : null)}
-                disabled={!isEditing}
-              />
-              <Input
-                type="datetime-local"
-                value={formData.assignmentTo ? new Date(formData.assignmentTo).toISOString().slice(0, 16) : ""}
-                onChange={(e) => handleChange("assignmentTo", e.target.value ? new Date(e.target.value) : null)}
-                disabled={!isEditing}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Auftrag von bis</Label>
+              <Input type="date" disabled={!isEditing} />
+            </div>
+            <div>
+              <Label>&nbsp;</Label>
+              <Input type="date" disabled={!isEditing} />
             </div>
           </div>
         </CardContent>
@@ -430,7 +378,9 @@ export function PropertyRightColumn({
           <CardTitle>Verkauf</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Verkaufsinformationen werden hier angezeigt</p>
+          <p className="text-sm text-muted-foreground">
+            Verkaufsinformationen werden hier angezeigt
+          </p>
         </CardContent>
       </Card>
 
@@ -440,36 +390,33 @@ export function PropertyRightColumn({
           <CardTitle>Provision Intern</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div>
             <Label>Innenprovision (intern)</Label>
             <div className="flex gap-2">
               <Input
-                value={formData.internalCommissionPercent || ""}
-                onChange={(e) => handleChange("internalCommissionPercent", e.target.value)}
-                disabled={!isEditing}
+                type="number"
                 placeholder="1"
+                step="0.01"
+                disabled={!isEditing}
+                className="flex-1"
               />
-              <div className="flex border rounded-md">
+              <div className="flex rounded-md overflow-hidden border">
                 <Button
-                  variant={commissionType === "percent" ? "default" : "ghost"}
+                  type="button"
+                  variant={commissionType === "percent" ? "default" : "outline"}
+                  className="rounded-none border-0"
                   size="sm"
-                  className="rounded-r-none"
-                  onClick={() => {
-                    setCommissionType("percent");
-                    handleChange("internalCommissionType", "percent");
-                  }}
+                  onClick={() => setCommissionType("percent")}
                   disabled={!isEditing}
                 >
                   %
                 </Button>
                 <Button
-                  variant={commissionType === "euro" ? "default" : "ghost"}
+                  type="button"
+                  variant={commissionType === "euro" ? "default" : "outline"}
+                  className="rounded-none border-0"
                   size="sm"
-                  className="rounded-l-none"
-                  onClick={() => {
-                    setCommissionType("euro");
-                    handleChange("internalCommissionType", "euro");
-                  }}
+                  onClick={() => setCommissionType("euro")}
                   disabled={!isEditing}
                 >
                   €
@@ -478,36 +425,33 @@ export function PropertyRightColumn({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Außenprovision (intern)</Label>
             <div className="flex gap-2">
               <Input
-                value={formData.externalCommissionInternalPercent || ""}
-                onChange={(e) => handleChange("externalCommissionInternalPercent", e.target.value)}
-                disabled={!isEditing}
+                type="number"
                 placeholder="2,5"
+                step="0.01"
+                disabled={!isEditing}
+                className="flex-1"
               />
-              <div className="flex border rounded-md">
+              <div className="flex rounded-md overflow-hidden border">
                 <Button
-                  variant={externalCommissionType === "percent" ? "default" : "ghost"}
+                  type="button"
+                  variant={commissionType === "percent" ? "default" : "outline"}
+                  className="rounded-none border-0"
                   size="sm"
-                  className="rounded-r-none"
-                  onClick={() => {
-                    setExternalCommissionType("percent");
-                    handleChange("externalCommissionInternalType", "percent");
-                  }}
+                  onClick={() => setCommissionType("percent")}
                   disabled={!isEditing}
                 >
                   %
                 </Button>
                 <Button
-                  variant={externalCommissionType === "euro" ? "default" : "ghost"}
+                  type="button"
+                  variant={commissionType === "euro" ? "default" : "outline"}
+                  className="rounded-none border-0"
                   size="sm"
-                  className="rounded-l-none"
-                  onClick={() => {
-                    setExternalCommissionType("euro");
-                    handleChange("externalCommissionInternalType", "euro");
-                  }}
+                  onClick={() => setCommissionType("euro")}
                   disabled={!isEditing}
                 >
                   €
@@ -516,12 +460,11 @@ export function PropertyRightColumn({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Gesamtprovision</Label>
             <Input
-              value={formData.totalCommission ? `${(formData.totalCommission / 100).toFixed(2)} €` : ""}
-              disabled
               placeholder="14.000 €"
+              disabled
             />
           </div>
         </CardContent>
@@ -533,24 +476,19 @@ export function PropertyRightColumn({
           <CardTitle>Provision Extern</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div>
             <Label>Außenprovision für Exposé</Label>
             <Input
-              value={formData.externalCommissionForExpose || ""}
-              onChange={(e) => handleChange("externalCommissionForExpose", e.target.value)}
-              disabled={!isEditing}
               placeholder="2,50% inkl. MwSt."
+              disabled={!isEditing}
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label>Provisionshinweis</Label>
             <Textarea
-              value={formData.commissionNote || ""}
-              onChange={(e) => handleChange("commissionNote", e.target.value)}
-              disabled={!isEditing}
               placeholder="2,50 inkl. 19 % MwSt."
-              rows={3}
+              disabled={!isEditing}
             />
           </div>
         </CardContent>
@@ -561,282 +499,234 @@ export function PropertyRightColumn({
         <CardHeader>
           <CardTitle>Energieausweis</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Energieausweis</Label>
-            <Select
-              value={formData.energyCertificateAvailability || ""}
-              onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wird nicht benötigt">wird nicht benötigt</SelectItem>
-                <SelectItem value="liegt vor">liegt vor</SelectItem>
-                <SelectItem value="liegt zur Besichtigung vor">liegt zur Besichtigung vor</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Energieausweis</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nicht_benoetigt">wird nicht benötigt</SelectItem>
+                  <SelectItem value="liegt_vor">liegt vor</SelectItem>
+                  <SelectItem value="zur_besichtigung">liegt zur Besichtigung vor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <Label>Erstellungsdatum</Label>
-            <Select
-              value={formData.energyCertificateCreationDate || ""}
-              onValueChange={(value) => handleChange("energyCertificateCreationDate", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ab 1. Mai 2014">ab 1. Mai 2014</SelectItem>
-                <SelectItem value="bis 30. April 2014">bis 30. April 2014</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Ausstellungsdatum</Label>
-            <Input
-              type="date"
-              value={formData.energyCertificateIssueDate || ""}
-              onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Gültig bis</Label>
-            <Input
-              type="date"
-              value={formData.energyCertificateValidUntil || ""}
-              onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energieausweistyp</Label>
-            <Select
-              value={formData.energyCertificateType || ""}
-              onValueChange={(value) => handleChange("energyCertificateType", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Bedarfsausweis">Bedarfsausweis</SelectItem>
-                <SelectItem value="Verbrauchsausweis">Verbrauchsausweis</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energieeffizienzklasse</Label>
-            <Select
-              value={formData.energyClass || ""}
-              onValueChange={(value) => handleChange("energyClass", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="A+">A+</SelectItem>
-                <SelectItem value="A">A</SelectItem>
-                <SelectItem value="B">B</SelectItem>
-                <SelectItem value="C">C</SelectItem>
-                <SelectItem value="D">D</SelectItem>
-                <SelectItem value="E">E</SelectItem>
-                <SelectItem value="F">F</SelectItem>
-                <SelectItem value="G">G</SelectItem>
-                <SelectItem value="H">H</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energiekennwert</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={formData.energyConsumption || ""}
-                onChange={(e) => handleChange("energyConsumption", e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!isEditing}
-                placeholder="0"
-                className="pr-24"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                kWh/(m²·a)
-              </span>
+            <div>
+              <Label>Erstellungsdatum</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ab_2014">ab 1. Mai 2014</SelectItem>
+                  <SelectItem value="bis_2014">bis 30. April 2014</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Energiekennwert Strom</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={formData.energyConsumptionElectricity || ""}
-                onChange={(e) => handleChange("energyConsumptionElectricity", e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!isEditing}
-                placeholder="0"
-                className="pr-24"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                kWh/(m²·a)
-              </span>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Ausstellungsdatum</Label>
+              <Input type="date" disabled={!isEditing} />
+            </div>
+
+            <div>
+              <Label>Gültig bis</Label>
+              <Input type="date" disabled={!isEditing} />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Energiekennwert Wärme</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={formData.energyConsumptionHeat || ""}
-                onChange={(e) => handleChange("energyConsumptionHeat", e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!isEditing}
-                placeholder="0"
-                className="pr-24"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                kWh/(m²·a)
-              </span>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Energieausweistyp</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bedarfsausweis">Bedarfsausweis</SelectItem>
+                  <SelectItem value="verbrauchsausweis">Verbrauchsausweis</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Energieeffizienzklasse</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="a_plus">A+</SelectItem>
+                  <SelectItem value="a">A</SelectItem>
+                  <SelectItem value="b">B</SelectItem>
+                  <SelectItem value="c">C</SelectItem>
+                  <SelectItem value="d">D</SelectItem>
+                  <SelectItem value="e">E</SelectItem>
+                  <SelectItem value="f">F</SelectItem>
+                  <SelectItem value="g">G</SelectItem>
+                  <SelectItem value="h">H</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Energiekennwert</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="0"
+                  disabled={!isEditing}
+                  className="pr-24"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  kWh/(m²·a)
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label>Energiekennwert Strom</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="0"
+                  disabled={!isEditing}
+                  className="pr-24"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  kWh/(m²·a)
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label>Energiekennwert Wärme</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="0"
+                  disabled={!isEditing}
+                  className="pr-24"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  kWh/(m²·a)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
             <Label>CO2-Emissionen</Label>
             <div className="relative">
               <Input
                 type="number"
-                value={formData.co2Emissions || ""}
-                onChange={(e) => handleChange("co2Emissions", e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!isEditing}
                 placeholder="0"
+                disabled={!isEditing}
                 className="pr-16"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                 kg/m²a
               </span>
             </div>
           </div>
 
-          <div className="col-span-2 flex items-center space-x-2">
-            <Switch
-              checked={formData.includesWarmWater || false}
-              onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
-              disabled={!isEditing}
-            />
+          <div className="flex items-center space-x-2">
+            <Switch disabled={!isEditing} />
             <Label>Energieverbrauch für Warmwasser enthalten</Label>
           </div>
 
-          <div className="space-y-2">
-            <Label>Heizungsart</Label>
-            <Select
-              value={formData.heatingType || ""}
-              onValueChange={(value) => handleChange("heatingType", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Zentralheizung">Zentralheizung</SelectItem>
-                <SelectItem value="Etagenheizung">Etagenheizung</SelectItem>
-                <SelectItem value="Ofenheizung">Ofenheizung</SelectItem>
-                <SelectItem value="Fußbodenheizung">Fußbodenheizung</SelectItem>
-                <SelectItem value="Fernwärme">Fernwärme</SelectItem>
-                <SelectItem value="Blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
-                <SelectItem value="Wärmepumpe">Wärmepumpe</SelectItem>
-                <SelectItem value="Pelletheizung">Pelletheizung</SelectItem>
-                <SelectItem value="Nachtspeicher">Nachtspeicher</SelectItem>
-                <SelectItem value="Elektroheizung">Elektroheizung</SelectItem>
-                <SelectItem value="Solarheizung">Solarheizung</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Heizungsart</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="zentralheizung">Zentralheizung</SelectItem>
+                  <SelectItem value="etagenheizung">Etagenheizung</SelectItem>
+                  <SelectItem value="fernwaerme">Fernwärme</SelectItem>
+                  <SelectItem value="fussboden">Fußbodenheizung</SelectItem>
+                  <SelectItem value="ofenheizung">Ofenheizung</SelectItem>
+                  <SelectItem value="nachtspeicher">Nachtspeicheröfen</SelectItem>
+                  <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                  <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
+                  <SelectItem value="pelletheizung">Pelletheizung</SelectItem>
+                  <SelectItem value="elektro">Elektro-Heizung</SelectItem>
+                  <SelectItem value="solar">Solar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Wesentlicher Energieträger</Label>
+              <Select disabled={!isEditing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="oel">Öl</SelectItem>
+                  <SelectItem value="gas">Gas</SelectItem>
+                  <SelectItem value="strom">Strom</SelectItem>
+                  <SelectItem value="alternativ">Alternative Energien</SelectItem>
+                  <SelectItem value="solar">Solar</SelectItem>
+                  <SelectItem value="erdwaerme">Erdwärme</SelectItem>
+                  <SelectItem value="luftwp">Luftwärmepumpe</SelectItem>
+                  <SelectItem value="fernwaerme">Fernwärme</SelectItem>
+                  <SelectItem value="holz">Holz</SelectItem>
+                  <SelectItem value="fluessiggas">Flüssiggas</SelectItem>
+                  <SelectItem value="kohle">Kohle</SelectItem>
+                  <SelectItem value="pellet">Pellet</SelectItem>
+                  <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
+                  <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                  <SelectItem value="bhkw_fossil">BHKW fossil befeuert</SelectItem>
+                  <SelectItem value="bhkw_regenerativ">BHKW regenerativ befeuert</SelectItem>
+                  <SelectItem value="kwk_fossil">KWK fossil befeuert</SelectItem>
+                  <SelectItem value="kwk_regenerativ">KWK regenerativ befeuert</SelectItem>
+                  <SelectItem value="nahwaerme">Nahwärme</SelectItem>
+                  <SelectItem value="windenergie">Windenergie</SelectItem>
+                  <SelectItem value="bioenergie">Bioenergie</SelectItem>
+                  <SelectItem value="biogas">Biogas</SelectItem>
+                  <SelectItem value="biooele">Bioöle</SelectItem>
+                  <SelectItem value="biomasse">Biomasse</SelectItem>
+                  <SelectItem value="kamin">Kamin</SelectItem>
+                  <SelectItem value="ofen">Ofen</SelectItem>
+                  <SelectItem value="wasserstoff">Wasserstoff</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Wesentlicher Energieträger</Label>
-            <Select
-              value={formData.mainEnergySource || ""}
-              onValueChange={(value) => handleChange("mainEnergySource", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Öl">Öl</SelectItem>
-                <SelectItem value="Gas">Gas</SelectItem>
-                <SelectItem value="Strom">Strom</SelectItem>
-                <SelectItem value="Fernwärme">Fernwärme</SelectItem>
-                <SelectItem value="Holz">Holz</SelectItem>
-                <SelectItem value="Pellets">Pellets</SelectItem>
-                <SelectItem value="Kohle">Kohle</SelectItem>
-                <SelectItem value="Solar">Solar</SelectItem>
-                <SelectItem value="Wärmepumpe Luft/Wasser">Wärmepumpe Luft/Wasser</SelectItem>
-                <SelectItem value="Wärmepumpe Sole/Wasser">Wärmepumpe Sole/Wasser</SelectItem>
-                <SelectItem value="Wärmepumpe Wasser/Wasser">Wärmepumpe Wasser/Wasser</SelectItem>
-                <SelectItem value="Erdwärme">Erdwärme</SelectItem>
-                <SelectItem value="Umweltthermie">Umweltthermie</SelectItem>
-                <SelectItem value="Flüssiggas">Flüssiggas</SelectItem>
-                <SelectItem value="Biogas">Biogas</SelectItem>
-                <SelectItem value="Bioenergie">Bioenergie</SelectItem>
-                <SelectItem value="KWK fossil">KWK fossil</SelectItem>
-                <SelectItem value="KWK erneuerbar">KWK erneuerbar</SelectItem>
-                <SelectItem value="Nahwärme">Nahwärme</SelectItem>
-                <SelectItem value="Blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
-                <SelectItem value="Windkraft">Windkraft</SelectItem>
-                <SelectItem value="Wasserkraft">Wasserkraft</SelectItem>
-                <SelectItem value="Geothermie">Geothermie</SelectItem>
-                <SelectItem value="Photovoltaik">Photovoltaik</SelectItem>
-                <SelectItem value="Brennstoffzelle">Brennstoffzelle</SelectItem>
-                <SelectItem value="Alternative Energien">Alternative Energien</SelectItem>
-                <SelectItem value="Regenerative Energien">Regenerative Energien</SelectItem>
-                <SelectItem value="Keine Angabe">Keine Angabe</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Baujahr</Label>
+              <Input
+                type="number"
+                placeholder="z.B. 1990"
+                disabled={!isEditing}
+              />
+            </div>
+
+            <div>
+              <Label>Baujahr Anlagentechnik</Label>
+              <Input
+                type="number"
+                placeholder="z.B. 2010"
+                disabled={!isEditing}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Baujahr</Label>
-            <Input
-              type="number"
-              value={formData.yearBuilt || ""}
-              onChange={(e) => handleChange("yearBuilt", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing || !!formData.buildingYearUnknown}
-              placeholder="z.B. 1990"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Baujahr Anlagentechnik</Label>
-            <Input
-              type="number"
-              value={formData.heatingSystemYear || ""}
-              onChange={(e) => handleChange("heatingSystemYear", e.target.value ? parseInt(e.target.value) : null)}
-              disabled={!isEditing}
-              placeholder="z.B. 2010"
-            />
-          </div>
-
-          <div className="col-span-2 flex items-center space-x-2">
-            <Switch
-              checked={formData.buildingYearUnknown || false}
-              onCheckedChange={(checked) => {
-                handleChange("buildingYearUnknown", checked);
-                if (checked) {
-                  handleChange("yearBuilt", null);
-                }
-              }}
-              disabled={!isEditing}
-            />
+          <div className="flex items-center space-x-2">
+            <Switch disabled={!isEditing} />
             <Label>Baujahr unbekannt</Label>
           </div>
         </CardContent>
@@ -848,7 +738,9 @@ export function PropertyRightColumn({
           <CardTitle>Verrechnung</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Verrechnungsinformationen werden hier angezeigt</p>
+          <p className="text-sm text-muted-foreground">
+            Verrechnungsinformationen werden hier angezeigt
+          </p>
         </CardContent>
       </Card>
 
@@ -857,112 +749,76 @@ export function PropertyRightColumn({
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Fahrzeiten</CardTitle>
           <Button
-            variant="outline"
             size="sm"
+            variant="outline"
             onClick={calculateDistances}
             disabled={!isEditing || isCalculating}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isCalculating ? 'animate-spin' : ''}`} />
-            {isCalculating ? 'Berechne...' : 'Distanzen berechnen'}
+            Distanzen berechnen
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Fußweg zu ÖPNV</Label>
+          <div>
+            <Label>Fußweg zu ÖPNV</Label>
+            <div className="grid grid-cols-2 gap-2">
               <Input
-                type="text"
                 value={formData.walkingTimeToPublicTransport || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 5 Min"
               />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
               <Input
-                type="text"
                 value={formData.distanceToPublicTransport || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 0,4 km"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Fahrzeit nächste Autobahn</Label>
+          <div>
+            <Label>Fahrzeit nächste Autobahn</Label>
+            <div className="grid grid-cols-2 gap-2">
               <Input
-                type="text"
                 value={formData.drivingTimeToHighway || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 10 Min"
               />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
               <Input
-                type="text"
                 value={formData.distanceToHighway || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 8 km"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Fahrzeit nächster HBF</Label>
+          <div>
+            <Label>Fahrzeit nächster HBF</Label>
+            <div className="grid grid-cols-2 gap-2">
               <Input
-                type="text"
                 value={formData.drivingTimeToMainStation || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 15 Min"
               />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
               <Input
-                type="text"
                 value={formData.distanceToMainStation || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 12 km"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Fahrzeit nächster Flughafen</Label>
+          <div>
+            <Label>Fahrzeit nächster Flughafen</Label>
+            <div className="grid grid-cols-2 gap-2">
               <Input
-                type="text"
                 value={formData.drivingTimeToAirport || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 45 Min"
               />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
               <Input
-                type="text"
                 value={formData.distanceToAirport || ""}
                 readOnly
-                disabled
-                placeholder=""
-                className="bg-muted"
+                placeholder="z.B. 60 km"
               />
             </div>
           </div>

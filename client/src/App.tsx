@@ -25,14 +25,14 @@ const dashboardNavItems = [
     icon: Building2,
   },
   {
-    title: "Immobilien",
-    href: "/dashboard/properties",
-    icon: Building2,
-  },
-  {
     title: "Kontakte",
     href: "/dashboard/contacts",
     icon: Users,
+  },
+  {
+    title: "Objekte",
+    href: "/dashboard/properties",
+    icon: Building2,
   },
   {
     title: "Leads",

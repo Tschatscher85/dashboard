@@ -64,6 +64,13 @@
       "when": 1762444109636,
       "tag": "0008_left_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1762446607111,
+      "tag": "0009_useful_jubilee",
+      "breakpoints": true
     }
   ]
 }
