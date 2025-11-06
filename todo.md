@@ -259,3 +259,22 @@
 - [ ] Add "Hausverwaltung" navigation item (initially hidden/disabled)
 - [ ] Add feature flags to enable/disable modules
 - [ ] Prepare placeholder pages for future modules
+
+## Layout Adjustments
+
+### Energieausweis Section Relocation
+- [x] Move Energieausweis section from left column to right column
+- [x] Position after Provision Extern section
+- [x] Maintain all 16 energy certificate fields
+- [x] Test responsive layout
+
+### Travel Time Calculation
+- [x] Clear default values from travel time fields
+- [x] Make travel time fields read-only
+- [x] Implement Google Maps Distance Matrix API integration
+- [x] Calculate walking time to nearest public transport
+- [x] Calculate driving time to nearest highway
+- [x] Calculate driving time to nearest main train station
+- [x] Calculate driving time to nearest airport
+- [x] Show loading state during calculation
+- [x] Handle API errors gracefully
