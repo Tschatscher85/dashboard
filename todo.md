@@ -91,3 +91,6 @@
 
 - [x] Make status badge clickable in properties overview to change status inline
 - [x] Make contact name clickable in contacts list table to navigate to detail page (already completed)
+
+- [x] Convert parking type field to multi-select to allow multiple selections (Garage, Carport, etc.)
+- [x] Improve energy certificate section design with better layout and grouping

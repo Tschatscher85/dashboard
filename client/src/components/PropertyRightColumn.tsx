@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 import { Globe, RefreshCw, Ban, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
@@ -499,235 +500,260 @@ export function PropertyRightColumn({
         <CardHeader>
           <CardTitle>Energieausweis</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Energieausweis</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nicht_benoetigt">wird nicht benötigt</SelectItem>
-                  <SelectItem value="liegt_vor">liegt vor</SelectItem>
-                  <SelectItem value="zur_besichtigung">liegt zur Besichtigung vor</SelectItem>
-                </SelectContent>
-              </Select>
+        <CardContent className="space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energieausweis</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nicht_benoetigt">wird nicht benötigt</SelectItem>
+                    <SelectItem value="liegt_vor">liegt vor</SelectItem>
+                    <SelectItem value="zur_besichtigung">liegt zur Besichtigung vor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Erstellungsdatum</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ab_2014">ab 1. Mai 2014</SelectItem>
+                    <SelectItem value="bis_2014">bis 30. April 2014</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <Label>Erstellungsdatum</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ab_2014">ab 1. Mai 2014</SelectItem>
-                  <SelectItem value="bis_2014">bis 30. April 2014</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Ausstellungsdatum</Label>
+                <Input type="date" disabled={!isEditing} className="h-10" />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Ausstellungsdatum</Label>
-              <Input type="date" disabled={!isEditing} />
-            </div>
-
-            <div>
-              <Label>Gültig bis</Label>
-              <Input type="date" disabled={!isEditing} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Energieausweistyp</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bedarfsausweis">Bedarfsausweis</SelectItem>
-                  <SelectItem value="verbrauchsausweis">Verbrauchsausweis</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Energieeffizienzklasse</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="a_plus">A+</SelectItem>
-                  <SelectItem value="a">A</SelectItem>
-                  <SelectItem value="b">B</SelectItem>
-                  <SelectItem value="c">C</SelectItem>
-                  <SelectItem value="d">D</SelectItem>
-                  <SelectItem value="e">E</SelectItem>
-                  <SelectItem value="f">F</SelectItem>
-                  <SelectItem value="g">G</SelectItem>
-                  <SelectItem value="h">H</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Gültig bis</Label>
+                <Input type="date" disabled={!isEditing} className="h-10" />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Energiekennwert</Label>
+          <Separator />
+
+          {/* Certificate Type & Efficiency */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energieausweistyp</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bedarfsausweis">Bedarfsausweis</SelectItem>
+                    <SelectItem value="verbrauchsausweis">Verbrauchsausweis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energieeffizienzklasse</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="a_plus">A+</SelectItem>
+                    <SelectItem value="a">A</SelectItem>
+                    <SelectItem value="b">B</SelectItem>
+                    <SelectItem value="c">C</SelectItem>
+                    <SelectItem value="d">D</SelectItem>
+                    <SelectItem value="e">E</SelectItem>
+                    <SelectItem value="f">F</SelectItem>
+                    <SelectItem value="g">G</SelectItem>
+                    <SelectItem value="h">H</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Energy Consumption Values */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energiekennwert</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    disabled={!isEditing}
+                    className="h-10 pr-28"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                    kWh/(m²·a)
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energiekennwert Strom</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    disabled={!isEditing}
+                    className="h-10 pr-28"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                    kWh/(m²·a)
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Energiekennwert Wärme</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    disabled={!isEditing}
+                    className="h-10 pr-28"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                    kWh/(m²·a)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">CO2-Emissionen</Label>
               <div className="relative">
                 <Input
                   type="number"
                   placeholder="0"
                   disabled={!isEditing}
-                  className="pr-24"
+                  className="h-10 pr-20"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  kWh/(m²·a)
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                  kg/m²a
                 </span>
               </div>
             </div>
+          </div>
 
-            <div>
-              <Label>Energiekennwert Strom</Label>
-              <div className="relative">
+          <Separator />
+
+          {/* Heating & Energy Source */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+              <Switch disabled={!isEditing} />
+              <Label className="text-sm">Energieverbrauch für Warmwasser enthalten</Label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Heizungsart</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="zentralheizung">Zentralheizung</SelectItem>
+                    <SelectItem value="etagenheizung">Etagenheizung</SelectItem>
+                    <SelectItem value="fernwaerme">Fernwärme</SelectItem>
+                    <SelectItem value="fussboden">Fußbodenheizung</SelectItem>
+                    <SelectItem value="ofenheizung">Ofenheizung</SelectItem>
+                    <SelectItem value="nachtspeicher">Nachtspeicheröfen</SelectItem>
+                    <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                    <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
+                    <SelectItem value="pelletheizung">Pelletheizung</SelectItem>
+                    <SelectItem value="elektro">Elektro-Heizung</SelectItem>
+                    <SelectItem value="solar">Solar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Wesentlicher Energieträger</Label>
+                <Select disabled={!isEditing}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="oel">Öl</SelectItem>
+                    <SelectItem value="gas">Gas</SelectItem>
+                    <SelectItem value="strom">Strom</SelectItem>
+                    <SelectItem value="alternativ">Alternative Energien</SelectItem>
+                    <SelectItem value="solar">Solar</SelectItem>
+                    <SelectItem value="erdwaerme">Erdwärme</SelectItem>
+                    <SelectItem value="luftwp">Luftwärmepumpe</SelectItem>
+                    <SelectItem value="fernwaerme">Fernwärme</SelectItem>
+                    <SelectItem value="holz">Holz</SelectItem>
+                    <SelectItem value="fluessiggas">Flüssiggas</SelectItem>
+                    <SelectItem value="kohle">Kohle</SelectItem>
+                    <SelectItem value="pellet">Pellet</SelectItem>
+                    <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
+                    <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                    <SelectItem value="bhkw_fossil">BHKW fossil befeuert</SelectItem>
+                    <SelectItem value="bhkw_regenerativ">BHKW regenerativ befeuert</SelectItem>
+                    <SelectItem value="kwk_fossil">KWK fossil befeuert</SelectItem>
+                    <SelectItem value="kwk_regenerativ">KWK regenerativ befeuert</SelectItem>
+                    <SelectItem value="nahwaerme">Nahwärme</SelectItem>
+                    <SelectItem value="windenergie">Windenergie</SelectItem>
+                    <SelectItem value="bioenergie">Bioenergie</SelectItem>
+                    <SelectItem value="biogas">Biogas</SelectItem>
+                    <SelectItem value="biooele">Bioöle</SelectItem>
+                    <SelectItem value="biomasse">Biomasse</SelectItem>
+                    <SelectItem value="kamin">Kamin</SelectItem>
+                    <SelectItem value="ofen">Ofen</SelectItem>
+                    <SelectItem value="wasserstoff">Wasserstoff</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Building Year */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Baujahr</Label>
                 <Input
                   type="number"
-                  placeholder="0"
+                  placeholder="z.B. 1990"
                   disabled={!isEditing}
-                  className="pr-24"
+                  className="h-10"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  kWh/(m²·a)
-                </span>
               </div>
-            </div>
 
-            <div>
-              <Label>Energiekennwert Wärme</Label>
-              <div className="relative">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Baujahr Anlagentechnik</Label>
                 <Input
                   type="number"
-                  placeholder="0"
+                  placeholder="z.B. 2010"
                   disabled={!isEditing}
-                  className="pr-24"
+                  className="h-10"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  kWh/(m²·a)
-                </span>
               </div>
             </div>
-          </div>
 
-          <div>
-            <Label>CO2-Emissionen</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                placeholder="0"
-                disabled={!isEditing}
-                className="pr-16"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                kg/m²a
-              </span>
+            <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+              <Switch disabled={!isEditing} />
+              <Label className="text-sm">Baujahr unbekannt</Label>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch disabled={!isEditing} />
-            <Label>Energieverbrauch für Warmwasser enthalten</Label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Heizungsart</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="zentralheizung">Zentralheizung</SelectItem>
-                  <SelectItem value="etagenheizung">Etagenheizung</SelectItem>
-                  <SelectItem value="fernwaerme">Fernwärme</SelectItem>
-                  <SelectItem value="fussboden">Fußbodenheizung</SelectItem>
-                  <SelectItem value="ofenheizung">Ofenheizung</SelectItem>
-                  <SelectItem value="nachtspeicher">Nachtspeicheröfen</SelectItem>
-                  <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
-                  <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
-                  <SelectItem value="pelletheizung">Pelletheizung</SelectItem>
-                  <SelectItem value="elektro">Elektro-Heizung</SelectItem>
-                  <SelectItem value="solar">Solar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Wesentlicher Energieträger</Label>
-              <Select disabled={!isEditing}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="oel">Öl</SelectItem>
-                  <SelectItem value="gas">Gas</SelectItem>
-                  <SelectItem value="strom">Strom</SelectItem>
-                  <SelectItem value="alternativ">Alternative Energien</SelectItem>
-                  <SelectItem value="solar">Solar</SelectItem>
-                  <SelectItem value="erdwaerme">Erdwärme</SelectItem>
-                  <SelectItem value="luftwp">Luftwärmepumpe</SelectItem>
-                  <SelectItem value="fernwaerme">Fernwärme</SelectItem>
-                  <SelectItem value="holz">Holz</SelectItem>
-                  <SelectItem value="fluessiggas">Flüssiggas</SelectItem>
-                  <SelectItem value="kohle">Kohle</SelectItem>
-                  <SelectItem value="pellet">Pellet</SelectItem>
-                  <SelectItem value="waermepumpe">Wärmepumpe</SelectItem>
-                  <SelectItem value="blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
-                  <SelectItem value="bhkw_fossil">BHKW fossil befeuert</SelectItem>
-                  <SelectItem value="bhkw_regenerativ">BHKW regenerativ befeuert</SelectItem>
-                  <SelectItem value="kwk_fossil">KWK fossil befeuert</SelectItem>
-                  <SelectItem value="kwk_regenerativ">KWK regenerativ befeuert</SelectItem>
-                  <SelectItem value="nahwaerme">Nahwärme</SelectItem>
-                  <SelectItem value="windenergie">Windenergie</SelectItem>
-                  <SelectItem value="bioenergie">Bioenergie</SelectItem>
-                  <SelectItem value="biogas">Biogas</SelectItem>
-                  <SelectItem value="biooele">Bioöle</SelectItem>
-                  <SelectItem value="biomasse">Biomasse</SelectItem>
-                  <SelectItem value="kamin">Kamin</SelectItem>
-                  <SelectItem value="ofen">Ofen</SelectItem>
-                  <SelectItem value="wasserstoff">Wasserstoff</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Baujahr</Label>
-              <Input
-                type="number"
-                placeholder="z.B. 1990"
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div>
-              <Label>Baujahr Anlagentechnik</Label>
-              <Input
-                type="number"
-                placeholder="z.B. 2010"
-                disabled={!isEditing}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch disabled={!isEditing} />
-            <Label>Baujahr unbekannt</Label>
           </div>
         </CardContent>
       </Card>

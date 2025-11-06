@@ -863,24 +863,21 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
 
           <div className="space-y-2">
             <Label>Stellplatztyp</Label>
-            <Select
-              value={formData.parkingType || ""}
-              onValueChange={(value) => handleChange("parkingType", value)}
+            <MultiSelect
+              options={[
+                { label: "Garage", value: "Garage" },
+                { label: "Außenstellplatz", value: "Außenstellplatz" },
+                { label: "Carport", value: "Carport" },
+                { label: "Duplex", value: "Duplex" },
+                { label: "Parkhaus", value: "Parkhaus" },
+                { label: "Tiefgarage", value: "Tiefgarage" },
+                { label: "Doppelgarage", value: "Doppelgarage" },
+              ]}
+              selected={formData.parkingType ? formData.parkingType.split(",").filter(Boolean) : []}
+              onChange={(values) => handleChange("parkingType", values.join(","))}
+              placeholder="Stellplatztyp wählen..."
               disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Typ wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Garage">Garage</SelectItem>
-                <SelectItem value="Außenstellplatz">Außenstellplatz</SelectItem>
-                <SelectItem value="Carport">Carport</SelectItem>
-                <SelectItem value="Duplex">Duplex</SelectItem>
-                <SelectItem value="Parkhaus">Parkhaus</SelectItem>
-                <SelectItem value="Tiefgarage">Tiefgarage</SelectItem>
-                <SelectItem value="Doppelgarage">Doppelgarage</SelectItem>
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div className="space-y-2">
