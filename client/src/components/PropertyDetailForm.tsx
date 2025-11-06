@@ -33,7 +33,14 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
   };
 
   const handleSave = () => {
-    onSave(formData);
+    // Filter out null/undefined/empty string values to avoid validation errors
+    const cleanedData: any = {};
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        cleanedData[key] = value;
+      }
+    });
+    onSave(cleanedData);
   };
 
   return (

@@ -119,3 +119,13 @@
 - [x] Add automatic "m²" suffix to area fields
 - [x] Add automatic "€" suffix to price fields
 - [x] Add sticky "Jetzt speichern" button at bottom of form (only visible when editing)
+
+### Critical Fixes & Database Migration
+- [x] Fix form validation errors (null values causing save failures)
+- [x] Keep prices/areas as numbers in DB (display with units in UI only)
+- [x] Prepare PostgreSQL migration guide for later VN setup
+- [x] Configure PostgreSQL connection code (ready for migration)
+- [x] Add OPENAI_API_KEY as secret
+- [x] Replace Manus LLM helper with direct OpenAI API calls
+- [x] Install OpenAI SDK
+- [x] Test AI description generator with OpenAI API

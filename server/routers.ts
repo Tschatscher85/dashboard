@@ -178,7 +178,7 @@ export const appRouter = router({
         creativity: z.number().min(0).max(1).default(0.7),
       }))
       .mutation(async ({ input }) => {
-        const { invokeLLM } = await import("./_core/llm");
+        const { generateText } = await import("./_core/openai");
         
         // Build property details string from data
         const p = input.propertyData;
@@ -231,15 +231,13 @@ export const appRouter = router({
         
         const prompt = `Erstelle eine professionelle Objektbeschreibung für eine Immobilienanzeige mit folgenden Details: ${details.join(', ')}. Die Beschreibung soll ansprechend und verkaufsfördernd sein.`;
         
-        const response = await invokeLLM({
+        const description = await generateText({
           messages: [
             { role: "system", content: "Du bist ein professioneller Immobilienmakler, der ansprechende Objektbeschreibungen erstellt." },
             { role: "user", content: prompt },
           ],
+          temperature: input.creativity,
         });
-        
-        const content = response.choices[0].message.content;
-        const description = typeof content === 'string' ? content : '';
         
         return { description };
       }),
