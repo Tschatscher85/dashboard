@@ -327,7 +327,13 @@ export default function PropertyDetail() {
         <TabsContent value="details" className="space-y-6">
           <PropertyDetailForm
             ref={formRef}
-            property={property}
+            property={property ? {
+              ...property,
+              // Convert Date to ISO string for date input fields
+              availableFrom: property.availableFrom instanceof Date
+                ? property.availableFrom.toISOString().split('T')[0] as any
+                : property.availableFrom
+            } as Property : property}
             onSave={handleSave}
             isEditing={isEditing}
           />

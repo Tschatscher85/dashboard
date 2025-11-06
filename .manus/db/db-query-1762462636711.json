@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, title, availableFrom FROM properties WHERE id = 2",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT id, title, availableFrom FROM properties WHERE id = 2",
+  "rows": [
+    {
+      "id": "2",
+      "title": "Haus in Geislingen",
+      "availableFrom": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tavailableFrom\n2\tHaus in Geislingen\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 383
+}

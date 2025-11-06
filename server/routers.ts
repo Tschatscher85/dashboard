@@ -38,7 +38,18 @@ export const appRouter = router({
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await db.getPropertyById(input.id);
+        const property = await db.getPropertyById(input.id);
+        if (!property) return undefined;
+        
+        // Ensure availableFrom is a string, not a Date object
+        if (property.availableFrom) {
+          const dateValue = property.availableFrom instanceof Date 
+            ? property.availableFrom 
+            : new Date(property.availableFrom as any);
+          (property as any).availableFrom = dateValue.toISOString().split('T')[0];
+        }
+        
+        return property;
       }),
 
     getBySlug: publicProcedure
@@ -135,13 +146,18 @@ export const appRouter = router({
             "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
             "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
           ]).optional(),
-          availableFrom: z.date().optional(),
+          availableFrom: z.union([z.string(), z.date()]).optional(),
           landingPageSlug: z.string().optional(),
           landingPagePublished: z.boolean().optional(),
         }),
       }))
       .mutation(async ({ input }) => {
-        await db.updateProperty(input.id, input.data);
+        // Convert string dates to Date objects before saving
+        const processedData: any = { ...input.data };
+        if (input.data.availableFrom && typeof input.data.availableFrom === 'string') {
+          processedData.availableFrom = new Date(input.data.availableFrom);
+        }
+        await db.updateProperty(input.id, processedData);
         return { success: true };
       }),
 

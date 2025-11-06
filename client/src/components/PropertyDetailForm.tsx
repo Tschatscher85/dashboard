@@ -35,8 +35,12 @@ export interface PropertyDetailFormHandle {
 export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyDetailFormProps>(
   ({ property, onSave, isEditing }, ref) => {
   // Initialize formData without title (title is managed separately in header)
+  // Also convert Date objects to ISO strings for date input fields
   const propertyWithoutTitle: any = { ...property };
   delete propertyWithoutTitle.title;
+  if (propertyWithoutTitle.availableFrom instanceof Date) {
+    propertyWithoutTitle.availableFrom = propertyWithoutTitle.availableFrom.toISOString().split('T')[0];
+  }
   const [formData, setFormData] = useState<Partial<Property>>(propertyWithoutTitle);
   const streetInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
@@ -801,8 +805,17 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             <Label>Verfügbar ab</Label>
             <Input
               type="date"
-              value={formData.availableFrom ? new Date(formData.availableFrom).toISOString().split('T')[0] : ""}
-              onChange={(e) => handleChange("availableFrom", e.target.value ? new Date(e.target.value) : null)}
+              value={
+                formData.availableFrom instanceof Date
+                  ? formData.availableFrom.toISOString().split('T')[0]
+                  : (typeof formData.availableFrom === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.availableFrom as string)
+                      ? (formData.availableFrom as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                // Store as ISO date string (YYYY-MM-DD) if value exists, otherwise null
+                handleChange("availableFrom", e.target.value || null);
+              }}
               disabled={!isEditing}
             />
           </div>

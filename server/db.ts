@@ -124,7 +124,15 @@ export async function getPropertyById(id: number) {
   if (!db) return undefined;
   
   const result = await db.select().from(properties).where(eq(properties.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  if (result.length === 0) return undefined;
+  
+  const property = result[0];
+  // Convert Date objects to ISO strings for frontend
+  if (property.availableFrom && property.availableFrom instanceof Date) {
+    (property as any).availableFrom = property.availableFrom.toISOString().split('T')[0];
+  }
+  
+  return property;
 }
 
 export async function getPropertyBySlug(slug: string) {
@@ -166,11 +174,17 @@ export async function getAllProperties(filters?: {
   return result;
 }
 
-export async function updateProperty(id: number, updates: Partial<InsertProperty>) {
+export async function updateProperty(id: number, updates: Partial<InsertProperty> & { availableFrom?: string | Date | null }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.update(properties).set(updates).where(eq(properties.id, id));
+  // Convert string dates to Date objects
+  const processedUpdates: any = { ...updates };
+  if (updates.availableFrom && typeof updates.availableFrom === 'string') {
+    processedUpdates.availableFrom = new Date(updates.availableFrom);
+  }
+  
+  const result = await db.update(properties).set(processedUpdates as Partial<InsertProperty>).where(eq(properties.id, id));
   return result;
 }
 

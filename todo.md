@@ -103,5 +103,6 @@
 
 - [x] Fix status badge to display German labels instead of English values (e.g., "Vermarktung" instead of "marketing")
 
-- [ ] Fix condition field validation error (invalid value being sent)
-- [ ] Make property title editable in edit mode (add input field for title in header)
+- [x] Fix condition field validation error (invalid value being sent)
+- [x] Make property title editable in edit mode (add input field for title in header)
+- [ ] Fix date field saving and display issue - dates (e.g., "Verfügbar ab") are saved to database but not displayed correctly after page reload
