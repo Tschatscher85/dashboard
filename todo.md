@@ -151,3 +151,75 @@
 - [x] Add autocomplete dropdown when typing street address
 - [x] Auto-populate street, city, postal code, country on selection
 - [x] Use existing Maps integration from template
+
+## Layout Redesign & Color Scheme
+
+### Two-Column Layout for Property Detail Page
+- [x] Restructure PropertyDetailView to use two-column grid layout
+- [x] Left column (60-65% width): Stammdaten, Adresse, Preise, Flächen, Zusatzinformationen, Ausstattung, Energieausweis, Beschreibung
+- [x] Right column (35-40% width): Ansprechpartner, Portale, Auftrag, Verkauf, Provision sections
+- [x] Make layout responsive for mobile devices (stack columns on small screens)
+
+### Color Scheme Update (immo-jaeger.eu branding)
+- [x] Update primary blue color to #0066B3 in index.css
+- [x] Add turquoise/cyan accent color #00D4AA for action buttons
+- [x] Update button colors: green (#4CAF50), yellow (#FFC107), red (#F44336)
+- [x] Apply orange/coral accent #FF6B35 where appropriate
+- [x] Update text colors for consistency
+- [x] Test all components with new color scheme
+
+## Right Column Sections Implementation
+
+### Ansprechpartner Section
+- [x] Add Betreuer dropdown (linked to users)
+- [x] Add Eigentümer field with contact search
+- [x] Add Käufer contact search field
+- [x] Add Notar contact search field
+- [x] Add Hausverwaltung contact search field
+- [x] Add Mieter contact search field
+- [x] Add Verknüpfte Kontakte field with type dropdown
+
+### Portale Section
+- [x] Create Portal-Export list display (3 portals)
+- [x] Add "Überall veröffentlichen" button
+- [x] Add individual "Veröffentlichen" buttons per portal
+- [x] Add "Aktualisieren" button (green)
+- [x] Add "Deaktivieren" button (yellow)
+- [x] Add "Löschen" button (red)
+- [x] Add "Jetzt buchen" button (turquoise)
+- [x] Add IS24-Ansprechpartner dropdown
+- [x] Add IS24-ID field
+- [x] Add IS24-Gruppen-Nr field
+- [x] Add Übersetzungen field
+- [ ] Prepare API integration structure for ImmoScout24
+- [ ] Prepare API integration structure for custom homepage
+
+### Auftrag Section
+- [x] Add Auftragsart dropdown (Alleinauftrag, etc.)
+- [x] Add Laufzeit dropdown (Unbefristet, Befristet)
+- [x] Add "Auftrag von" date field
+- [x] Add "Auftrag bis" date field
+
+### Verkauf Section
+- [x] Add Verkauf section placeholder
+
+### Provision Intern Section
+- [x] Add Innenprovision (intern) field with % / € toggle
+- [x] Add Außenprovision (intern) field with % / € toggle
+- [x] Add Gesamtprovision calculated field (read-only)
+- [ ] Implement automatic commission calculation logic
+
+### Provision Extern Section
+- [x] Add Außenprovision für Exposé field
+- [x] Add Provisionshinweis textarea
+
+### Verrechnung Section
+- [x] Add Verrechnung section placeholder
+
+### Fahrzeiten Section
+- [x] Add Fußweg zu ÖPNV field (minutes + km)
+- [x] Add Fahrzeit nächste Autobahn field (minutes + km)
+- [x] Add Fahrzeit nächster HBF field (minutes + km)
+- [x] Add Fahrzeit nächster Flughafen field (minutes + km)
+- [x] Add "Distanzen berechnen" button
+- [ ] Implement distance calculation using Google Maps API

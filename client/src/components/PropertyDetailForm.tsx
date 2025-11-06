@@ -18,6 +18,8 @@ import { MultiSelect } from "./ui/multi-select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { AIDescriptionDialog } from "./AIDescriptionDialog";
 import { Separator } from "./ui/separator";
+import { PropertyDetailFormLayout } from "./PropertyDetailFormLayout";
+import { PropertyRightColumn } from "./PropertyRightColumn";
 
 interface PropertyDetailFormProps {
   property: Property;
@@ -153,9 +155,11 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stammdaten */}
-      <Card>
+    <PropertyDetailFormLayout
+      leftColumn={
+        <>
+          {/* Stammdaten */}
+          <Card>
         <CardHeader>
           <CardTitle>Stammdaten</CardTitle>
         </CardHeader>
@@ -1298,14 +1302,16 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
           </div>
         </CardContent>
       </Card>
-
-      {isEditing && (
-        <div className="sticky bottom-0 z-10 flex justify-center gap-2 border-t bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <Button onClick={handleSave} size="lg" className="min-w-[200px]">
-            Jetzt speichern
-          </Button>
-        </div>
-      )}
-    </div>
+        </>
+      }
+      rightColumn={
+        <PropertyRightColumn
+          property={property}
+          formData={formData}
+          isEditing={isEditing}
+          handleChange={handleChange}
+        />
+      }
+    />
   );
 }

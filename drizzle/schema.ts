@@ -156,6 +156,56 @@ export const properties = mysqlTable("properties", {
   availableFrom: timestamp("availableFrom"),
   contactPersonId: int("contactPersonId"), // reference to users or contacts
   
+  // Ansprechpartner (Contact Persons)
+  supervisorId: int("supervisorId"), // Betreuer (user)
+  ownerId: int("ownerId"), // Eigentümer (contact)
+  ownerType: varchar("ownerType", { length: 100 }), // Typ (optional)
+  buyerId: int("buyerId"), // Käufer (contact)
+  notaryId: int("notaryId"), // Notar (contact)
+  propertyManagementId: int("propertyManagementId"), // Hausverwaltung (contact)
+  tenantId: int("tenantId"), // Mieter (contact)
+  linkedContactIds: text("linkedContactIds"), // Verknüpfte Kontakte (JSON array)
+  
+  // Portale (Portal Export)
+  portalExports: text("portalExports"), // JSON array of portal exports
+  is24ContactPerson: varchar("is24ContactPerson", { length: 255 }), // IS24-Ansprechpartner
+  is24Id: varchar("is24Id", { length: 100 }), // IS24-ID
+  is24GroupNumber: varchar("is24GroupNumber", { length: 100 }), // IS24-Gruppen-Nr
+  translations: text("translations"), // Übersetzungen (JSON)
+  
+  // Auftrag (Assignment)
+  assignmentType: varchar("assignmentType", { length: 100 }), // Auftragsart (Alleinauftrag, etc.)
+  assignmentDuration: varchar("assignmentDuration", { length: 100 }), // Laufzeit (Unbefristet, Befristet)
+  assignmentFrom: timestamp("assignmentFrom"), // Auftrag von
+  assignmentTo: timestamp("assignmentTo"), // Auftrag bis
+  
+  // Verkauf (Sale)
+  saleInfo: text("saleInfo"), // JSON for sale information
+  
+  // Provision Intern (Internal Commission)
+  internalCommissionPercent: varchar("internalCommissionPercent", { length: 50 }), // Innenprovision (intern)
+  internalCommissionType: mysqlEnum("internalCommissionType", ["percent", "euro"]).default("percent"), // % or €
+  externalCommissionInternalPercent: varchar("externalCommissionInternalPercent", { length: 50 }), // Außenprovision (intern)
+  externalCommissionInternalType: mysqlEnum("externalCommissionInternalType", ["percent", "euro"]).default("percent"),
+  totalCommission: int("totalCommission"), // Gesamtprovision (calculated, in cents)
+  
+  // Provision Extern (External Commission)
+  externalCommissionForExpose: varchar("externalCommissionForExpose", { length: 255 }), // Außenprovision für Exposé
+  commissionNote: text("commissionNote"), // Provisionshinweis
+  
+  // Verrechnung (Billing)
+  billingInfo: text("billingInfo"), // JSON for billing information
+  
+  // Fahrzeiten (Travel Times)
+  walkingTimeToPublicTransport: int("walkingTimeToPublicTransport"), // in minutes
+  distanceToPublicTransport: int("distanceToPublicTransport"), // in meters
+  drivingTimeToHighway: int("drivingTimeToHighway"), // in minutes
+  distanceToHighway: int("distanceToHighway"), // in meters
+  drivingTimeToMainStation: int("drivingTimeToMainStation"), // in minutes
+  distanceToMainStation: int("distanceToMainStation"), // in meters
+  drivingTimeToAirport: int("drivingTimeToAirport"), // in minutes
+  distanceToAirport: int("distanceToAirport"), // in meters
+  
   // Auto-export settings
   autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
   
