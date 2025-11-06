@@ -223,3 +223,39 @@
 - [x] Add Fahrzeit nächster Flughafen field (minutes + km)
 - [x] Add "Distanzen berechnen" button
 - [ ] Implement distance calculation using Google Maps API
+
+## Future Module Preparation
+
+### Contact Tagging System
+- [x] Add tags field to contacts table (TEXT, JSON array)
+- [x] Create predefined tag list (Versicherungskunde, Makler-Lead, Hausverwaltung-Interessent, Käufer, Verkäufer, Mieter, Vermieter)
+- [x] Add tag multi-select component to contact detail view
+- [x] Add tag filter to contact list view
+- [x] Add tag badges display in contact cards
+
+### Versicherungen (Insurance) Module - Database Preparation
+- [x] Create insurancePolicies table
+- [x] Fields: policyNumber, insuranceType, provider, contactId, propertyId, startDate, endDate, premium, paymentInterval, status
+- [x] Add insuranceType enum (Gebäudeversicherung, Haftpflicht, Rechtsschutz, Hausrat, Elementarschaden, etc.)
+- [x] Add relationship to contacts and properties tables
+
+### Makler (Broker) Module - Database Preparation
+- [x] Create brokerContracts table
+- [x] Fields: contractNumber, contactId, propertyId, contractType, startDate, endDate, commissionRate, commissionAmount, status
+- [x] Add contractType enum (Alleinauftrag, Einfacher Auftrag, Qualifizierter Alleinauftrag)
+- [x] Add commission tracking fields
+
+### Hausverwaltung (Property Management) Module - Database Preparation
+- [x] Create propertyManagementContracts table
+- [x] Fields: contractNumber, propertyId, managerId (contactId), startDate, endDate, monthlyFee, services, status
+- [x] Create maintenanceRecords table
+- [x] Fields: propertyId, date, description, cost, category, vendor, status
+- [x] Create utilityBills table for Nebenkostenabrechnung
+- [x] Fields: propertyId, year, month, type, amount, paidBy, status
+
+### UI Preparation
+- [ ] Add "Versicherungen" navigation item (initially hidden/disabled)
+- [ ] Add "Maklerverträge" navigation item (initially hidden/disabled)
+- [ ] Add "Hausverwaltung" navigation item (initially hidden/disabled)
+- [ ] Add feature flags to enable/disable modules
+- [ ] Prepare placeholder pages for future modules

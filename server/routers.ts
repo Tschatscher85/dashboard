@@ -324,6 +324,7 @@ export const appRouter = router({
           country: z.string().optional(),
           notes: z.string().optional(),
           source: z.string().optional(),
+          tags: z.string().optional(),
         }),
       }))
       .mutation(async ({ input }) => {

@@ -50,6 +50,13 @@
       "when": 1762441565911,
       "tag": "0006_white_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1762442373465,
+      "tag": "0007_right_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

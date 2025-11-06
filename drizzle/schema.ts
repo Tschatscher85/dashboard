@@ -254,6 +254,7 @@ export const contacts = mysqlTable("contacts", {
   // Additional info
   notes: text("notes"),
   source: varchar("source", { length: 100 }), // where did they come from
+  tags: text("tags"), // JSON array of tags: ["Versicherungskunde", "Makler-Lead", etc.]
   
   // Brevo sync
   brevoContactId: varchar("brevoContactId", { length: 100 }),
@@ -420,3 +421,212 @@ export const leads = mysqlTable("leads", {
 
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
+
+/**
+ * Insurance Policies - for future Versicherungen module
+ * Tracks insurance contracts linked to properties and contacts
+ */
+export const insurancePolicies = mysqlTable("insurancePolicies", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Policy details
+  policyNumber: varchar("policyNumber", { length: 100 }),
+  insuranceType: mysqlEnum("insuranceType", [
+    "building", // Gebäudeversicherung
+    "liability", // Haftpflicht
+    "legal", // Rechtsschutz
+    "household", // Hausrat
+    "elemental", // Elementarschaden
+    "glass", // Glasversicherung
+    "other"
+  ]).notNull(),
+  provider: varchar("provider", { length: 255 }), // Allianz, etc.
+  
+  // Relations
+  contactId: int("contactId"), // policy holder
+  propertyId: int("propertyId"), // insured property
+  
+  // Financial
+  premium: int("premium"), // in cents
+  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "quarterly", "yearly"]),
+  
+  // Dates
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  
+  // Status
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type InsurancePolicy = typeof insurancePolicies.$inferSelect;
+export type InsertInsurancePolicy = typeof insurancePolicies.$inferInsert;
+
+/**
+ * Broker Contracts - for future Makler module
+ * Tracks broker contracts and commissions
+ */
+export const brokerContracts = mysqlTable("brokerContracts", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Contract details
+  contractNumber: varchar("contractNumber", { length: 100 }),
+  contractType: mysqlEnum("contractType", [
+    "exclusive", // Alleinauftrag
+    "simple", // Einfacher Auftrag
+    "qualified_exclusive" // Qualifizierter Alleinauftrag
+  ]).notNull(),
+  
+  // Relations
+  contactId: int("contactId").notNull(), // client
+  propertyId: int("propertyId").notNull(), // property being brokered
+  
+  // Commission
+  commissionRate: int("commissionRate"), // percentage * 100 (e.g., 350 = 3.5%)
+  commissionAmount: int("commissionAmount"), // fixed amount in cents
+  commissionType: mysqlEnum("commissionType", ["percentage", "fixed"]),
+  
+  // Dates
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate"),
+  
+  // Status
+  status: mysqlEnum("status", ["active", "completed", "cancelled"]).default("active"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BrokerContract = typeof brokerContracts.$inferSelect;
+export type InsertBrokerContract = typeof brokerContracts.$inferInsert;
+
+/**
+ * Property Management Contracts - for future Hausverwaltung module
+ */
+export const propertyManagementContracts = mysqlTable("propertyManagementContracts", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Contract details
+  contractNumber: varchar("contractNumber", { length: 100 }),
+  
+  // Relations
+  propertyId: int("propertyId").notNull(),
+  managerId: int("managerId").notNull(), // contactId of property manager
+  
+  // Financial
+  monthlyFee: int("monthlyFee"), // in cents
+  services: text("services"), // JSON array of services included
+  
+  // Dates
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate"),
+  
+  // Status
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PropertyManagementContract = typeof propertyManagementContracts.$inferSelect;
+export type InsertPropertyManagementContract = typeof propertyManagementContracts.$inferInsert;
+
+/**
+ * Maintenance Records - for Hausverwaltung module
+ */
+export const maintenanceRecords = mysqlTable("maintenanceRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Relations
+  propertyId: int("propertyId").notNull(),
+  
+  // Maintenance details
+  date: timestamp("date").notNull(),
+  description: text("description").notNull(),
+  category: mysqlEnum("category", [
+    "repair", // Reparatur
+    "inspection", // Inspektion
+    "cleaning", // Reinigung
+    "renovation", // Renovierung
+    "other"
+  ]).notNull(),
+  
+  // Financial
+  cost: int("cost"), // in cents
+  vendor: varchar("vendor", { length: 255 }), // company/person who did the work
+  
+  // Status
+  status: mysqlEnum("status", ["scheduled", "in_progress", "completed", "cancelled"]).default("scheduled"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MaintenanceRecord = typeof maintenanceRecords.$inferSelect;
+export type InsertMaintenanceRecord = typeof maintenanceRecords.$inferInsert;
+
+/**
+ * Utility Bills - for Nebenkostenabrechnung in Hausverwaltung module
+ */
+export const utilityBills = mysqlTable("utilityBills", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Relations
+  propertyId: int("propertyId").notNull(),
+  
+  // Bill details
+  year: int("year").notNull(),
+  month: int("month"), // optional, for monthly bills
+  type: mysqlEnum("type", [
+    "heating", // Heizung
+    "water", // Wasser
+    "electricity", // Strom
+    "gas", // Gas
+    "waste", // Müll
+    "cleaning", // Reinigung
+    "maintenance", // Instandhaltung
+    "insurance", // Versicherung
+    "property_tax", // Grundsteuer
+    "other"
+  ]).notNull(),
+  
+  // Financial
+  amount: int("amount").notNull(), // in cents
+  paidBy: mysqlEnum("paidBy", ["owner", "tenant", "management"]),
+  
+  // Status
+  status: mysqlEnum("status", ["pending", "paid", "overdue"]).default("pending"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UtilityBill = typeof utilityBills.$inferSelect;
+export type InsertUtilityBill = typeof utilityBills.$inferInsert;

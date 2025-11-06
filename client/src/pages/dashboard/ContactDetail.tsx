@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { ContactTagsInput } from "@/components/ContactTagsInput";
 
 export default function ContactDetail() {
   const [, params] = useRoute("/dashboard/contacts/:id");
@@ -45,6 +46,16 @@ export default function ContactDetail() {
     },
     onError: (error) => {
       toast.error("Fehler beim Synchronisieren: " + error.message);
+    },
+  });
+
+  const updateTagsMutation = trpc.contacts.update.useMutation({
+    onSuccess: () => {
+      toast.success("Tags aktualisiert");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Aktualisieren: " + error.message);
     },
   });
 
@@ -285,6 +296,27 @@ export default function ContactDetail() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Tags */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tags</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContactTagsInput
+                tags={contact.tags ? JSON.parse(contact.tags) : []}
+                onChange={(newTags) => {
+                  // Update contact tags via mutation
+                  updateTagsMutation.mutate({
+                    id: contact.id,
+                    data: {
+                      tags: JSON.stringify(newTags),
+                    },
+                  });
+                }}
+              />
             </CardContent>
           </Card>
 

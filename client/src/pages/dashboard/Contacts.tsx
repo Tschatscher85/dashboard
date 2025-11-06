@@ -33,10 +33,12 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { CONTACT_TAG_OPTIONS } from "@/components/ContactTagsInput";
 
 export default function Contacts() {
   const [, setLocation] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     contactType: "interested" as const,
     salutation: "mr" as const,
@@ -141,6 +143,19 @@ export default function Contacts() {
     );
   }
 
+  // Filter contacts by selected tag
+  const filteredContacts = selectedTagFilter === "all" 
+    ? contacts 
+    : contacts?.filter(contact => {
+        if (!contact.tags) return false;
+        try {
+          const tags = JSON.parse(contact.tags);
+          return tags.includes(selectedTagFilter);
+        } catch {
+          return false;
+        }
+      });
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -150,13 +165,27 @@ export default function Contacts() {
             Verwalten Sie Ihre Kunden und Interessenten
           </p>
         </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Neuer Kontakt
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Select value={selectedTagFilter} onValueChange={setSelectedTagFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter nach Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Kontakte</SelectItem>
+              {CONTACT_TAG_OPTIONS.map((tag) => (
+                <SelectItem key={tag} value={tag}>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Neuer Kontakt
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Neuen Kontakt anlegen</DialogTitle>
@@ -279,10 +308,10 @@ export default function Contacts() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
-      {contacts && contacts.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-muted/50">
+      {!filteredContacts || filteredContacts.length === 0 ? (        <div className="text-center py-12 border rounded-lg bg-muted/50">
           <Users className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Keine Kontakte vorhanden</h3>
           <p className="text-sm text-muted-foreground mt-2">
@@ -303,7 +332,7 @@ export default function Contacts() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts?.map((contact) => (
+              {filteredContacts?.map((contact) => (
                 <TableRow key={contact.id}>
                   <TableCell className="font-medium">
                     {contact.firstName} {contact.lastName}
