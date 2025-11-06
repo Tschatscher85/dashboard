@@ -260,6 +260,146 @@ export const appRouter = router({
         const base64 = Buffer.from(pdfBytes).toString('base64');
         return { pdf: base64 };
       }),
+
+    // Export properties for homepage sync
+    exportForHomepage: protectedProcedure
+      .input(z.object({
+        propertyIds: z.array(z.number()).optional(), // If not provided, export all active properties
+      }).optional())
+      .query(async ({ input }) => {
+        // Get properties - either specific ones or all active ones
+        const properties = await db.getAllProperties({
+          status: input?.propertyIds ? undefined : 'marketing', // Only marketing properties if no specific IDs
+        });
+        
+        // Filter by IDs if provided
+        const filteredProperties = input?.propertyIds 
+          ? properties.filter(p => input.propertyIds!.includes(p.id))
+          : properties;
+        
+        // Transform to homepage format
+        const exportData = await Promise.all(
+          filteredProperties.map(async (property) => {
+            const images = await db.getPropertyImages(property.id);
+            
+            return {
+              id: property.id.toString(),
+              title: property.title || '',
+              type: property.propertyType || 'other',
+              subType: property.subType || '',
+              price: property.price || 0,
+              livingSpace: property.livingArea || 0,
+              plotSize: property.plotArea || 0,
+              rooms: property.rooms || 0,
+              bedrooms: property.bedrooms || 0,
+              bathrooms: property.bathrooms || 0,
+              buildYear: property.yearBuilt || 0,
+              address: {
+                street: property.street || '',
+                houseNumber: property.houseNumber || '',
+                postalCode: property.zipCode || '',
+                city: property.city || '',
+              },
+              description: property.description || '',
+              features: [
+                ...(property.hasBalcony ? ['Balkon'] : []),
+                ...(property.hasTerrace ? ['Terrasse'] : []),
+                ...(property.hasGarden ? ['Garten'] : []),
+                ...(property.hasElevator ? ['Aufzug'] : []),
+                ...(property.hasParking ? ['Parkplatz'] : []),
+                ...(property.hasBasement ? ['Keller'] : []),
+                ...(property.hasBuiltInKitchen ? ['Einbauküche'] : []),
+                ...(property.hasGuestToilet ? ['Gäste-WC'] : []),
+              ],
+              images: images.map(img => img.imageUrl),
+              status: property.status || 'available',
+              marketingType: property.marketingType || 'sale',
+            };
+          })
+        );
+        
+        return { properties: exportData };
+      }),
+
+    // Sync properties to homepage
+    syncToHomepage: protectedProcedure
+      .input(z.object({
+        homepageUrl: z.string().url(),
+        propertyIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Get export data
+        const exportData = await db.getAllProperties({
+          status: input.propertyIds ? undefined : 'marketing',
+        });
+        
+        const filteredProperties = input.propertyIds
+          ? exportData.filter(p => input.propertyIds!.includes(p.id))
+          : exportData;
+        
+        const formattedData = await Promise.all(
+          filteredProperties.map(async (property) => {
+            const images = await db.getPropertyImages(property.id);
+            
+            return {
+              id: property.id.toString(),
+              title: property.title || '',
+              type: property.propertyType || 'other',
+              subType: property.subType || '',
+              price: property.price || 0,
+              livingSpace: property.livingArea || 0,
+              plotSize: property.plotArea || 0,
+              rooms: property.rooms || 0,
+              bedrooms: property.bedrooms || 0,
+              bathrooms: property.bathrooms || 0,
+              buildYear: property.yearBuilt || 0,
+              address: {
+                street: property.street || '',
+                houseNumber: property.houseNumber || '',
+                postalCode: property.zipCode || '',
+                city: property.city || '',
+              },
+              description: property.description || '',
+              features: [
+                ...(property.hasBalcony ? ['Balkon'] : []),
+                ...(property.hasTerrace ? ['Terrasse'] : []),
+                ...(property.hasGarden ? ['Garten'] : []),
+                ...(property.hasElevator ? ['Aufzug'] : []),
+                ...(property.hasParking ? ['Parkplatz'] : []),
+                ...(property.hasBasement ? ['Keller'] : []),
+                ...(property.hasBuiltInKitchen ? ['Einbauküche'] : []),
+                ...(property.hasGuestToilet ? ['Gäste-WC'] : []),
+              ],
+              images: images.map(img => img.imageUrl),
+              status: property.status || 'available',
+              marketingType: property.marketingType || 'sale',
+            };
+          })
+        );
+        
+        // Send to homepage
+        try {
+          const response = await fetch(input.homepageUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ properties: formattedData }),
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Homepage sync failed: ${response.statusText}`);
+          }
+          
+          return { 
+            success: true, 
+            message: `${formattedData.length} Immobilien erfolgreich synchronisiert`,
+            count: formattedData.length,
+          };
+        } catch (error) {
+          throw new Error(`Sync fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
+        }
+      }),
   }),
 
   // ============ CONTACTS ============

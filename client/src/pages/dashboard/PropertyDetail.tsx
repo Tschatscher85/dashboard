@@ -22,14 +22,15 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { PropertyDetailForm, type Property } from "@/components/PropertyDetailForm";
-import { useState } from "react";
+import { PropertyDetailForm, type Property, type PropertyDetailFormHandle } from "@/components/PropertyDetailForm";
+import { useState, useRef } from "react";
 
 export default function PropertyDetail() {
   const [, params] = useRoute("/dashboard/properties/:id");
   const [, setLocation] = useLocation();
   const propertyId = params?.id ? parseInt(params.id) : 0;
   const [isEditing, setIsEditing] = useState(false);
+  const formRef = useRef<PropertyDetailFormHandle>(null);
 
   const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
     id: propertyId,
@@ -61,6 +62,12 @@ export default function PropertyDetail() {
       id: propertyId,
       data: data as any,
     });
+  };
+
+  const handleSaveClick = () => {
+    if (formRef.current) {
+      formRef.current.save();
+    }
   };
 
   if (isLoading) {
@@ -190,14 +197,7 @@ export default function PropertyDetail() {
                   <>
                     <Button 
                       variant="default" 
-                      onClick={() => {
-                        // The form will handle the save via handleSave
-                        // This is just a visual indicator that we're in edit mode
-                        const form = document.querySelector('form');
-                        if (form) {
-                          form.requestSubmit();
-                        }
-                      }}
+                      onClick={handleSaveClick}
                     >
                       <Save className="h-4 w-4 mr-2" />
                       Speichern
@@ -290,6 +290,7 @@ export default function PropertyDetail() {
         {/* Details Tab - Now uses PropertyDetailForm */}
         <TabsContent value="details" className="space-y-6">
           <PropertyDetailForm
+            ref={formRef}
             property={property}
             onSave={handleSave}
             isEditing={isEditing}

@@ -94,3 +94,9 @@
 
 - [x] Convert parking type field to multi-select to allow multiple selections (Garage, Carport, etc.)
 - [x] Improve energy certificate section design with better layout and grouping
+
+- [x] Fix property data saving issue (save button not working)
+- [x] Create API endpoint to export properties in JSON format for homepage sync
+- [x] Add sync button to properties overview
+- [x] Implement sync functionality to send properties to homepage
+- [x] Add homepage URL configuration (for sync target)

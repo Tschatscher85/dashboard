@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import type { Property } from "../../../drizzle/schema";
 
 export type { Property };
@@ -27,7 +27,12 @@ interface PropertyDetailFormProps {
   isEditing: boolean;
 }
 
-export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDetailFormProps) {
+export interface PropertyDetailFormHandle {
+  save: () => void;
+}
+
+export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyDetailFormProps>(
+  ({ property, onSave, isEditing }, ref) => {
   const [formData, setFormData] = useState<Partial<Property>>(property);
   const streetInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
@@ -153,6 +158,11 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
     });
     onSave(cleanedData);
   };
+
+  // Expose save function to parent via ref
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+  }));
 
   return (
     <PropertyDetailFormLayout
@@ -1027,4 +1037,6 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
       }
     />
   );
-}
+});
+
+PropertyDetailForm.displayName = "PropertyDetailForm";

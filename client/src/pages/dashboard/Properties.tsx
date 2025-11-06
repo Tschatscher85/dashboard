@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,11 +36,13 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Properties() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
+  const [homepageUrl, setHomepageUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [statusChangePropertyId, setStatusChangePropertyId] = useState<number | null>(null);
-  const [newStatus, setNewStatus] = useState<string>("");
+  const [newStatus, setNewStatus] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -220,6 +222,71 @@ export default function Properties() {
     }
   };
 
+  const handleSync = async () => {
+    if (!homepageUrl) {
+      toast.error("Bitte geben Sie eine Homepage-URL ein");
+      return;
+    }
+
+    try {
+      // Get properties to sync (selected or all active)
+      const propertiesToSync = selectedProperties.length > 0
+        ? properties?.filter(p => selectedProperties.includes(p.id))
+        : properties?.filter(p => p.status !== 'inactive');
+
+      if (!propertiesToSync || propertiesToSync.length === 0) {
+        toast.error("Keine Immobilien zum Synchronisieren gefunden");
+        return;
+      }
+
+      // Format properties for export
+      const exportData = {
+        properties: propertiesToSync.map(p => ({
+          id: p.id.toString(),
+          title: p.title || '',
+          type: p.subType || p.propertyType || 'apartment',
+          price: p.price ? p.price / 100 : 0,
+          livingSpace: p.livingArea || 0,
+          plotSize: p.plotArea || 0,
+          rooms: p.rooms || 0,
+          bedrooms: p.bedrooms || 0,
+          bathrooms: p.bathrooms || 0,
+          buildYear: p.yearBuilt || null,
+          address: {
+            street: p.street || '',
+            houseNumber: p.houseNumber || '',
+            postalCode: p.zipCode || '',
+            city: p.city || ''
+          },
+          description: p.description || '',
+          features: [],
+          images: [],
+          status: p.status || 'available'
+        }))
+      };
+
+      // Send to homepage
+      const response = await fetch(homepageUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(exportData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      toast.success(`${propertiesToSync.length} Immobilie(n) erfolgreich synchronisiert`);
+      setIsSyncDialogOpen(false);
+      setSelectedProperties([]);
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast.error("Fehler beim Synchronisieren: " + (error instanceof Error ? error.message : 'Unbekannter Fehler'));
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -245,9 +312,49 @@ export default function Properties() {
             Verwalten Sie Ihre Immobilien und erstellen Sie Exposés
           </p>
         </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
+        <div className="flex gap-2">
+          <Dialog open={isSyncDialogOpen} onOpenChange={setIsSyncDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Zur Homepage synchronisieren
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Immobilien synchronisieren</DialogTitle>
+                <DialogDescription>
+                  Synchronisieren Sie {selectedProperties.length > 0 ? `${selectedProperties.length} ausgewählte` : 'alle aktiven'} Immobilien mit Ihrer Homepage.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="homepage-url">Homepage API-URL</Label>
+                  <Input
+                    id="homepage-url"
+                    placeholder="https://ihre-homepage.de/api/properties"
+                    value={homepageUrl}
+                    onChange={(e) => setHomepageUrl(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Geben Sie die URL ein, an die die Immobiliendaten gesendet werden sollen.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsSyncDialogOpen(false)}>
+                  Abbrechen
+                </Button>
+                <Button onClick={handleSync}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Jetzt synchronisieren
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button>
               <Plus className="mr-2 h-4 w-4" />
               Neue Immobilie
             </Button>
@@ -396,6 +503,7 @@ export default function Properties() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search and Filters */}
