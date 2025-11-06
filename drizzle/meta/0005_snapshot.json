@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "5f1eaabe-3169-4462-8b03-4a1828ea5358",
-  "prevId": "4e16373d-c3d0-44ba-ad95-538207312817",
+  "id": "38b039f0-1acd-4020-82eb-3d9129774271",
+  "prevId": "5f1eaabe-3169-4462-8b03-4a1828ea5358",
   "tables": {
     "activities": {
       "name": "activities",
@@ -1206,6 +1206,41 @@
           "notNull": false,
           "autoincrement": false
         },
+        "energyCertificateAvailability": {
+          "name": "energyCertificateAvailability",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "energyCertificateCreationDate": {
+          "name": "energyCertificateCreationDate",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "energyCertificateIssueDate": {
+          "name": "energyCertificateIssueDate",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "energyCertificateValidUntil": {
+          "name": "energyCertificateValidUntil",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "energyCertificateType": {
+          "name": "energyCertificateType",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "energyClass": {
           "name": "energyClass",
           "type": "varchar(10)",
@@ -1220,9 +1255,60 @@
           "notNull": false,
           "autoincrement": false
         },
+        "energyConsumptionElectricity": {
+          "name": "energyConsumptionElectricity",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "energyConsumptionHeat": {
+          "name": "energyConsumptionHeat",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "co2Emissions": {
+          "name": "co2Emissions",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "includesWarmWater": {
+          "name": "includesWarmWater",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "heatingType": {
           "name": "heatingType",
           "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mainEnergySource": {
+          "name": "mainEnergySource",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "buildingYearUnknown": {
+          "name": "buildingYearUnknown",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "heatingSystemYear": {
+          "name": "heatingSystemYear",
+          "type": "int",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

@@ -127,10 +127,22 @@ export const properties = mysqlTable("properties", {
   // Stored as comma-separated values
   flooringTypes: text("flooringTypes"),
   
-  // Energy certificate
-  energyClass: varchar("energyClass", { length: 10 }), // A+, A, B, C, etc.
-  energyConsumption: int("energyConsumption"), // kWh/(m²*a)
-  heatingType: varchar("heatingType", { length: 100 }),
+  // Energy certificate (Energieausweis)
+  energyCertificateAvailability: varchar("energyCertificateAvailability", { length: 100 }), // wird nicht benötigt, liegt vor, liegt zur Besichtigung vor
+  energyCertificateCreationDate: varchar("energyCertificateCreationDate", { length: 50 }), // ab 1. Mai 2014, bis 30. April 2014
+  energyCertificateIssueDate: varchar("energyCertificateIssueDate", { length: 20 }), // Date as string
+  energyCertificateValidUntil: varchar("energyCertificateValidUntil", { length: 20 }), // Date as string
+  energyCertificateType: varchar("energyCertificateType", { length: 50 }), // Bedarfsausweis, Verbrauchsausweis
+  energyClass: varchar("energyClass", { length: 10 }), // A+, A, B, C, D, E, F, G, H
+  energyConsumption: int("energyConsumption"), // Energiekennwert kWh/(m²*a)
+  energyConsumptionElectricity: int("energyConsumptionElectricity"), // Energiekennwert Strom
+  energyConsumptionHeat: int("energyConsumptionHeat"), // Energiekennwert Wärme
+  co2Emissions: int("co2Emissions"), // CO2-Emissionen
+  includesWarmWater: boolean("includesWarmWater").default(false), // Energieverbrauch für Warmwasser enthalten
+  heatingType: varchar("heatingType", { length: 100 }), // Heizungsart
+  mainEnergySource: varchar("mainEnergySource", { length: 100 }), // Wesentlicher Energieträger
+  buildingYearUnknown: boolean("buildingYearUnknown").default(false), // Baujahr unbekannt
+  heatingSystemYear: int("heatingSystemYear"), // Baujahr Anlagentechnik
   
   // Construction
   yearBuilt: int("yearBuilt"),

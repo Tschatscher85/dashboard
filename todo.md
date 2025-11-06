@@ -129,3 +129,25 @@
 - [x] Replace Manus LLM helper with direct OpenAI API calls
 - [x] Install OpenAI SDK
 - [x] Test AI description generator with OpenAI API
+
+### Energieausweis (Energy Certificate)
+- [x] Add energy certificate fields to database schema
+- [x] Add Energieausweis dropdown (wird nicht benötigt, liegt vor, liegt zur Besichtigung vor)
+- [x] Add Erstellungsdatum dropdown (ab 1. Mai 2014, bis 30. April 2014)
+- [x] Add Ausstellungsdatum date field
+- [x] Add Gültig bis date field
+- [x] Add Energieausweistyp dropdown (Bedarfsausweis, Verbrauchsausweis)
+- [x] Add Energieeffizienzklasse dropdown (A+ to H)
+- [x] Add Energiekennwert, Energiekennwert Strom, Energiekennwert Wärme number fields
+- [x] Add CO2-Emissionen number field
+- [x] Add Energieverbrauch für Warmwasser enthalten checkbox
+- [x] Add Heizungsart dropdown (11 options)
+- [x] Add Wesentlicher Energieträger dropdown (28 options)
+- [x] Add Baujahr, Baujahr Anlagentechnik year fields
+- [x] Add Baujahr unbekannt checkbox
+
+### Address Autocomplete
+- [x] Integrate Google Places API for address autocomplete
+- [x] Add autocomplete dropdown when typing street address
+- [x] Auto-populate street, city, postal code, country on selection
+- [x] Use existing Maps integration from template

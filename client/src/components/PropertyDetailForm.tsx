@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Property } from "../../../drizzle/schema";
 
 export type { Property };
@@ -27,6 +27,115 @@ interface PropertyDetailFormProps {
 
 export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDetailFormProps) {
   const [formData, setFormData] = useState<Partial<Property>>(property);
+  const streetInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<any>(null);
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    if (!isEditing || !streetInputRef.current) return;
+
+    const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+    const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
+    const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+
+    const loadGoogleMaps = async () => {
+      if (window.google?.maps?.places) {
+        initAutocomplete();
+        return;
+      }
+
+      try {
+        const scriptUrl = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&libraries=places`;
+        const response = await fetch(scriptUrl, {
+          method: 'GET',
+          headers: { 'Origin': window.location.origin },
+        });
+        const content = await response.text();
+        const script = document.createElement('script');
+        script.textContent = content;
+        document.head.appendChild(script);
+
+        // Poll for Google Maps availability
+        let attempts = 0;
+        const checkGoogle = setInterval(() => {
+          attempts++;
+          if (window.google?.maps?.places) {
+            clearInterval(checkGoogle);
+            initAutocomplete();
+          } else if (attempts > 50) {
+            clearInterval(checkGoogle);
+            console.error('Google Maps failed to load');
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Failed to load Google Maps:', error);
+      }
+    };
+
+    const initAutocomplete = () => {
+      if (!streetInputRef.current || !window.google?.maps?.places) return;
+
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        streetInputRef.current,
+        {
+          types: ['address'],
+          componentRestrictions: { country: 'de' },
+        }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) return;
+
+        let street = '';
+        let houseNumber = '';
+        let zipCode = '';
+        let city = '';
+        let country = 'Deutschland';
+
+        place.address_components.forEach((component: any) => {
+          const types = component.types;
+          if (types.includes('route')) {
+            street = component.long_name;
+          }
+          if (types.includes('street_number')) {
+            houseNumber = component.long_name;
+          }
+          if (types.includes('postal_code')) {
+            zipCode = component.long_name;
+          }
+          if (types.includes('locality')) {
+            city = component.long_name;
+          }
+          if (types.includes('country')) {
+            country = component.long_name;
+          }
+        });
+
+        // Update form data with parsed address
+        setFormData((prev) => ({
+          ...prev,
+          street: street || prev.street,
+          houseNumber: houseNumber || prev.houseNumber,
+          zipCode: zipCode || prev.zipCode,
+          city: city || prev.city,
+          country: country || prev.country,
+          latitude: place.geometry?.location?.lat() || prev.latitude,
+          longitude: place.geometry?.location?.lng() || prev.longitude,
+        }));
+      });
+
+      autocompleteRef.current = autocomplete;
+    };
+
+    loadGoogleMaps();
+
+    return () => {
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [isEditing]);
 
   const handleChange = (field: keyof Property, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -238,9 +347,11 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
           <div className="space-y-2">
             <Label>Straße</Label>
             <Input
+              ref={streetInputRef}
               value={formData.street || ""}
               onChange={(e) => handleChange("street", e.target.value)}
               disabled={!isEditing}
+              placeholder="Adresse eingeben für Autocomplete..."
             />
           </div>
 
@@ -874,6 +985,292 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
               placeholder="Bodenbelag wählen..."
               disabled={!isEditing}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Energieausweis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Energieausweis</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Energieausweis</Label>
+            <Select
+              value={formData.energyCertificateAvailability || ""}
+              onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="wird nicht benötigt">wird nicht benötigt</SelectItem>
+                <SelectItem value="liegt vor">liegt vor</SelectItem>
+                <SelectItem value="liegt zur Besichtigung vor">liegt zur Besichtigung vor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Erstellungsdatum</Label>
+            <Select
+              value={formData.energyCertificateCreationDate || ""}
+              onValueChange={(value) => handleChange("energyCertificateCreationDate", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ab 1. Mai 2014">ab 1. Mai 2014</SelectItem>
+                <SelectItem value="bis 30. April 2014">bis 30. April 2014</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ausstellungsdatum</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateIssueDate || ""}
+              onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Gültig bis</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateValidUntil || ""}
+              onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieausweistyp</Label>
+            <Select
+              value={formData.energyCertificateType || ""}
+              onValueChange={(value) => handleChange("energyCertificateType", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Bedarfsausweis">Bedarfsausweis</SelectItem>
+                <SelectItem value="Verbrauchsausweis">Verbrauchsausweis</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieeffizienzklasse</Label>
+            <Select
+              value={formData.energyClass || ""}
+              onValueChange={(value) => handleChange("energyClass", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="B">B</SelectItem>
+                <SelectItem value="C">C</SelectItem>
+                <SelectItem value="D">D</SelectItem>
+                <SelectItem value="E">E</SelectItem>
+                <SelectItem value="F">F</SelectItem>
+                <SelectItem value="G">G</SelectItem>
+                <SelectItem value="H">H</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.energyConsumption || ""}
+                onChange={(e) => handleChange("energyConsumption", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
+                placeholder="0"
+                className="pr-24"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                kWh/(m²·a)
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Strom</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.energyConsumptionElectricity || ""}
+                onChange={(e) => handleChange("energyConsumptionElectricity", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
+                placeholder="0"
+                className="pr-24"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                kWh/(m²·a)
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Wärme</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.energyConsumptionHeat || ""}
+                onChange={(e) => handleChange("energyConsumptionHeat", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
+                placeholder="0"
+                className="pr-24"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                kWh/(m²·a)
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>CO2-Emissionen</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.co2Emissions || ""}
+                onChange={(e) => handleChange("co2Emissions", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
+                placeholder="0"
+                className="pr-16"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                kg/m²a
+              </span>
+            </div>
+          </div>
+
+          <div className="col-span-2 flex items-center space-x-2">
+            <Switch
+              checked={formData.includesWarmWater || false}
+              onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
+              disabled={!isEditing}
+            />
+            <Label>Energieverbrauch für Warmwasser enthalten</Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Heizungsart</Label>
+            <Select
+              value={formData.heatingType || ""}
+              onValueChange={(value) => handleChange("heatingType", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Zentralheizung">Zentralheizung</SelectItem>
+                <SelectItem value="Etagenheizung">Etagenheizung</SelectItem>
+                <SelectItem value="Ofenheizung">Ofenheizung</SelectItem>
+                <SelectItem value="Fußbodenheizung">Fußbodenheizung</SelectItem>
+                <SelectItem value="Fernwärme">Fernwärme</SelectItem>
+                <SelectItem value="Blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                <SelectItem value="Wärmepumpe">Wärmepumpe</SelectItem>
+                <SelectItem value="Pelletheizung">Pelletheizung</SelectItem>
+                <SelectItem value="Nachtspeicher">Nachtspeicher</SelectItem>
+                <SelectItem value="Elektroheizung">Elektroheizung</SelectItem>
+                <SelectItem value="Solarheizung">Solarheizung</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Wesentlicher Energieträger</Label>
+            <Select
+              value={formData.mainEnergySource || ""}
+              onValueChange={(value) => handleChange("mainEnergySource", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Öl">Öl</SelectItem>
+                <SelectItem value="Gas">Gas</SelectItem>
+                <SelectItem value="Strom">Strom</SelectItem>
+                <SelectItem value="Fernwärme">Fernwärme</SelectItem>
+                <SelectItem value="Holz">Holz</SelectItem>
+                <SelectItem value="Pellets">Pellets</SelectItem>
+                <SelectItem value="Kohle">Kohle</SelectItem>
+                <SelectItem value="Solar">Solar</SelectItem>
+                <SelectItem value="Wärmepumpe Luft/Wasser">Wärmepumpe Luft/Wasser</SelectItem>
+                <SelectItem value="Wärmepumpe Sole/Wasser">Wärmepumpe Sole/Wasser</SelectItem>
+                <SelectItem value="Wärmepumpe Wasser/Wasser">Wärmepumpe Wasser/Wasser</SelectItem>
+                <SelectItem value="Erdwärme">Erdwärme</SelectItem>
+                <SelectItem value="Umweltthermie">Umweltthermie</SelectItem>
+                <SelectItem value="Flüssiggas">Flüssiggas</SelectItem>
+                <SelectItem value="Biogas">Biogas</SelectItem>
+                <SelectItem value="Bioenergie">Bioenergie</SelectItem>
+                <SelectItem value="KWK fossil">KWK fossil</SelectItem>
+                <SelectItem value="KWK erneuerbar">KWK erneuerbar</SelectItem>
+                <SelectItem value="Nahwärme">Nahwärme</SelectItem>
+                <SelectItem value="Blockheizkraftwerk">Blockheizkraftwerk</SelectItem>
+                <SelectItem value="Windkraft">Windkraft</SelectItem>
+                <SelectItem value="Wasserkraft">Wasserkraft</SelectItem>
+                <SelectItem value="Geothermie">Geothermie</SelectItem>
+                <SelectItem value="Photovoltaik">Photovoltaik</SelectItem>
+                <SelectItem value="Brennstoffzelle">Brennstoffzelle</SelectItem>
+                <SelectItem value="Alternative Energien">Alternative Energien</SelectItem>
+                <SelectItem value="Regenerative Energien">Regenerative Energien</SelectItem>
+                <SelectItem value="Keine Angabe">Keine Angabe</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Baujahr</Label>
+            <Input
+              type="number"
+              value={formData.yearBuilt || ""}
+              onChange={(e) => handleChange("yearBuilt", e.target.value ? parseInt(e.target.value) : null)}
+              disabled={!isEditing || !!formData.buildingYearUnknown}
+              placeholder="z.B. 1990"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Baujahr Anlagentechnik</Label>
+            <Input
+              type="number"
+              value={formData.heatingSystemYear || ""}
+              onChange={(e) => handleChange("heatingSystemYear", e.target.value ? parseInt(e.target.value) : null)}
+              disabled={!isEditing}
+              placeholder="z.B. 2010"
+            />
+          </div>
+
+          <div className="col-span-2 flex items-center space-x-2">
+            <Switch
+              checked={formData.buildingYearUnknown || false}
+              onCheckedChange={(checked) => {
+                handleChange("buildingYearUnknown", checked);
+                if (checked) {
+                  handleChange("yearBuilt", null);
+                }
+              }}
+              disabled={!isEditing}
+            />
+            <Label>Baujahr unbekannt</Label>
           </div>
         </CardContent>
       </Card>
