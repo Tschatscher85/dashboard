@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +36,9 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Properties() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -180,6 +183,28 @@ export default function Properties() {
       lease: "Pacht",
     };
     return labels[type] || type;
+  };
+
+  // Filter and search logic
+  const filteredProperties = properties?.filter((property) => {
+    const matchesSearch = property.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      property.city?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || property.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  }) || [];
+
+  const togglePropertySelection = (id: number) => {
+    setSelectedProperties(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAllProperties = () => {
+    if (selectedProperties.length === filteredProperties.length) {
+      setSelectedProperties([]);
+    } else {
+      setSelectedProperties(filteredProperties.map(p => p.id));
+    }
   };
 
   if (isLoading) {
@@ -360,6 +385,38 @@ export default function Properties() {
         </Dialog>
       </div>
 
+      {/* Search and Filters */}
+      <div className="flex gap-4 items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Objekt suchen..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Status</SelectItem>
+            <SelectItem value="available">Verfügbar</SelectItem>
+            <SelectItem value="reserved">Reserviert</SelectItem>
+            <SelectItem value="sold">Verkauft</SelectItem>
+            <SelectItem value="rented">Vermietet</SelectItem>
+            <SelectItem value="inactive">Inaktiv</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="icon">
+          <Filter className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon">
+          <ArrowUpDown className="h-4 w-4" />
+        </Button>
+      </div>
+
       {properties && properties.length === 0 ? (
         <div className="text-center py-12 border rounded-lg bg-muted/50">
           <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -373,10 +430,19 @@ export default function Properties() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Titel</TableHead>
-                <TableHead>Typ</TableHead>
-                <TableHead>Vermarktung</TableHead>
-                <TableHead>Ort</TableHead>
+                <TableHead className="w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedProperties.length === filteredProperties.length && filteredProperties.length > 0}
+                    onChange={toggleAllProperties}
+                    className="rounded border-gray-300"
+                  />
+                </TableHead>
+                <TableHead className="w-20">Bild</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Projekt</TableHead>
+                <TableHead>Etage</TableHead>
+                <TableHead>Zimmer</TableHead>
                 <TableHead>Fläche</TableHead>
                 <TableHead>Preis</TableHead>
                 <TableHead>Status</TableHead>
@@ -384,8 +450,21 @@ export default function Properties() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {properties?.map((property) => (
+              {filteredProperties.map((property) => (
                 <TableRow key={property.id}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedProperties.includes(property.id)}
+                      onChange={() => togglePropertySelection(property.id)}
+                      className="rounded border-gray-300"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="w-16 h-12 bg-muted rounded overflow-hidden flex items-center justify-center">
+                      <Building2 className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  </TableCell>
                   <TableCell className="font-medium">
                     <button
                       onClick={() => setLocation(`/dashboard/properties/${property.id}`)}
@@ -394,9 +473,9 @@ export default function Properties() {
                       {property.title}
                     </button>
                   </TableCell>
-                  <TableCell>{getPropertyTypeLabel(property.propertyType)}</TableCell>
-                  <TableCell>{getMarketingTypeLabel(property.marketingType)}</TableCell>
-                  <TableCell>{property.city || "-"}</TableCell>
+                  <TableCell>{property.project || "-"}</TableCell>
+                  <TableCell>{property.floor || "-"}</TableCell>
+                  <TableCell>{property.rooms || "-"}</TableCell>
                   <TableCell>{property.livingArea ? `${property.livingArea} m²` : "-"}</TableCell>
                   <TableCell>{formatPrice(property.price)}</TableCell>
                   <TableCell>{getStatusBadge(property.status)}</TableCell>

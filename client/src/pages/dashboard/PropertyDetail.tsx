@@ -123,53 +123,78 @@ export default function PropertyDetail() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/dashboard/properties")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{property.title}</h1>
-            <div className="flex items-center gap-2 text-muted-foreground mt-1">
-              <MapPin className="h-4 w-4" />
-              <span>
-                {[property.street, property.houseNumber, property.zipCode, property.city]
-                  .filter(Boolean)
-                  .join(" ")}
-              </span>
+      {/* New Header with Image */}
+      <div className="bg-card border rounded-lg p-6">
+        <div className="flex gap-6">
+          {/* Property Image */}
+          <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <Building2 className="h-12 w-12 text-muted-foreground" />
+          </div>
+          
+          {/* Property Info */}
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold">{property.title}</h1>
+                  {getStatusBadge(property.status)}
+                  {/* Info Badges */}
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="rounded-full">29</Badge>
+                    <Badge variant="outline" className="rounded-full bg-pink-100 text-pink-700 border-pink-200">6</Badge>
+                    <Badge variant="outline" className="rounded-full bg-purple-100 text-purple-700 border-purple-200">1</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>
+                    {[property.street, property.houseNumber, property.zipCode, property.city]
+                      .filter(Boolean)
+                      .join(" ")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm mt-2">
+                  <span className="font-semibold">{formatPrice(property.price)}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span>{property.marketingType === 'sale' ? 'Kauf' : property.marketingType === 'rent' ? 'Miete' : 'Pacht'}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span>{getPropertyTypeLabel(property.propertyType)}</span>
+                  {property.subType && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span>{property.subType}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {!isEditing ? (
+                  <>
+                    <Button variant="outline" onClick={() => setIsEditing(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Bearbeiten
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm("Möchten Sie diese Immobilie wirklich löschen?")) {
+                          deleteMutation.mutate({ id: property.id });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="outline" onClick={() => setIsEditing(false)}>
+                    <X className="h-4 w-4 mr-2" />
+                    Abbrechen
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          {!isEditing ? (
-            <>
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Bearbeiten
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (confirm("Möchten Sie diese Immobilie wirklich löschen?")) {
-                    deleteMutation.mutate({ id: property.id });
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Abbrechen
-            </Button>
-          )}
         </div>
       </div>
 
