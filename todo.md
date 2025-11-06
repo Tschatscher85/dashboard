@@ -108,3 +108,14 @@
 - [x] Replace bathroom checkboxes with multi-select dropdown (Dusche, Wanne, Fenster, Bidet, Urinal)
 - [x] Replace flooring checkboxes with multi-select dropdown (Beton, Epoxidharz, Fliesen, Dielen, Laminat, Parkett, PVC, Teppichboden, etc.)
 - [x] Update database schema to store bathroom and flooring as TEXT fields
+
+### AI & UX Improvements
+- [x] Add AI-powered property description generator (ChatGPT API)
+- [x] Add KI-Kreativitäts-Slider for description generation
+- [x] Add dropdown options for Objektzustand (14 options)
+- [x] Add dropdown options for Qualität der Ausstattung (4 options)
+- [x] Add dropdown options for Stellplatztyp (7 options)
+- [x] Add dropdown options for Bauphase (4 options)
+- [x] Add automatic "m²" suffix to area fields
+- [x] Add automatic "€" suffix to price fields
+- [x] Add sticky "Jetzt speichern" button at bottom of form (only visible when editing)

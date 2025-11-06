@@ -172,6 +172,78 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    generateDescription: protectedProcedure
+      .input(z.object({
+        propertyData: z.any(),
+        creativity: z.number().min(0).max(1).default(0.7),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        
+        // Build property details string from data
+        const p = input.propertyData;
+        const details: string[] = [];
+        
+        if (p.marketingType) details.push(`${p.marketingType}`);
+        if (p.propertyType) details.push(`${p.propertyType}`);
+        if (p.rooms) details.push(`${p.rooms} Zimmer`);
+        if (p.bedrooms) details.push(`${p.bedrooms} Schlafzimmer`);
+        if (p.bathrooms) details.push(`${p.bathrooms} Bäder`);
+        if (p.livingArea) details.push(`${p.livingArea} m²`);
+        if (p.plotArea) details.push(`Grundstück ${p.plotArea} m²`);
+        if (p.gardenArea) details.push(`Gartenfläche ${p.gardenArea} m²`);
+        if (p.floor) details.push(`${p.floor} Etagen`);
+        if (p.yearBuilt) details.push(`letzte Modernisierung ${p.yearBuilt}`);
+        if (p.condition) details.push(p.condition);
+        if (p.equipmentQuality) details.push(`Ausstattung ${p.equipmentQuality}`);
+        
+        // Flooring
+        if (p.flooringTypes) {
+          const floors = p.flooringTypes.split(',').filter(Boolean);
+          if (floors.length > 0) details.push(`Bodenbelag ${floors.join(', ')}`);
+        }
+        
+        // Parking
+        if (p.parkingType) details.push(p.parkingType);
+        if (p.parkingCount) details.push(`${p.parkingCount} Parkplätze`);
+        
+        // Features
+        const features: string[] = [];
+        if (p.hasBalcony) features.push('Balkon');
+        if (p.hasTerrace) features.push('Terrasse');
+        if (p.hasGarden) features.push('Garten');
+        if (p.hasElevator) features.push('Aufzug');
+        if (p.hasBasement) features.push('Keller');
+        if (p.hasAttic) features.push('Abstellraum');
+        if (p.hasGuestToilet) features.push('Gäste-WC');
+        if (p.hasBuiltInKitchen) features.push('Einbauküche');
+        
+        // Bathroom features
+        if (p.bathroomFeatures) {
+          const bathFeatures = p.bathroomFeatures.split(',').filter(Boolean);
+          features.push(...bathFeatures);
+        }
+        
+        // Heating
+        if (p.heatingType) features.push(p.heatingType);
+        
+        if (features.length > 0) details.push(features.join(', '));
+        
+        const prompt = `Erstelle eine professionelle Objektbeschreibung für eine Immobilienanzeige mit folgenden Details: ${details.join(', ')}. Die Beschreibung soll ansprechend und verkaufsfördernd sein.`;
+        
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "Du bist ein professioneller Immobilienmakler, der ansprechende Objektbeschreibungen erstellt." },
+            { role: "user", content: prompt },
+          ],
+        });
+        
+        const content = response.choices[0].message.content;
+        const description = typeof content === 'string' ? content : '';
+        
+        return { description };
+      }),
+
     generateExpose: protectedProcedure
       .input(z.object({ propertyId: z.number() }))
       .mutation(async ({ input }) => {

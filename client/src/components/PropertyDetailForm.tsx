@@ -16,6 +16,7 @@ import {
 import { Switch } from "./ui/switch";
 import { MultiSelect } from "./ui/multi-select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { AIDescriptionDialog } from "./AIDescriptionDialog";
 import { Separator } from "./ui/separator";
 
 interface PropertyDetailFormProps {
@@ -377,13 +378,17 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Kaufpreis (€)</Label>
-            <Input
-              type="number"
-              value={formData.price ? formData.price / 100 : ""}
-              onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Kaufpreis</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.price ? formData.price / 100 : ""}
+                onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
+                disabled={!isEditing}
+                className="pr-8"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+            </div>
           </div>
 
           <div className="col-span-2 flex gap-4">
@@ -498,13 +503,17 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
           </div>
 
           <div className="space-y-2">
-            <Label>Mtl. Mieteinnahmen (€)</Label>
-            <Input
-              type="number"
-              value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
-              onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Mtl. Mieteinnahmen</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
+                onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
+                disabled={!isEditing}
+                className="pr-8"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -516,23 +525,31 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Wohnfläche (m²)</Label>
-            <Input
-              type="number"
-              value={formData.livingArea || ""}
-              onChange={(e) => handleChange("livingArea", parseInt(e.target.value || "0"))}
-              disabled={!isEditing}
-            />
+            <Label>Wohnfläche</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.livingArea || ""}
+                onChange={(e) => handleChange("livingArea", parseInt(e.target.value || "0"))}
+                disabled={!isEditing}
+                className="pr-10"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Grundstücksfläche (m²)</Label>
-            <Input
-              type="number"
-              value={formData.plotArea || ""}
-              onChange={(e) => handleChange("plotArea", parseInt(e.target.value || "0"))}
-              disabled={!isEditing}
-            />
+            <Label>Grundstückfläche</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={formData.plotArea || ""}
+                onChange={(e) => handleChange("plotArea", parseInt(e.target.value || "0"))}
+                disabled={!isEditing}
+                className="pr-10"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -665,11 +682,20 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
                 <SelectValue placeholder="Zustand wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="new">Neubau</SelectItem>
-                <SelectItem value="renovated">Saniert</SelectItem>
-                <SelectItem value="good">Gut</SelectItem>
-                <SelectItem value="needs_renovation">Renovierungsbedürftig</SelectItem>
-                <SelectItem value="demolished">Abgerissen</SelectItem>
+                <SelectItem value="erstbezug">Erstbezug</SelectItem>
+                <SelectItem value="erstbezug_nach_sanierung">Erstbezug nach Sanierung</SelectItem>
+                <SelectItem value="neuwertig">neuwertig</SelectItem>
+                <SelectItem value="saniert">saniert</SelectItem>
+                <SelectItem value="teilsaniert">teilsaniert</SelectItem>
+                <SelectItem value="sanierungsbedürftig">sanierungsbedürftig</SelectItem>
+                <SelectItem value="baufällig">baufällig</SelectItem>
+                <SelectItem value="modernisiert">modernisiert</SelectItem>
+                <SelectItem value="vollständig_renoviert">vollständig renoviert</SelectItem>
+                <SelectItem value="teilweise_renoviert">teilweise renoviert</SelectItem>
+                <SelectItem value="gepflegt">gepflegt</SelectItem>
+                <SelectItem value="renovierungsbedürftig">renovierungsbedürftig</SelectItem>
+                <SelectItem value="nach_vereinbarung">nach Vereinbarung</SelectItem>
+                <SelectItem value="abbruchreif">abbruchreif</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -695,10 +721,10 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
                 <SelectValue placeholder="Qualität wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="einfach">Einfach</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="gehoben">Gehoben</SelectItem>
-                <SelectItem value="luxus">Luxus</SelectItem>
+                <SelectItem value="luxuriös">luxuriös</SelectItem>
+                <SelectItem value="gehoben">gehoben</SelectItem>
+                <SelectItem value="normal">normal</SelectItem>
+                <SelectItem value="einfach">einfach</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -725,20 +751,33 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Garage">Garage</SelectItem>
-                <SelectItem value="Tiefgarage">Tiefgarage</SelectItem>
+                <SelectItem value="Außenstellplatz">Außenstellplatz</SelectItem>
                 <SelectItem value="Carport">Carport</SelectItem>
-                <SelectItem value="Stellplatz">Stellplatz</SelectItem>
+                <SelectItem value="Duplex">Duplex</SelectItem>
+                <SelectItem value="Parkhaus">Parkhaus</SelectItem>
+                <SelectItem value="Tiefgarage">Tiefgarage</SelectItem>
+                <SelectItem value="Doppelgarage">Doppelgarage</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label>Bauphase</Label>
-            <Input
+            <Select
               value={formData.buildingPhase || ""}
-              onChange={(e) => handleChange("buildingPhase", e.target.value)}
+              onValueChange={(value) => handleChange("buildingPhase", value)}
               disabled={!isEditing}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Bauphase wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="in_planung_projektiert">Haus in Planung (projektiert)</SelectItem>
+                <SelectItem value="in_planung_bewilligt">Haus in Planung (bewilligt)</SelectItem>
+                <SelectItem value="im_bau">Haus im Bau</SelectItem>
+                <SelectItem value="fertig_gestellt">Haus fertig gestellt</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -834,8 +873,13 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
 
       {/* Beschreibung */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Beschreibung</CardTitle>
+          <AIDescriptionDialog
+            property={formData}
+            onGenerated={(description) => handleChange("description", description)}
+            disabled={!isEditing}
+          />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -852,8 +896,10 @@ export function PropertyDetailForm({ property, onSave, isEditing }: PropertyDeta
       </Card>
 
       {isEditing && (
-        <div className="flex justify-end gap-2">
-          <Button onClick={handleSave}>Änderungen speichern</Button>
+        <div className="sticky bottom-0 z-10 flex justify-center gap-2 border-t bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <Button onClick={handleSave} size="lg" className="min-w-[200px]">
+            Jetzt speichern
+          </Button>
         </div>
       )}
     </div>
