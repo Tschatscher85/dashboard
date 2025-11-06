@@ -15,6 +15,20 @@
       "when": 1762429356285,
       "tag": "0001_exotic_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1762432360054,
+      "tag": "0002_gigantic_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1762434924244,
+      "tag": "0003_careful_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }

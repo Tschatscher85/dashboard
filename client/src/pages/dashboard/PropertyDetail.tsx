@@ -16,18 +16,34 @@ import {
   ArrowLeft,
   Edit,
   Trash2,
+  Save,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { PropertyDetailForm, type Property } from "@/components/PropertyDetailForm";
+import { useState } from "react";
 
 export default function PropertyDetail() {
   const [, params] = useRoute("/dashboard/properties/:id");
   const [, setLocation] = useLocation();
   const propertyId = params?.id ? parseInt(params.id) : 0;
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
     id: propertyId,
+  });
+
+  const updateMutation = trpc.properties.update.useMutation({
+    onSuccess: () => {
+      toast.success("Immobilie aktualisiert");
+      refetch();
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Aktualisieren: " + error.message);
+    },
   });
 
   const deleteMutation = trpc.properties.delete.useMutation({
@@ -39,6 +55,13 @@ export default function PropertyDetail() {
       toast.error("Fehler beim Löschen: " + error.message);
     },
   });
+
+  const handleSave = (data: Partial<Property>) => {
+    updateMutation.mutate({
+      id: propertyId,
+      data: data as any,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -84,18 +107,11 @@ export default function PropertyDetail() {
     return labels[type] || type;
   };
 
-  const getMarketingTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      sale: "Kauf",
-      rent: "Miete",
-      lease: "Pacht",
-    };
-    return labels[type] || type;
-  };
-
   const getStatusBadge = (status: string) => {
     const config: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      available: { label: "Verfügbar", variant: "default" },
+      acquisition: { label: "Akquise", variant: "secondary" },
+      preparation: { label: "Vorbereitung", variant: "secondary" },
+      marketing: { label: "Vermarktung", variant: "default" },
       reserved: { label: "Reserviert", variant: "secondary" },
       sold: { label: "Verkauft", variant: "outline" },
       rented: { label: "Vermietet", variant: "outline" },
@@ -130,20 +146,30 @@ export default function PropertyDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              if (confirm("Möchten Sie diese Immobilie wirklich löschen?")) {
-                deleteMutation.mutate({ id: property.id });
-              }
-            }}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+          {!isEditing ? (
+            <>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Bearbeiten
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (confirm("Möchten Sie diese Immobilie wirklich löschen?")) {
+                    deleteMutation.mutate({ id: property.id });
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              <X className="h-4 w-4 mr-2" />
+              Abbrechen
+            </Button>
+          )}
         </div>
       </div>
 
@@ -220,164 +246,13 @@ export default function PropertyDetail() {
           <TabsTrigger value="history">Historie</TabsTrigger>
         </TabsList>
 
-        {/* Details Tab */}
+        {/* Details Tab - Now uses PropertyDetailForm */}
         <TabsContent value="details" className="space-y-6">
-          {/* Stammdaten */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Stammdaten</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground">Kategorie</div>
-                <div className="font-semibold">{getMarketingTypeLabel(property.marketingType)}</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">Objektart</div>
-                <div className="font-semibold">{getPropertyTypeLabel(property.propertyType)}</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">Status</div>
-                <div>{getStatusBadge(property.status)}</div>
-              </div>
-
-            </CardContent>
-          </Card>
-
-          {/* Adresse */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Adresse</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground">Straße + Nr.</div>
-                <div className="font-semibold">
-                  {[property.street, property.houseNumber].filter(Boolean).join(" ") || "-"}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">PLZ / Ort</div>
-                <div className="font-semibold">
-                  {[property.zipCode, property.city].filter(Boolean).join(" ") || "-"}
-                </div>
-              </div>
-              {property.country && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Land</div>
-                  <div className="font-semibold">{property.country}</div>
-                </div>
-              )}
-
-            </CardContent>
-          </Card>
-
-          {/* Preise */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Preise</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground">
-                  {property.marketingType === "sale" ? "Kaufpreis" : "Kaltmiete"}
-                </div>
-                <div className="text-2xl font-bold">{formatPrice(property.price)}</div>
-              </div>
-              {property.additionalCosts && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Nebenkosten</div>
-                  <div className="font-semibold">{formatPrice(property.additionalCosts)}</div>
-                </div>
-              )}
-              {property.heatingCosts && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Heizkosten</div>
-                  <div className="font-semibold">{formatPrice(property.heatingCosts)}</div>
-                </div>
-              )}
-              {property.deposit && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Kaution</div>
-                  <div className="font-semibold">{formatPrice(property.deposit)}</div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Flächen */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Flächen</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              {property.livingArea && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Wohnfläche</div>
-                  <div className="font-semibold">{property.livingArea} m²</div>
-                </div>
-              )}
-              {property.plotArea && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Grundstücksfläche</div>
-                  <div className="font-semibold">{property.plotArea} m²</div>
-                </div>
-              )}
-              {property.rooms && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Zimmer</div>
-                  <div className="font-semibold">{property.rooms}</div>
-                </div>
-              )}
-              {property.bedrooms && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Schlafzimmer</div>
-                  <div className="font-semibold">{property.bedrooms}</div>
-                </div>
-              )}
-              {property.bathrooms && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Badezimmer</div>
-                  <div className="font-semibold">{property.bathrooms}</div>
-                </div>
-              )}
-              {property.floor !== null && property.floor !== undefined && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Etage</div>
-                  <div className="font-semibold">{property.floor}</div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Ausstattung */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ausstattung</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4">
-                {property.hasBalcony && <div className="flex items-center gap-2">✓ Balkon</div>}
-                {property.hasTerrace && <div className="flex items-center gap-2">✓ Terrasse</div>}
-                {property.hasGarden && <div className="flex items-center gap-2">✓ Garten</div>}
-                {property.hasElevator && <div className="flex items-center gap-2">✓ Aufzug</div>}
-                {property.hasParking && <div className="flex items-center gap-2">✓ Parkplatz</div>}
-                {property.hasBasement && <div className="flex items-center gap-2">✓ Keller</div>}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Beschreibung */}
-          {property.description && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Beschreibung</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap">{property.description}</p>
-              </CardContent>
-            </Card>
-          )}
+          <PropertyDetailForm
+            property={property}
+            onSave={handleSave}
+            isEditing={isEditing}
+          />
         </TabsContent>
 
         {/* Activities Tab */}
@@ -450,7 +325,7 @@ export default function PropertyDetail() {
                       <Edit className="h-4 w-4" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold">Zuletzt bearbeitet</div>
+                      <div className="font-semibold">Zuletzt aktualisiert</div>
                       <div className="text-sm text-muted-foreground">
                         {format(new Date(property.updatedAt), "PPP 'um' HH:mm 'Uhr'", { locale: de })}
                       </div>

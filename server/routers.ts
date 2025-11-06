@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { generateExpose } from "./exposeGenerator";
 import { getBrevoClient } from "./brevoClient";
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "./googleCalendar";
 
 export const appRouter = router({
   system: systemRouter,
@@ -52,7 +53,7 @@ export const appRouter = router({
         description: z.string().optional(),
         propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
         marketingType: z.enum(["sale", "rent", "lease"]),
-        status: z.enum(["available", "reserved", "sold", "rented", "inactive"]).optional(),
+        status: z.enum(["acquisition", "preparation", "marketing", "reserved", "sold", "rented", "inactive"]).optional(),
         street: z.string().optional(),
         houseNumber: z.string().optional(),
         zipCode: z.string().optional(),
@@ -98,7 +99,7 @@ export const appRouter = router({
           description: z.string().optional(),
           propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]).optional(),
           marketingType: z.enum(["sale", "rent", "lease"]).optional(),
-          status: z.enum(["available", "reserved", "sold", "rented", "inactive"]).optional(),
+          status: z.enum(["acquisition", "preparation", "marketing", "reserved", "sold", "rented", "inactive"]).optional(),
           street: z.string().optional(),
           houseNumber: z.string().optional(),
           zipCode: z.string().optional(),
@@ -298,13 +299,61 @@ export const appRouter = router({
         propertyId: z.number().optional(),
         contactId: z.number().optional(),
         notes: z.string().optional(),
+        syncToGoogleCalendar: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        await db.createAppointment({
-          ...input,
+        const { syncToGoogleCalendar, ...appointmentData } = input;
+        
+        // Create appointment in database
+        const appointmentId = await db.createAppointment({
+          ...appointmentData,
           createdBy: ctx.user.id,
         });
-        return { success: true };
+        
+        // Sync to Google Calendar if requested
+        if (syncToGoogleCalendar) {
+          try {
+            // Get property and contact details for location and attendees
+            let location = "";
+            let attendees: string[] = [];
+            
+            if (appointmentData.propertyId) {
+              const property = await db.getPropertyById(appointmentData.propertyId);
+              if (property) {
+                location = `${property.street || ""} ${property.houseNumber || ""}, ${property.zipCode || ""} ${property.city || ""}`.trim();
+              }
+            }
+            
+            if (appointmentData.contactId) {
+              const contact = await db.getContactById(appointmentData.contactId);
+              if (contact?.email) {
+                attendees.push(contact.email);
+              }
+            }
+            
+            const calendarEvent = await createCalendarEvent({
+              summary: appointmentData.title,
+              description: appointmentData.description || appointmentData.notes,
+              location,
+              start_time: appointmentData.startTime.toISOString(),
+              end_time: appointmentData.endTime.toISOString(),
+              attendees,
+              reminders: [30], // 30 minutes before
+            });
+            
+            // Update appointment with Google Calendar event ID
+            await db.updateAppointment(appointmentId, {
+              googleCalendarEventId: calendarEvent.event_id,
+              googleCalendarLink: calendarEvent.html_link,
+              lastSyncedToGoogleCalendar: new Date(),
+            });
+          } catch (error) {
+            console.error("Failed to sync to Google Calendar:", error);
+            // Don't fail the whole operation if calendar sync fails
+          }
+        }
+        
+        return { success: true, id: appointmentId };
       }),
 
     update: protectedProcedure

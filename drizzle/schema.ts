@@ -26,43 +26,110 @@ export const properties = mysqlTable("properties", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   
+  // Stammdaten
+  unitNumber: varchar("unitNumber", { length: 100 }), // Einheitennummer
+  apartmentNumber: varchar("apartmentNumber", { length: 50 }), // Wohnungsnummer
+  parkingNumber: varchar("parkingNumber", { length: 50 }), // Stellplatz Nr.
+  headline: varchar("headline", { length: 500 }), // Überschrift
+  headlineScore: int("headlineScore"), // 99/100 Bewertung
+  project: varchar("project", { length: 255 }), // Projekt
+  features: text("features"), // Merkmale (JSON or comma-separated)
+  warning: text("warning"), // Warnhinweis
+  archived: boolean("archived").default(false), // Archiviert
+  internalNotes: text("internalNotes"), // Interne Notiz
+  
   // Property type and status
+  category: varchar("category", { length: 100 }), // Kategorie (Kauf, Miete)
   propertyType: mysqlEnum("propertyType", [
     "apartment", "house", "commercial", "land", "parking", "other"
   ]).notNull(),
+  subType: varchar("subType", { length: 100 }), // Wohnung, Etagenwohnung, etc.
   marketingType: mysqlEnum("marketingType", ["sale", "rent", "lease"]).notNull(),
-  status: mysqlEnum("status", ["available", "reserved", "sold", "rented", "inactive"]).default("available").notNull(),
+  status: mysqlEnum("status", ["acquisition", "preparation", "marketing", "reserved", "sold", "rented", "inactive"]).default("acquisition").notNull(),
   
   // Address
   street: varchar("street", { length: 255 }),
   houseNumber: varchar("houseNumber", { length: 50 }),
   zipCode: varchar("zipCode", { length: 20 }),
   city: varchar("city", { length: 100 }),
+  region: varchar("region", { length: 100 }), // Region / Land
   country: varchar("country", { length: 100 }).default("Deutschland"),
+  latitude: varchar("latitude", { length: 50 }), // Koordinaten
+  longitude: varchar("longitude", { length: 50 }),
+  hideStreetOnPortals: boolean("hideStreetOnPortals").default(false),
+  
+  // Grundbuch
+  districtCourt: varchar("districtCourt", { length: 255 }), // Amtsgericht
+  landRegisterSheet: varchar("landRegisterSheet", { length: 100 }), // Grundbuchblatt
+  landRegisterOf: varchar("landRegisterOf", { length: 255 }), // Grundbuch von
+  cadastralDistrict: varchar("cadastralDistrict", { length: 100 }), // Gemarkung
+  corridor: varchar("corridor", { length: 100 }), // Flur
+  parcel: varchar("parcel", { length: 100 }), // Flurstück
   
   // Property details
   livingArea: int("livingArea"), // in sqm
   plotArea: int("plotArea"), // in sqm
+  usableArea: int("usableArea"), // Nutzfläche (Wohnen)
+  balconyArea: int("balconyArea"), // Balkon/Terrasse Fläche
+  gardenArea: int("gardenArea"), // Gartenfläche
   rooms: int("rooms"),
   bedrooms: int("bedrooms"),
   bathrooms: int("bathrooms"),
   floor: int("floor"),
+  floorLevel: varchar("floorLevel", { length: 100 }), // Etagenlage
   totalFloors: int("totalFloors"),
   
   // Financial
-  price: int("price"), // in cents to avoid decimal issues
+  price: int("price"), // in cents
+  priceOnRequest: boolean("priceOnRequest").default(false), // Preis auf Anfrage
+  priceByNegotiation: boolean("priceByNegotiation").default(false), // Preis gegen Gebot
+  coldRent: int("coldRent"), // Kaltmiete in cents
+  warmRent: int("warmRent"), // Warmmiete in cents
   pricePerSqm: int("pricePerSqm"), // calculated, in cents
   additionalCosts: int("additionalCosts"), // Nebenkosten in cents
   heatingCosts: int("heatingCosts"), // in cents
+  heatingIncludedInAdditional: boolean("heatingIncludedInAdditional").default(false),
+  nonRecoverableCosts: int("nonRecoverableCosts"), // Nicht umlegbare Kosten
+  houseMoney: int("houseMoney"), // Hausgeld/Monat
+  maintenanceReserve: int("maintenanceReserve"), // Instandhaltungsrücklage
+  parkingPrice: int("parkingPrice"), // Stellplatz-Preis
+  monthlyRentalIncome: int("monthlyRentalIncome"), // Mtl. Mieteinnahmen
   deposit: int("deposit"), // Kaution in cents
   
-  // Features
-  hasBalcony: boolean("hasBalcony").default(false),
+  // Ausstattung / Features
+  hasElevator: boolean("hasElevator").default(false), // Aufzug
+  isBarrierFree: boolean("isBarrierFree").default(false), // Barrierefrei
+  hasBasement: boolean("hasBasement").default(false), // Keller
+  hasGuestToilet: boolean("hasGuestToilet").default(false), // Gäste-WC
+  hasBuiltInKitchen: boolean("hasBuiltInKitchen").default(false), // Einbauküche
+  hasBalcony: boolean("hasBalcony").default(false), // Balkon/Terrasse
   hasTerrace: boolean("hasTerrace").default(false),
-  hasGarden: boolean("hasGarden").default(false),
-  hasElevator: boolean("hasElevator").default(false),
+  hasLoggia: boolean("hasLoggia").default(false), // Loggia
+  hasGarden: boolean("hasGarden").default(false), // Garten
+  isMonument: boolean("isMonument").default(false), // Denkmalschutz
+  suitableAsHoliday: boolean("suitableAsHoliday").default(false), // Als Ferienwohnung geeignet
+  hasStorageRoom: boolean("hasStorageRoom").default(false), // Abstellraum
+  hasFireplace: boolean("hasFireplace").default(false), // Kamin
+  hasPool: boolean("hasPool").default(false), // Pool
+  hasSauna: boolean("hasSauna").default(false), // Sauna
+  hasAlarm: boolean("hasAlarm").default(false), // Alarmanlage
+  hasWinterGarden: boolean("hasWinterGarden").default(false), // Wintergarten
+  hasAirConditioning: boolean("hasAirConditioning").default(false), // Klimaanlage
   hasParking: boolean("hasParking").default(false),
-  hasBasement: boolean("hasBasement").default(false),
+  parkingCount: int("parkingCount"), // Anzahl Parkplätze
+  parkingType: varchar("parkingType", { length: 100 }), // Stellplatztyp (Garage, etc.)
+  
+  // Bad
+  bathShower: boolean("bathShower").default(false), // Dusche
+  bathTub: boolean("bathTub").default(false), // Wanne
+  bathWindow: boolean("bathWindow").default(false), // Fenster
+  
+  // Bodenbelag
+  flooringTiles: boolean("flooringTiles").default(false), // Fliesen
+  flooringLaminate: boolean("flooringLaminate").default(false), // Laminat
+  flooringPVC: boolean("flooringPVC").default(false), // PVC
+  flooringParquet: boolean("flooringParquet").default(false), // Parkett
+  flooringVinyl: boolean("flooringVinyl").default(false), // Vinylboden
   
   // Energy certificate
   energyClass: varchar("energyClass", { length: 10 }), // A+, A, B, C, etc.
@@ -71,11 +138,18 @@ export const properties = mysqlTable("properties", {
   
   // Construction
   yearBuilt: int("yearBuilt"),
+  lastModernization: int("lastModernization"), // Letzte Modernisierung (Jahr)
   condition: mysqlEnum("condition", ["new", "renovated", "good", "needs_renovation", "demolished"]),
+  buildingPhase: varchar("buildingPhase", { length: 100 }), // Bauphase
+  equipmentQuality: varchar("equipmentQuality", { length: 100 }), // Qualität der Ausstattung
   
   // Contact and availability
+  isRented: boolean("isRented").default(false), // Vermietet
   availableFrom: timestamp("availableFrom"),
   contactPersonId: int("contactPersonId"), // reference to users or contacts
+  
+  // Auto-export settings
+  autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
   
   // Landing page
   hasLandingPage: boolean("hasLandingPage").default(false),
@@ -218,6 +292,11 @@ export const appointments = mysqlTable("appointments", {
   
   // Notes
   notes: text("notes"),
+  
+  // Google Calendar integration
+  googleCalendarEventId: varchar("googleCalendarEventId", { length: 255 }),
+  googleCalendarLink: text("googleCalendarLink"),
+  lastSyncedToGoogleCalendar: timestamp("lastSyncedToGoogleCalendar"),
   
   // Metadata
   createdBy: int("createdBy").notNull(),

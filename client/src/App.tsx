@@ -15,6 +15,44 @@ import Leads from "./pages/dashboard/Leads";
 import PropertyLanding from "./pages/PropertyLanding";
 import { Building2, Users, Mail, Calendar, FileText, Settings } from "lucide-react";
 
+const dashboardNavItems = [
+  {
+    title: "Übersicht",
+    href: "/dashboard",
+    icon: Building2,
+  },
+  {
+    title: "Immobilien",
+    href: "/dashboard/properties",
+    icon: Building2,
+  },
+  {
+    title: "Kontakte",
+    href: "/dashboard/contacts",
+    icon: Users,
+  },
+  {
+    title: "Leads",
+    href: "/dashboard/leads",
+    icon: Mail,
+  },
+  {
+    title: "Termine",
+    href: "/dashboard/appointments",
+    icon: Calendar,
+  },
+  {
+    title: "Dokumente",
+    href: "/dashboard/documents",
+    icon: FileText,
+  },
+  {
+    title: "Einstellungen",
+    href: "/dashboard/settings",
+    icon: Settings,
+  },
+];
+
 function Router() {
   return (
     <Switch>
@@ -22,80 +60,75 @@ function Router() {
       <Route path="/property/:id" component={PropertyLanding} />
       
       {/* Dashboard Routes */}
-      <Route path={"/dashboard"}>
+      <Route path="/dashboard/properties/:id">
         {() => (
-          <DashboardLayout
-            navItems={[
-              {
-                title: "Übersicht",
-                href: "/dashboard",
-                icon: Building2,
-              },
-              {
-                title: "Immobilien",
-                href: "/dashboard/properties",
-                icon: Building2,
-              },
-              {
-                title: "Kontakte",
-                href: "/dashboard/contacts",
-                icon: Users,
-              },
-              {
-                title: "Leads",
-                href: "/dashboard/leads",
-                icon: Mail,
-              },
-              {
-                title: "Termine",
-                href: "/dashboard/appointments",
-                icon: Calendar,
-              },
-              {
-                title: "Dokumente",
-                href: "/dashboard/documents",
-                icon: FileText,
-              },
-              {
-                title: "Einstellungen",
-                href: "/dashboard/settings",
-                icon: Settings,
-              },
-            ]}
-          >
-            <Switch>
-              <Route path="/dashboard" component={DashboardOverview} />
-              <Route path="/dashboard/properties/:id" component={PropertyDetail} />
-              <Route path="/dashboard/properties" component={Properties} />
-              <Route path="/dashboard/contacts/:id" component={ContactDetail} />
-              <Route path="/dashboard/contacts" component={Contacts} />
-              <Route path="/dashboard/leads" component={Leads} />
-              <Route path="/dashboard/appointments">
-                {() => (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold">Termine</h1>
-                    <p className="text-muted-foreground">Terminverwaltung kommt bald...</p>
-                  </div>
-                )}
-              </Route>
-              <Route path="/dashboard/documents">
-                {() => (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold">Dokumente</h1>
-                    <p className="text-muted-foreground">Dokumentenverwaltung kommt bald...</p>
-                  </div>
-                )}
-              </Route>
-              <Route path="/dashboard/settings">
-                {() => (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold">Einstellungen</h1>
-                    <p className="text-muted-foreground">Einstellungen kommen bald...</p>
-                  </div>
-                )}
-              </Route>
-              <Route component={NotFound} />
-            </Switch>
+          <DashboardLayout navItems={dashboardNavItems}>
+            <PropertyDetail />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/properties">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <Properties />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/contacts/:id">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <ContactDetail />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/contacts">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <Contacts />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/leads">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <Leads />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/appointments">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <div className="space-y-6">
+              <h1 className="text-3xl font-bold">Termine</h1>
+              <p className="text-muted-foreground">Terminverwaltung kommt bald...</p>
+            </div>
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/documents">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <div className="space-y-6">
+              <h1 className="text-3xl font-bold">Dokumente</h1>
+              <p className="text-muted-foreground">Dokumentenverwaltung kommt bald...</p>
+            </div>
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/settings">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <div className="space-y-6">
+              <h1 className="text-3xl font-bold">Einstellungen</h1>
+              <p className="text-muted-foreground">Einstellungen kommen bald...</p>
+            </div>
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <DashboardOverview />
           </DashboardLayout>
         )}
       </Route>

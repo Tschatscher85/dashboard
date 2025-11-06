@@ -67,8 +67,9 @@
 - [ ] Contact linking with roles (Eigentümer, Käufer, Notar, Hausverwaltung, Mieter)
 - [ ] Activity timeline for property
 - [x] Comprehensive property data display (Stammdaten, Adresse, Preise, Flächen, Ausstattung)
-- [ ] Property description editor
-- [ ] Property status workflow (Akquise, Vorbereitung, Vermarktung, Reserviert, Abgeschlossen)
+- [x] Comprehensive property detail form with all Propstack fields (editable)
+- [x] Property description editor (in detail form)
+- [x] Property status workflow dropdown (Akquise, Vorbereitung, Vermarktung, Reserviert, Verkauft, Vermietet, Inaktiv)
 - [x] Contact detail page with tabbed interface
 - [x] Navigation from list views to detail views
 
@@ -86,3 +87,11 @@
 - [ ] Link documents to contacts
 - [ ] Image gallery for properties
 - [ ] Document browser in dashboard
+
+### Property Enhancements (All 6 Points)
+- [ ] 1. Image gallery with upload, sort, drag-and-drop reorder, main image selection
+- [ ] 2. Contact linking with roles (Eigentümer, Käufer, Mieter, Makler, Notar, Hausverwaltung)
+- [ ] 3. Activity timeline (Notizen, Anrufe, E-Mails, Besichtigungen) with timestamps
+- [ ] 4. Status workflow dropdown (Akquise → Vorbereitung → Vermarktung → Reserviert → Verkauft/Vermietet)
+- [ ] 5. Advanced filters in property list (Preis von-bis, Größe, Status, Ort, Immobilientyp, Zimmer)
+- [ ] 6. Document upload and management (Grundrisse, Energieausweis, Verträge, sonstige PDFs)

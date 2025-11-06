@@ -315,8 +315,14 @@ export async function createAppointment(appointment: InsertAppointment) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(appointments).values(appointment);
-  return result;
+  await db.insert(appointments).values(appointment);
+  
+  // Get the last inserted appointment
+  const result = await db.select().from(appointments)
+    .orderBy(desc(appointments.id))
+    .limit(1);
+  
+  return result[0]?.id || 0;
 }
 
 export async function getAppointmentById(id: number) {
