@@ -43,16 +43,22 @@
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --radius: 0.65rem;
+  /* Immo-Jaeger Brand Colors */
+  --brand-blue: 0 102 179; /* #0066B3 - Primary brand color */
+  --brand-orange: 255 107 0; /* #FF6B00 - Accent/CTA color */
+  --brand-teal: 0 153 153; /* #009999 - Secondary accent */
+  --brand-purple: 153 51 204; /* #9933CC - Tertiary accent */
+  
+  --primary: rgb(var(--brand-blue));
+  --primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: rgb(var(--brand-blue));
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --chart-1: rgb(var(--brand-blue));
+  --chart-2: rgb(var(--brand-orange));
+  --chart-3: rgb(var(--brand-teal));
+  --chart-4: rgb(var(--brand-purple));
+  --chart-5: oklch(0.4 0.1 260);
+  --radius: 0.5rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.235 0.015 65);
   --card: oklch(1 0 0);
@@ -63,26 +69,26 @@
   --secondary-foreground: oklch(0.4 0.015 65);
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
+  --accent: rgb(var(--brand-orange) / 0.1);
+  --accent-foreground: rgb(var(--brand-orange));
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
+  --ring: rgb(var(--brand-blue));
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.235 0.015 65);
   --sidebar-accent: oklch(0.967 0.001 286.375);
   --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
   --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  --sidebar-ring: rgb(var(--brand-blue));
 }
 
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
+  --primary: rgb(var(--brand-blue));
+  --primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: rgb(var(--brand-blue) / 0.9);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.85 0.005 65);
   --card: oklch(0.21 0.006 285.885);
@@ -99,18 +105,18 @@
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  --ring: rgb(var(--brand-blue) / 0.8);
+  --chart-1: rgb(var(--brand-blue));
+  --chart-2: rgb(var(--brand-orange));
+  --chart-3: rgb(var(--brand-teal));
+  --chart-4: rgb(var(--brand-purple));
+  --chart-5: oklch(0.4 0.1 260);
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.85 0.005 65);
   --sidebar-accent: oklch(0.274 0.006 286.033);
   --sidebar-accent-foreground:  oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --sidebar-ring: rgb(var(--brand-blue) / 0.8);
 }
 
 @layer base {

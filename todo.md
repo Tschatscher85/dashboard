@@ -95,3 +95,11 @@
 - [ ] 4. Status workflow dropdown (Akquise → Vorbereitung → Vermarktung → Reserviert → Verkauft/Vermietet)
 - [ ] 5. Advanced filters in property list (Preis von-bis, Größe, Status, Ort, Immobilientyp, Zimmer)
 - [ ] 6. Document upload and management (Grundrisse, Energieausweis, Verträge, sonstige PDFs)
+
+### Branding & Design
+- [x] Extract color scheme from immo-jaeger.eu homepage
+- [x] Apply brand colors to application theme (primary, secondary, accent colors)
+- [x] Extract and integrate company logo
+- [x] Apply consistent fonts from homepage
+- [x] Update application title and branding information
+- [x] Ensure consistent visual identity across all pages

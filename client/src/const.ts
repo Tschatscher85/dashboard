@@ -1,10 +1,17 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
+export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "Immo-Jaeger";
 
 export const APP_LOGO =
   import.meta.env.VITE_APP_LOGO ||
-  "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
+  "/immo-jaeger-logo.png";
+
+// Company information
+export const COMPANY_NAME = "Immo-Jaeger";
+export const COMPANY_OWNER = "Sven Jaeger";
+export const COMPANY_ADDRESS = "Bahnhofstraße 2, 73329 Kuchen";
+export const COMPANY_PHONE = "+49 7331 3079990";
+export const COMPANY_EMAIL = "info@unlog.eu";
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
