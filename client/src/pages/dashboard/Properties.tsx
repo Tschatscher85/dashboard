@@ -163,14 +163,18 @@ export default function Properties() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      available: "default",
+      acquisition: "default",
+      preparation: "secondary",
+      marketing: "default",
       reserved: "secondary",
       sold: "destructive",
       rented: "destructive",
       inactive: "outline",
     };
     const labels: Record<string, string> = {
-      available: "Verfügbar",
+      acquisition: "Akquise",
+      preparation: "Vorbereitung",
+      marketing: "Vermarktung",
       reserved: "Reserviert",
       sold: "Verkauft",
       rented: "Vermietet",

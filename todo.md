@@ -100,3 +100,5 @@
 - [x] Add sync button to properties overview
 - [x] Implement sync functionality to send properties to homepage
 - [x] Add homepage URL configuration (for sync target)
+
+- [x] Fix status badge to display German labels instead of English values (e.g., "Vermarktung" instead of "marketing")
