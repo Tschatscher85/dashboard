@@ -358,3 +358,13 @@
 - [ ] Add image category field to property images schema
 - [ ] Update PropertyMedia to allow setting image categories
 - [ ] Test landing page with real property data
+
+## Fix Image Display and NAS Configuration
+
+- [x] Configure NAS WebDAV credentials as secrets (NAS_WEBDAV_URL, NAS_USERNAME, NAS_PASSWORD)
+- [x] Update PropertyDetail Medien tab to show uploaded images from database in grid layout
+- [x] Add image count to Medien tab title
+- [x] Add hover effect and image labels
+- [x] Add fallback for broken images
+- [ ] Test NAS upload with real credentials
+- [ ] Verify images appear in both PropertyMedia and PropertyDetail pages
