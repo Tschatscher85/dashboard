@@ -284,3 +284,16 @@
 - [ ] Test NAS connection and file upload with real NAS
 - [ ] Test file listing from NAS folders
 - [ ] Test file deletion from NAS
+
+## Display NAS Files in PropertyMedia Page
+
+- [x] Add listNASFiles query to PropertyMedia component for images
+- [x] Display uploaded images from NAS in image gallery grid
+- [x] Add listNASFiles query for each document category (Objektunterlagen, Sensible Daten, Vertragsunterlagen)
+- [x] Display uploaded documents in document sections with file names and sizes
+- [x] Implement delete functionality for images (with confirmation dialog)
+- [x] Implement delete functionality for documents (with confirmation dialog)
+- [x] Add automatic refetch after upload to show new files immediately
+- [x] Show file count badges in image gallery header
+- [x] Show file count for each document category
+- [x] Display file sizes in KB for all files

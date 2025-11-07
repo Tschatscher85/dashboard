@@ -14,6 +14,25 @@ export default function PropertyMedia() {
   const propertyId = parseInt(id || "0");
   
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
+  
+  // Fetch NAS files for each category
+  const { data: nasImages, refetch: refetchImages } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: "Bilder" },
+    { enabled: !!propertyId }
+  );
+  const { data: nasObjektunterlagen, refetch: refetchObjektunterlagen } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: "Objektunterlagen" },
+    { enabled: !!propertyId }
+  );
+  const { data: nasSensibleDaten, refetch: refetchSensibleDaten } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: "Sensible Daten" },
+    { enabled: !!propertyId }
+  );
+  const { data: nasVertragsunterlagen, refetch: refetchVertragsunterlagen } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: "Vertragsunterlagen" },
+    { enabled: !!propertyId }
+  );
+  
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingDocs, setUploadingDocs] = useState(false);
@@ -45,11 +64,30 @@ export default function PropertyMedia() {
   };
 
   const uploadMutation = trpc.properties.uploadToNAS.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Datei erfolgreich hochgeladen");
+      // Refetch the appropriate category
+      if (variables.category === "Bilder") refetchImages();
+      else if (variables.category === "Objektunterlagen") refetchObjektunterlagen();
+      else if (variables.category === "Sensible Daten") refetchSensibleDaten();
+      else if (variables.category === "Vertragsunterlagen") refetchVertragsunterlagen();
     },
     onError: (error) => {
       toast.error(`Fehler beim Hochladen: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = trpc.properties.deleteFromNAS.useMutation({
+    onSuccess: () => {
+      toast.success("Datei gelöscht");
+      // Refetch all categories to be safe
+      refetchImages();
+      refetchObjektunterlagen();
+      refetchSensibleDaten();
+      refetchVertragsunterlagen();
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Löschen: ${error.message}`);
     },
   });
 
@@ -200,30 +238,37 @@ export default function PropertyMedia() {
 
               {/* Image Gallery */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">Bildergalerie</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Bildergalerie
+                  {nasImages && nasImages.length > 0 && (
+                    <span className="ml-2 text-sm text-muted-foreground">({nasImages.length} Bilder)</span>
+                  )}
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {property.images && property.images.length > 0 ? (
-                    property.images.map((image: any, index: number) => (
+                  {nasImages && nasImages.length > 0 ? (
+                    nasImages.map((file: any, index: number) => (
                       <div key={index} className="relative group">
-                        <img
-                          src={image.url}
-                          alt={image.title || `Bild ${index + 1}`}
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
+                        <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+                          <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                        </div>
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                           <Button
                             variant="destructive"
                             size="icon"
                             onClick={() => {
-                              // TODO: Delete image
-                              toast.success("Bild gelöscht");
+                              if (confirm(`Bild "${file.basename}" wirklich löschen?`)) {
+                                deleteMutation.mutate({ nasPath: file.filename });
+                              }
                             }}
                           >
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
-                        <p className="mt-2 text-sm text-center truncate">
-                          {image.title || `Bild ${index + 1}`}
+                        <p className="mt-2 text-sm text-center truncate" title={file.basename}>
+                          {file.basename}
+                        </p>
+                        <p className="text-xs text-center text-muted-foreground">
+                          {(file.size / 1024).toFixed(1)} KB
                         </p>
                       </div>
                     ))
@@ -289,7 +334,48 @@ export default function PropertyMedia() {
                 
                 {/* Document List */}
                 <div className="mt-4 space-y-2">
-                  <p className="text-sm text-muted-foreground">Noch keine Dokumente hochgeladen</p>
+                  {(() => {
+                    let files: any[] = [];
+                    if (key === "objektunterlagen") files = nasObjektunterlagen || [];
+                    else if (key === "sensible") files = nasSensibleDaten || [];
+                    else if (key === "vertragsunterlagen") files = nasVertragsunterlagen || [];
+                    else files = nasObjektunterlagen || []; // Default for "upload"
+
+                    return files.length > 0 ? (
+                      <>
+                        <p className="text-sm font-medium mb-2">{files.length} Dokument(e)</p>
+                        {files.map((file: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate" title={file.basename}>
+                                  {file.basename}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {(file.size / 1024).toFixed(1)} KB
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="flex-shrink-0"
+                              onClick={() => {
+                                if (confirm(`Dokument "${file.basename}" wirklich löschen?`)) {
+                                  deleteMutation.mutate({ nasPath: file.filename });
+                                }
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Noch keine Dokumente hochgeladen</p>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>
