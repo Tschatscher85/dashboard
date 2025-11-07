@@ -235,3 +235,24 @@
 - [ ] Add "negotiation" to property status enum in schema
 - [ ] Run database migration to update enum
 - [ ] Test status change to "Verhandlung"
+
+## Media Upload Implementation
+
+- [x] Create PropertyMedia page component with tabs (Medien, Dokumente, Links)
+- [x] Implement drag-and-drop file upload zone
+- [x] Add image gallery grid with thumbnails
+- [x] Add route /dashboard/properties/:id/media
+- [ ] Create NAS upload endpoint (POST /api/properties/:id/media/upload)
+- [ ] Implement image categorization (Hausansicht, Küche, Bad, Grundrisse, etc.)
+- [ ] Add image description/caption fields
+- [x] Create document upload UI with 4 categories (Objektunterlagen, Sensible Daten, Vertragsunterlagen, Upload)
+- [x] Add links management UI (360° tour, business card)
+- [ ] Connect upload to NAS WebDAV
+- [ ] Test file upload to NAS WebDAV
+
+## Property Description Generator Fix
+
+- [ ] Read current property data in AIDescriptionDialog
+- [ ] Pass all property fields to backend generateDescription endpoint
+- [ ] Update LLM prompt to include property data
+- [ ] Test description generation with real property data

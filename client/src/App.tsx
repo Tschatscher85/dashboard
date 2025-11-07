@@ -16,6 +16,7 @@ import Insurances from "./pages/dashboard/Insurances";
 import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
 import PropertyManagement from "./pages/dashboard/PropertyManagement";
 import PropertyLanding from "./pages/PropertyLanding";
+import PropertyMedia from "./pages/dashboard/PropertyMedia";
 import Settings from "./pages/Settings";
 import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench } from "lucide-react";
 
@@ -74,6 +75,13 @@ function Router() {
       <Route path="/property/:id" component={PropertyLanding} />
       
       {/* Dashboard Routes */}
+      <Route path="/dashboard/properties/:id/media">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <PropertyMedia />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route path="/dashboard/properties/:id">
         {() => (
           <DashboardLayout navItems={dashboardNavItems}>
