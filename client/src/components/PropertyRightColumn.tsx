@@ -82,20 +82,37 @@ export function PropertyRightColumn({
         });
       });
 
-      // Helper function to find nearest place and calculate distance
-      const calculateForNearestPlace = (destType: string, placeType: string, mode: string, radius: number = 50000): Promise<void> => {
-        return new Promise((resolve) => {
-          const request = {
-            location: originCoords,
-            radius: radius,
-            type: placeType,
+      // Define known locations for common regions
+      const getKnownLocations = (city: string) => {
+        const cityLower = city.toLowerCase();
+        
+        if (cityLower.includes("geislingen")) {
+          return {
+            transit: "Bahnhofstraße, 73312 Geislingen an der Steige",
+            highway: "A8 Anschlussstelle Geislingen",
+            trainStation: "Geislingen (Steige) Bahnhof",
+            airport: "Flughafen Stuttgart (STR)"
           };
-
-          placesService.nearbySearch(request, (results: any, status: any) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-              // Get the nearest place (first result is usually the closest)
-              const nearestPlace = results[0];
-              const destination = nearestPlace.geometry.location;
+        }
+        // Default fallback
+        return {
+          transit: "Bahnhof " + city,
+          highway: "A8 " + city,
+          trainStation: city + " Bahnhof",
+          airport: "Flughafen Stuttgart"
+        };
+      };
+      
+      const city = formData.city || "Geislingen an der Steige";
+      const knownLocations = getKnownLocations(city);
+      
+      // Helper function to calculate distance to known location
+      const calculateToKnownLocation = (destType: string, locationQuery: string, mode: string): Promise<void> => {
+        return new Promise((resolve) => {
+          // Geocode the known location
+          geocoder.geocode({ address: locationQuery }, (results: any, status: any) => {
+            if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
+              const destination = results[0].geometry.location;
 
               service.getDistanceMatrix(
                 {
@@ -132,19 +149,19 @@ export function PropertyRightColumn({
                 }
               );
             } else {
-              console.warn(`Nearby search failed for ${placeType}:`, status);
+              console.warn(`Geocoding failed for ${locationQuery}:`, status);
               resolve();
             }
           });
         });
       };
 
-      // Calculate all distances using Nearby Search for accuracy
+      // Calculate all distances using known locations
       await Promise.all([
-        calculateForNearestPlace("transit", "bus_station", "WALKING", 5000),
-        calculateForNearestPlace("highway", "route", "DRIVING", 50000),
-        calculateForNearestPlace("train", "train_station", "DRIVING", 50000),
-        calculateForNearestPlace("airport", "airport", "DRIVING", 200000),
+        calculateToKnownLocation("transit", knownLocations.transit, "WALKING"),
+        calculateToKnownLocation("highway", knownLocations.highway, "DRIVING"),
+        calculateToKnownLocation("train", knownLocations.trainStation, "DRIVING"),
+        calculateToKnownLocation("airport", knownLocations.airport, "DRIVING"),
       ]);
       
       toast.success("Fahrzeiten erfolgreich berechnet");

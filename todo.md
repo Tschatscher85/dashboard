@@ -207,3 +207,31 @@
 - [ ] Add creativity slider functionality
 - [ ] Generate description based on property type (Haus, Wohnung, Grundstück)
 - [ ] Test description generation with real property data
+
+## Media Upload Implementation
+
+- [ ] Create PropertyMedia page component with tabs (Medien, Dokumente, Links)
+- [ ] Implement drag-and-drop zone for image uploads
+- [ ] Add file upload button as alternative to drag-and-drop
+- [ ] Create backend endpoint for uploading files to NAS
+- [ ] Implement image preview grid with thumbnails
+- [ ] Add image metadata (title, description, category)
+- [ ] Support image reordering (drag to reorder)
+- [ ] Add delete functionality for images
+- [ ] Create document categories (Objektunterlagen, Sensible Daten, Vertragsunterlagen, Upload-Bereich)
+- [ ] Implement links management (360° tour URL, business card URL)
+- [ ] Test file upload to NAS with WebDAV
+- [ ] Add loading states and error handling
+
+## Property Description Generator Fix
+
+- [ ] Read current implementation of description generator
+- [ ] Fix data fetching to include all property fields
+- [ ] Update prompt to use actual property data (rooms, area, features, location)
+- [ ] Test generator with real property data
+
+## Bug: Missing Status "Verhandlung"
+
+- [ ] Add "negotiation" to property status enum in schema
+- [ ] Run database migration to update enum
+- [ ] Test status change to "Verhandlung"
