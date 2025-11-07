@@ -320,3 +320,41 @@
 - [x] Label images as "Cloud" or "NAS" for clarity
 - [x] Fallback to icon if image fails to load
 - [ ] Test with uploaded S3 files to verify display works
+
+## Public Property Landing Page (Exposé)
+
+### Design Analysis (from Propstack PDF)
+- [ ] Clean, professional design with blue headings (#0066A1 color)
+- [ ] Page 1: Hero with title, main image, address, property ID
+- [ ] Page 2-3: "Daten im Überblick" - two-column table with all property details
+- [ ] Page 4-5: "Beschreibung" with sections (Objektbeschreibung, Ausstattung & Highlights, Lage, Fazit)
+- [ ] Page 6: Location details and contact info
+- [ ] Page 7+: Image gallery with 2 images per page, labeled (Hausansicht, Terrasse, Eingangsbereich, Küche, etc.)
+- [ ] Footer: "Immo-Jaeger" branding on every page
+
+### Implementation Tasks
+- [ ] Create PropertyLanding.tsx component for public exposé page
+- [ ] Add public route `/expose/:id` (no login required)
+- [ ] Hero section with property title and main image
+- [ ] "Daten im Überblick" section with all property details in table format
+- [ ] "Beschreibung" section with AI-generated or manual description
+- [ ] "Ausstattung & Highlights" section with bullet points
+- [ ] "Lage" section with location description
+- [ ] Image gallery with labeled images (2-column grid)
+- [ ] Contact section with phone, WhatsApp, email
+- [ ] Responsive design for mobile/tablet/desktop
+- [ ] PDF export button to generate downloadable exposé
+- [ ] Share functionality (copy link, QR code)
+
+## Update PropertyLanding to Match Propstack Design
+
+- [x] Change heading colors to Propstack blue (#0066A1)
+- [x] Remove emojis from headings for professional look
+- [x] Rename "Objektdaten" to "Daten im Überblick"
+- [x] Rename "Bilder" to "Bildergalerie"
+- [x] Add complete data table with all available property fields (energy data, distances, heating, etc.)
+- [x] Fix property field names to match schema (mainEnergySource, energyClass, distanceToHighway, etc.)
+- [ ] Implement labeled image gallery (images with category labels like "Hausansicht", "Küche", etc.)
+- [ ] Add image category field to property images schema
+- [ ] Update PropertyMedia to allow setting image categories
+- [ ] Test landing page with real property data

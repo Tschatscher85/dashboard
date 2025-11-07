@@ -223,8 +223,8 @@ export default function PropertyLanding() {
 
       {/* Title Section */}
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
-          🏡 {property.title}
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-[#0066A1]">
+          {property.title}
         </h1>
         <p className="text-gray-600">
           {[property.street, property.houseNumber, property.zipCode, property.city]
@@ -238,7 +238,7 @@ export default function PropertyLanding() {
         {/* Objektbeschreibung Section */}
         {property.description && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4">🏡 Objektbeschreibung</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Objektbeschreibung</h2>
             <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {property.description}
             </div>
@@ -248,7 +248,7 @@ export default function PropertyLanding() {
         {/* Ausstattung & Highlights */}
         {features.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4">✨ Ausstattung & Highlights</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Ausstattung & Highlights</h2>
             <div className="space-y-2">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
@@ -262,7 +262,7 @@ export default function PropertyLanding() {
 
         {/* Objektdaten Section */}
         <section ref={objektdatenRef} className="mb-12 scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6">Objektdaten</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Daten im Überblick</h2>
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
               <tbody className="divide-y">
@@ -367,6 +367,96 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">Garage</td>
                   </tr>
                 )}
+
+                {property.floor && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Etagenzahl</td>
+                    <td className="px-4 py-3">{property.floor}</td>
+                  </tr>
+                )}
+                {property.lastModernization && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Letzte Modernisierung</td>
+                    <td className="px-4 py-3">{property.lastModernization}</td>
+                  </tr>
+                )}
+
+
+                {property.balconyArea && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Balkon/Terrasse Fläche ca.</td>
+                    <td className="px-4 py-3">{property.balconyArea} m²</td>
+                  </tr>
+                )}
+
+
+                {property.hasFireplace && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Kamin</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+
+                {property.distanceToPublicTransport && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Fußweg zu öffentl. Verkehrsmitteln</td>
+                    <td className="px-4 py-3">{property.distanceToPublicTransport} Min.</td>
+                  </tr>
+                )}
+                {property.distanceToHighway && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung zur Autobahn</td>
+                    <td className="px-4 py-3">{property.distanceToHighway} km</td>
+                  </tr>
+                )}
+                {property.yearBuilt && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Baujahr Anlagentechnik</td>
+                    <td className="px-4 py-3">{property.yearBuilt}</td>
+                  </tr>
+                )}
+                {property.heatingType && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Heizungsart</td>
+                    <td className="px-4 py-3">{property.heatingType}</td>
+                  </tr>
+                )}
+                {property.mainEnergySource && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Wesentlicher Energieträger</td>
+                    <td className="px-4 py-3">{property.mainEnergySource}</td>
+                  </tr>
+                )}
+                {property.energyCertificateType && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Energieausweistyp</td>
+                    <td className="px-4 py-3">{property.energyCertificateType}</td>
+                  </tr>
+                )}
+                {property.energyConsumption && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Endenergiebedarf</td>
+                    <td className="px-4 py-3">{property.energyConsumption} kWh/(m²*a)</td>
+                  </tr>
+                )}
+                {property.energyClass && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Energieeffizienzklasse</td>
+                    <td className="px-4 py-3">{property.energyClass}</td>
+                  </tr>
+                )}
+                {property.energyCertificateIssueDate && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Energieausweis: Ausstellungsdatum</td>
+                    <td className="px-4 py-3">{new Date(property.energyCertificateIssueDate).toLocaleDateString('de-DE')}</td>
+                  </tr>
+                )}
+                {property.energyCertificateValidUntil && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Energieausweis: gültig bis</td>
+                    <td className="px-4 py-3">{new Date(property.energyCertificateValidUntil).toLocaleDateString('de-DE')}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -375,7 +465,7 @@ export default function PropertyLanding() {
         {/* Bilder Section */}
         {property.images && property.images.length > 0 && (
           <section ref={bilderRef} className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl font-bold mb-6">Bilder</h2>
+            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Bildergalerie</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {property.images.map((image: string, index: number) => (
                 <div key={index} className="aspect-video overflow-hidden rounded-lg border">
@@ -392,7 +482,7 @@ export default function PropertyLanding() {
 
         {/* Lage Section */}
         <section ref={lageRef} className="mb-12 scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6">Lage</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Lage</h2>
           <div className="prose max-w-none mb-6">
             <p className="text-gray-700">
               Entdecken Sie die ideale Lage dieser Immobilie in{" "}
@@ -415,7 +505,7 @@ export default function PropertyLanding() {
 
         {/* Kontakt Section */}
         <section ref={kontaktRef} className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6">Kontakt</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontakt</h2>
           <div className="max-w-2xl">
             <div className="bg-gray-50 border rounded-lg p-6 mb-6">
               <p className="text-gray-700 mb-2">📞 Kontaktieren Sie uns direkt!</p>
