@@ -72,6 +72,10 @@ export const appRouter = router({
           brevo: process.env.BREVO_API_KEY || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
+          nasUrl: process.env.NAS_WEBDAV_URL || "",
+          nasUsername: process.env.NAS_USERNAME || "",
+          nasPassword: process.env.NAS_PASSWORD || "",
+          nasBasePath: process.env.NAS_BASE_PATH || "/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
         };
       }),
 
@@ -81,6 +85,10 @@ export const appRouter = router({
         brevo: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
+        nasUrl: z.string().optional(),
+        nasUsername: z.string().optional(),
+        nasPassword: z.string().optional(),
+        nasBasePath: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // In production, save these to a secure settings table or update .env file
@@ -91,7 +99,17 @@ export const appRouter = router({
           brevo: input.brevo ? "***" : "(empty)",
           propertySync: input.propertySync ? "***" : "(empty)",
           openai: input.openai ? "***" : "(empty)",
+          nasUrl: input.nasUrl ? "***" : "(empty)",
+          nasUsername: input.nasUsername ? "***" : "(empty)",
+          nasPassword: input.nasPassword ? "***" : "(empty)",
+          nasBasePath: input.nasBasePath || "(default)",
         });
+        
+        // TODO: Save NAS credentials to environment variables or secure storage
+        if (input.nasUrl) process.env.NAS_WEBDAV_URL = input.nasUrl;
+        if (input.nasUsername) process.env.NAS_USERNAME = input.nasUsername;
+        if (input.nasPassword) process.env.NAS_PASSWORD = input.nasPassword;
+        if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
         
         return { success: true };
       }),

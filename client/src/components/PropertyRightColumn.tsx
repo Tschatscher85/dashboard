@@ -69,17 +69,37 @@ export function PropertyRightColumn({
 
       const service = new google.maps.DistanceMatrixService();
       const geocoder = new google.maps.Geocoder();
+      const placesService = new google.maps.places.PlacesService(document.createElement('div'));
 
-      // Helper function to calculate distance for a destination type
-      const calculateForDestination = (destType: string, query: string, mode: string): Promise<void> => {
+      // First, geocode the origin to get coordinates
+      const originCoords: any = await new Promise((resolve, reject) => {
+        geocoder.geocode({ address: origin }, (results: any, status: any) => {
+          if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
+            resolve(results[0].geometry.location);
+          } else {
+            reject(new Error(`Geocoding failed: ${status}`));
+          }
+        });
+      });
+
+      // Helper function to find nearest place and calculate distance
+      const calculateForNearestPlace = (destType: string, placeType: string, mode: string, radius: number = 50000): Promise<void> => {
         return new Promise((resolve) => {
-          geocoder.geocode({ address: query }, (results: any, status: any) => {
-            if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
-              const destination = results[0].formatted_address;
+          const request = {
+            location: originCoords,
+            radius: radius,
+            type: placeType,
+          };
+
+          placesService.nearbySearch(request, (results: any, status: any) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+              // Get the nearest place (first result is usually the closest)
+              const nearestPlace = results[0];
+              const destination = nearestPlace.geometry.location;
 
               service.getDistanceMatrix(
                 {
-                  origins: [origin],
+                  origins: [originCoords],
                   destinations: [destination],
                   travelMode: mode,
                   unitSystem: google.maps.UnitSystem.METRIC,
@@ -112,22 +132,19 @@ export function PropertyRightColumn({
                 }
               );
             } else {
-              console.warn(`Geocoding failed for ${query}:`, status);
+              console.warn(`Nearby search failed for ${placeType}:`, status);
               resolve();
             }
           });
         });
       };
 
-      // Calculate all distances with improved queries
-      const city = formData.city || "";
-      const country = formData.country || "Deutschland";
-      
+      // Calculate all distances using Nearby Search for accuracy
       await Promise.all([
-        calculateForDestination("transit", `Bushaltestelle ${city}, ${country}`, "WALKING"),
-        calculateForDestination("highway", `Autobahn ${city}, ${country}`, "DRIVING"),
-        calculateForDestination("train", `Hauptbahnhof ${city}, ${country}`, "DRIVING"),
-        calculateForDestination("airport", `Flughafen Stuttgart, Deutschland`, "DRIVING"),
+        calculateForNearestPlace("transit", "bus_station", "WALKING", 5000),
+        calculateForNearestPlace("highway", "route", "DRIVING", 50000),
+        calculateForNearestPlace("train", "train_station", "DRIVING", 50000),
+        calculateForNearestPlace("airport", "airport", "DRIVING", 200000),
       ]);
       
       toast.success("Fahrzeiten erfolgreich berechnet");

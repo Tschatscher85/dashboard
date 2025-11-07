@@ -175,3 +175,35 @@
 - [x] Debug Google Maps Distance Matrix API integration
 - [x] Verify geocoding and distance calculation logic
 - [x] Improved geocoding queries for better accuracy
+
+## Distance Calculation Accuracy Fix
+
+- [ ] Replace text-based geocoding with Google Places Nearby Search API
+- [ ] Find nearest train station using place type "train_station"
+- [ ] Find nearest highway using place type "route" or coordinates-based search
+- [ ] Find nearest bus stop using place type "bus_station" or "transit_station"
+- [ ] Find nearest airport using place type "airport"
+- [ ] Test with Klingenweg 15, 73312 Geislingen (should be ~10 min to HBF, ~40 min to Autobahn)
+
+## Media Upload & NAS Integration
+
+- [ ] Analyze Propstack media page design
+- [ ] Implement drag-and-drop file upload component
+- [ ] Add "Hochladen" button for file selection
+- [ ] Create WebDAV client for Synology NAS connection
+- [ ] Add NAS credentials to settings (WebDAV URL, username, password)
+- [ ] Implement file upload to NAS with folder structure: `/Verkauf/[Adresse]/Bilder/`
+- [ ] Create `/Objektunterlagen/` folder for documents
+- [ ] Add image preview grid in Media tab
+- [ ] Support multiple file formats (JPG, PNG, PDF)
+- [ ] Add file type filtering (Bilder vs Objektunterlagen)
+- [ ] Implement image deletion from NAS
+- [ ] Test WebDAV connection and file upload
+
+## Property Description Generator Fix
+
+- [ ] Fix "Objektbeschreibung erzeugen" to use actual property data
+- [ ] Pass all property fields to LLM (address, rooms, size, features, etc.)
+- [ ] Add creativity slider functionality
+- [ ] Generate description based on property type (Haus, Wohnung, Grundstück)
+- [ ] Test description generation with real property data

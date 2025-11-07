@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,9 @@ export default function Settings() {
     brevo: false,
     propertySync: false,
     openai: false,
+    nasUrl: false,
+    nasUsername: false,
+    nasPassword: false,
   });
 
   // User form state
@@ -34,6 +37,10 @@ export default function Settings() {
     brevo: "",
     propertySync: "",
     openai: "",
+    nasUrl: "",
+    nasUsername: "",
+    nasPassword: "",
+    nasBasePath: "",
   });
 
   // Queries
@@ -73,16 +80,20 @@ export default function Settings() {
   });
 
   // Load current API keys when data is available
-  useState(() => {
+  React.useEffect(() => {
     if (currentApiKeys) {
       setApiKeys({
         superchat: currentApiKeys.superchat || "",
         brevo: currentApiKeys.brevo || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
+        nasUrl: currentApiKeys.nasUrl || "",
+        nasUsername: currentApiKeys.nasUsername || "",
+        nasPassword: currentApiKeys.nasPassword || "",
+        nasBasePath: currentApiKeys.nasBasePath || "/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
       });
     }
-  });
+  }, [currentApiKeys]);
 
   const handleCreateUser = () => {
     if (!newUser.name || !newUser.email) {
@@ -353,6 +364,94 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">
                     Für KI-gestützte Immobilienbeschreibungen
                   </p>
+                </div>
+
+                {/* NAS Configuration */}
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-4">NAS-Speicher (Synology WebDAV)</h3>
+                  
+                  <div className="space-y-4">
+                    {/* NAS WebDAV URL */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasUrl">WebDAV URL</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="nasUrl"
+                          type={showApiKeys.nasUrl ? "text" : "password"}
+                          value={apiKeys.nasUrl}
+                          onChange={(e) => setApiKeys({ ...apiKeys, nasUrl: e.target.value })}
+                          placeholder="http://192.168.0.189:2001"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => toggleShowApiKey("nasUrl")}
+                        >
+                          {showApiKeys.nasUrl ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        WebDAV-URL Ihres Synology NAS (z.B. http://IP:PORT)
+                      </p>
+                    </div>
+
+                    {/* NAS Username */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasUsername">Benutzername</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="nasUsername"
+                          type={showApiKeys.nasUsername ? "text" : "password"}
+                          value={apiKeys.nasUsername}
+                          onChange={(e) => setApiKeys({ ...apiKeys, nasUsername: e.target.value })}
+                          placeholder="NAS-Benutzername"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => toggleShowApiKey("nasUsername")}
+                        >
+                          {showApiKeys.nasUsername ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* NAS Password */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasPassword">Passwort</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="nasPassword"
+                          type={showApiKeys.nasPassword ? "text" : "password"}
+                          value={apiKeys.nasPassword}
+                          onChange={(e) => setApiKeys({ ...apiKeys, nasPassword: e.target.value })}
+                          placeholder="NAS-Passwort"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => toggleShowApiKey("nasPassword")}
+                        >
+                          {showApiKeys.nasPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* NAS Base Path */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasBasePath">Basis-Pfad</Label>
+                      <Input
+                        id="nasBasePath"
+                        type="text"
+                        value={apiKeys.nasBasePath}
+                        onChange={(e) => setApiKeys({ ...apiKeys, nasBasePath: e.target.value })}
+                        placeholder="/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Basis-Ordner für Immobilien-Dateien auf dem NAS
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-4">
