@@ -310,3 +310,13 @@
 - [x] Navigate back using window.history.back()
 - [ ] Test upload with small image file to verify fallback works
 - [ ] Verify error messages are displayed correctly
+
+## Display S3 Files from Database
+
+- [x] Show images from database (property.images) in gallery alongside NAS files
+- [x] Combine NAS files and database files in single list with total count
+- [x] Show actual image previews using imageUrl from database
+- [x] Add delete functionality for database images with deleteImageMutation
+- [x] Label images as "Cloud" or "NAS" for clarity
+- [x] Fallback to icon if image fails to load
+- [ ] Test with uploaded S3 files to verify display works

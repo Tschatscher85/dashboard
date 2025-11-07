@@ -97,6 +97,17 @@ export default function PropertyMedia() {
     },
   });
 
+  const deleteImageMutation = trpc.properties.deleteImage.useMutation({
+    onSuccess: () => {
+      toast.success("Bild gelöscht");
+      // Refetch property to update images list
+      window.location.reload(); // Simple refresh for now
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Löschen: ${error.message}`);
+    },
+  });
+
   const uploadFiles = async (files: File[], category: "images" | "documents", docCategory?: string) => {
     if (files.length === 0) return;
     
@@ -255,46 +266,98 @@ export default function PropertyMedia() {
 
               {/* Image Gallery */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">
-                  Bildergalerie
-                  {nasImages && nasImages.length > 0 && (
-                    <span className="ml-2 text-sm text-muted-foreground">({nasImages.length} Bilder)</span>
-                  )}
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {nasImages && nasImages.length > 0 ? (
-                    nasImages.map((file: any, index: number) => (
-                      <div key={index} className="relative group">
-                        <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-                          <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                        </div>
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm(`Bild "${file.basename}" wirklich löschen?`)) {
-                                deleteMutation.mutate({ nasPath: file.filename });
-                              }
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <p className="mt-2 text-sm text-center truncate" title={file.basename}>
-                          {file.basename}
-                        </p>
-                        <p className="text-xs text-center text-muted-foreground">
-                          {(file.size / 1024).toFixed(1)} KB
-                        </p>
+                {(() => {
+                  // Combine database images and NAS images
+                  const dbImages = property.images || [];
+                  const totalImages = dbImages.length + (nasImages?.length || 0);
+                  
+                  return (
+                    <>
+                      <h3 className="text-lg font-semibold mb-4">
+                        Bildergalerie
+                        {totalImages > 0 && (
+                          <span className="ml-2 text-sm text-muted-foreground">({totalImages} Bilder)</span>
+                        )}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {/* Database images (S3) */}
+                        {dbImages.map((image: any, index: number) => (
+                          <div key={`db-${image.id || index}`} className="relative group">
+                            <img
+                              src={image.imageUrl}
+                              alt={image.title || `Bild ${index + 1}`}
+                              className="w-full h-48 object-cover rounded-lg"
+                              onError={(e) => {
+                                // Fallback if image fails to load
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                            <div className="hidden w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+                              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                            </div>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm(`Bild "${image.title || 'Unbenannt'}" wirklich löschen?`)) {
+                                    // Delete from database
+                                    if (image.id) {
+                                      deleteImageMutation.mutate({ id: image.id });
+                                    }
+                                  }
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <p className="mt-2 text-sm text-center truncate" title={image.title}>
+                              {image.title || `Bild ${index + 1}`}
+                            </p>
+                            <p className="text-xs text-center text-muted-foreground">
+                              Cloud
+                            </p>
+                          </div>
+                        ))}
+                        
+                        {/* NAS images */}
+                        {nasImages && nasImages.map((file: any, index: number) => (
+                          <div key={`nas-${index}`} className="relative group">
+                            <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+                              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                            </div>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm(`Bild "${file.basename}" wirklich löschen?`)) {
+                                    deleteMutation.mutate({ nasPath: file.filename });
+                                  }
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <p className="mt-2 text-sm text-center truncate" title={file.basename}>
+                              {file.basename}
+                            </p>
+                            <p className="text-xs text-center text-muted-foreground">
+                              NAS • {(file.size / 1024).toFixed(1)} KB
+                            </p>
+                          </div>
+                        ))}
+                        
+                        {totalImages === 0 && (
+                          <p className="col-span-full text-center text-muted-foreground py-8">
+                            Noch keine Bilder hochgeladen
+                          </p>
+                        )}
                       </div>
-                    ))
-                  ) : (
-                    <p className="col-span-full text-center text-muted-foreground py-8">
-                      Noch keine Bilder hochgeladen
-                    </p>
-                  )}
-                </div>
+                    </>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
