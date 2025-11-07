@@ -213,6 +213,10 @@ export default function PropertyDetail() {
               <div className="flex gap-2">
                 {!isEditing ? (
                   <>
+                    <Button variant="outline" onClick={() => setLocation(`/dashboard/properties/${propertyId}/media`)}>
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      Medien verwalten
+                    </Button>
                     <Button variant="outline" onClick={handleEditClick}>
                       <Edit className="h-4 w-4 mr-2" />
                       Bearbeiten

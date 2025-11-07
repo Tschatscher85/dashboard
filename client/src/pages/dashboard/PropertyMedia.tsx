@@ -31,20 +31,29 @@ export default function PropertyMedia() {
     setIsDragging(false);
   };
 
-  const handleDrop = async (e: React.DragEvent, category: "images" | "documents") => {
+  const handleDrop = async (e: React.DragEvent, category: "images" | "documents", docCategory?: string) => {
     e.preventDefault();
     setIsDragging(false);
     
     const files = Array.from(e.dataTransfer.files);
-    await uploadFiles(files, category);
+    await uploadFiles(files, category, docCategory);
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, category: "images" | "documents") => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, category: "images" | "documents", docCategory?: string) => {
     const files = Array.from(e.target.files || []);
-    await uploadFiles(files, category);
+    await uploadFiles(files, category, docCategory);
   };
 
-  const uploadFiles = async (files: File[], category: "images" | "documents") => {
+  const uploadMutation = trpc.properties.uploadToNAS.useMutation({
+    onSuccess: () => {
+      toast.success("Datei erfolgreich hochgeladen");
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Hochladen: ${error.message}`);
+    },
+  });
+
+  const uploadFiles = async (files: File[], category: "images" | "documents", docCategory?: string) => {
     if (files.length === 0) return;
     
     if (category === "images") {
@@ -54,9 +63,39 @@ export default function PropertyMedia() {
     }
 
     try {
-      // TODO: Implement actual NAS upload
-      // For now, just simulate upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Determine NAS category
+      let nasCategory: "Bilder" | "Objektunterlagen" | "Sensible Daten" | "Vertragsunterlagen" = "Bilder";
+      if (category === "documents") {
+        if (docCategory === "objektunterlagen") nasCategory = "Objektunterlagen";
+        else if (docCategory === "sensible") nasCategory = "Sensible Daten";
+        else if (docCategory === "vertragsunterlagen") nasCategory = "Vertragsunterlagen";
+        else nasCategory = "Objektunterlagen"; // Default for "upload" category
+      }
+
+      // Upload each file
+      for (const file of files) {
+        // Convert file to base64
+        const reader = new FileReader();
+        const fileData = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            // Remove data URL prefix (e.g., "data:image/png;base64,")
+            const base64Data = base64.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        // Upload to NAS
+        await uploadMutation.mutateAsync({
+          propertyId,
+          category: nasCategory,
+          fileName: file.name,
+          fileData,
+          mimeType: file.type,
+        });
+      }
       
       toast.success(`${files.length} Datei(en) erfolgreich hochgeladen`);
     } catch (error) {
@@ -201,16 +240,21 @@ export default function PropertyMedia() {
 
         {/* Dokumente Tab */}
         <TabsContent value="dokumente" className="space-y-4">
-          {["Objektunterlagen", "Sensible Daten", "Vertragsunterlagen", "Unterlagen Upload Haus"].map((category) => (
-            <Card key={category}>
+          {[
+            { label: "Objektunterlagen", key: "objektunterlagen" },
+            { label: "Sensible Daten", key: "sensible" },
+            { label: "Vertragsunterlagen", key: "vertragsunterlagen" },
+            { label: "Unterlagen Upload Haus", key: "upload" }
+          ].map(({ label, key }) => (
+            <Card key={key}>
               <CardHeader>
-                <CardTitle>{category}</CardTitle>
+                <CardTitle>{label}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, "documents")}
+                  onDrop={(e) => handleDrop(e, "documents", key)}
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                     isDragging ? "border-primary bg-primary/5" : "border-border"
                   }`}
@@ -230,12 +274,12 @@ export default function PropertyMedia() {
                         type="file"
                         multiple
                         accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileSelect(e, "documents")}
+                        onChange={(e) => handleFileSelect(e, "documents", key)}
                         className="hidden"
-                        id={`doc-upload-${category}`}
+                        id={`doc-upload-${key}`}
                       />
                       <Button asChild variant="outline" size="sm">
-                        <label htmlFor={`doc-upload-${category}`} className="cursor-pointer">
+                        <label htmlFor={`doc-upload-${key}`} className="cursor-pointer">
                           Dokumente auswählen
                         </label>
                       </Button>

@@ -1,0 +1,229 @@
+import { createClient, WebDAVClient } from 'webdav';
+
+/**
+ * WebDAV Client for Synology NAS integration
+ * 
+ * Folder structure on NAS:
+ * /volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/
+ *   └── [Straße Hausnummer, PLZ Ort]/
+ *       ├── Bilder/              (public - for exposé, landing page)
+ *       ├── Objektunterlagen/    (public - for prospects)
+ *       ├── Sensible Daten/      (internal only)
+ *       └── Vertragsunterlagen/  (not visible in app, NAS only)
+ */
+
+let webdavClient: WebDAVClient | null = null;
+
+interface WebDAVConfig {
+  url: string;
+  username: string;
+  password: string;
+}
+
+/**
+ * Get WebDAV client instance (singleton pattern)
+ */
+export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
+  if (!webdavClient) {
+    const url = config?.url || process.env.NAS_WEBDAV_URL || 'http://ugreen.tschatscher.eu:2001';
+    const username = config?.username || process.env.NAS_USERNAME || 'tschatscher';
+    const password = config?.password || process.env.NAS_PASSWORD || 'Survive1985#';
+
+    webdavClient = createClient(url, {
+      username,
+      password,
+    });
+  }
+
+  return webdavClient;
+}
+
+/**
+ * Reset WebDAV client (useful for testing or config changes)
+ */
+export function resetWebDAVClient(): void {
+  webdavClient = null;
+}
+
+/**
+ * Base path for property files on NAS
+ */
+const BASE_PATH = '/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf';
+
+/**
+ * Generate property folder name from address
+ * Format: "Straße Hausnummer, PLZ Ort"
+ */
+export function getPropertyFolderName(property: {
+  street?: string | null;
+  houseNumber?: string | null;
+  zipCode?: string | null;
+  city?: string | null;
+}): string {
+  const street = property.street || 'Unbekannte Straße';
+  const houseNumber = property.houseNumber || '';
+  const zipCode = property.zipCode || '';
+  const city = property.city || 'Unbekannte Stadt';
+
+  return `${street} ${houseNumber}, ${zipCode} ${city}`.trim();
+}
+
+/**
+ * Get full path for property folder
+ */
+export function getPropertyPath(propertyFolderName: string): string {
+  return `${BASE_PATH}/${propertyFolderName}`;
+}
+
+/**
+ * Get full path for category folder
+ */
+export function getCategoryPath(propertyFolderName: string, category: string): string {
+  return `${getPropertyPath(propertyFolderName)}/${category}`;
+}
+
+/**
+ * Category folders that should be created for each property
+ */
+export const PROPERTY_CATEGORIES = [
+  'Bilder',
+  'Objektunterlagen',
+  'Sensible Daten',
+  'Vertragsunterlagen',
+] as const;
+
+/**
+ * Ensure property folder structure exists on NAS
+ */
+export async function ensurePropertyFolders(propertyFolderName: string): Promise<void> {
+  const client = getWebDAVClient();
+  const propertyPath = getPropertyPath(propertyFolderName);
+
+  try {
+    // Create main property folder
+    const exists = await client.exists(propertyPath);
+    if (!exists) {
+      await client.createDirectory(propertyPath);
+      console.log(`[WebDAV] Created property folder: ${propertyPath}`);
+    }
+
+    // Create category subfolders
+    for (const category of PROPERTY_CATEGORIES) {
+      const categoryPath = getCategoryPath(propertyFolderName, category);
+      const categoryExists = await client.exists(categoryPath);
+      if (!categoryExists) {
+        await client.createDirectory(categoryPath);
+        console.log(`[WebDAV] Created category folder: ${categoryPath}`);
+      }
+    }
+  } catch (error) {
+    console.error('[WebDAV] Error creating folders:', error);
+    throw new Error(`Failed to create property folders: ${error}`);
+  }
+}
+
+/**
+ * Upload file to NAS
+ */
+export async function uploadFile(
+  propertyFolderName: string,
+  category: string,
+  fileName: string,
+  fileBuffer: Buffer
+): Promise<string> {
+  const client = getWebDAVClient();
+
+  try {
+    // Ensure folders exist
+    await ensurePropertyFolders(propertyFolderName);
+
+    // Upload file
+    const filePath = `${getCategoryPath(propertyFolderName, category)}/${fileName}`;
+    await client.putFileContents(filePath, fileBuffer, {
+      overwrite: true,
+    });
+
+    console.log(`[WebDAV] Uploaded file: ${filePath}`);
+    return filePath;
+  } catch (error) {
+    console.error('[WebDAV] Error uploading file:', error);
+    throw new Error(`Failed to upload file: ${error}`);
+  }
+}
+
+/**
+ * Delete file from NAS
+ */
+export async function deleteFile(filePath: string): Promise<void> {
+  const client = getWebDAVClient();
+
+  try {
+    const exists = await client.exists(filePath);
+    if (exists) {
+      await client.deleteFile(filePath);
+      console.log(`[WebDAV] Deleted file: ${filePath}`);
+    }
+  } catch (error) {
+    console.error('[WebDAV] Error deleting file:', error);
+    throw new Error(`Failed to delete file: ${error}`);
+  }
+}
+
+/**
+ * List files in a category folder
+ */
+export async function listFiles(
+  propertyFolderName: string,
+  category: string
+): Promise<Array<{ filename: string; basename: string; size: number; type: string }>> {
+  const client = getWebDAVClient();
+  const categoryPath = getCategoryPath(propertyFolderName, category);
+
+  try {
+    const exists = await client.exists(categoryPath);
+    if (!exists) {
+      return [];
+    }
+
+    const contents = await client.getDirectoryContents(categoryPath) as any[];
+    return contents.map((item: any) => ({
+      filename: item.filename,
+      basename: item.basename,
+      size: item.size,
+      type: item.type,
+    }));
+  } catch (error) {
+    console.error('[WebDAV] Error listing files:', error);
+    return [];
+  }
+}
+
+/**
+ * Get file content from NAS
+ */
+export async function getFileContent(filePath: string): Promise<Buffer> {
+  const client = getWebDAVClient();
+
+  try {
+    const content = await client.getFileContents(filePath);
+    return Buffer.from(content as ArrayBuffer);
+  } catch (error) {
+    console.error('[WebDAV] Error getting file content:', error);
+    throw new Error(`Failed to get file content: ${error}`);
+  }
+}
+
+/**
+ * Check if WebDAV connection is working
+ */
+export async function testConnection(): Promise<boolean> {
+  const client = getWebDAVClient();
+
+  try {
+    await client.exists(BASE_PATH);
+    return true;
+  } catch (error) {
+    console.error('[WebDAV] Connection test failed:', error);
+    return false;
+  }
+}

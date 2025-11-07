@@ -252,7 +252,35 @@
 
 ## Property Description Generator Fix
 
-- [ ] Read current property data in AIDescriptionDialog
-- [ ] Pass all property fields to backend generateDescription endpoint
-- [ ] Update LLM prompt to include property data
+- [x] Read current property data in AIDescriptionDialog
+- [x] Pass all property fields to backend generateDescription endpoint
+- [x] Update LLM prompt to include property data (title, address, price, dimensions, features, energy)
+- [x] Add German translations for property types and marketing types
+- [x] Format price with currency formatter
+- [x] Include all features (balcony, terrace, garden, elevator, heating, energy class)
+- [x] Improve prompt with structured format and clear instructions
 - [ ] Test description generation with real property data
+
+## Priority 3: Media Button to PropertyDetail
+
+- [x] Add "Medien verwalten" button to PropertyDetail page header
+- [x] Position button next to "Bearbeiten" and "Löschen" buttons
+- [x] Navigate to /dashboard/properties/:id/media on click
+- [x] Use ImageIcon from lucide-react
+- [x] Test navigation to PropertyMedia page
+
+## Priority 1: NAS Upload Integration
+
+- [x] Install webdav package
+- [x] Create WebDAV client for Synology NAS (server/lib/webdav-client.ts)
+- [x] Implement folder structure creation (Bilder, Objektunterlagen, Sensible Daten, Vertragsunterlagen)
+- [x] Add uploadToNAS endpoint in properties router
+- [x] Add listNASFiles endpoint to list files from NAS
+- [x] Add deleteFromNAS endpoint to delete files from NAS
+- [x] Connect PropertyMedia component to NAS upload endpoints
+- [x] Implement file-to-base64 conversion in frontend
+- [x] Add category mapping (objektunterlagen → Objektunterlagen, sensible → Sensible Daten, etc.)
+- [x] Update document upload handlers to pass correct category
+- [ ] Test NAS connection and file upload with real NAS
+- [ ] Test file listing from NAS folders
+- [ ] Test file deletion from NAS

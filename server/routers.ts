@@ -297,6 +297,87 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    uploadToNAS: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        category: z.enum(["Bilder", "Objektunterlagen", "Sensible Daten", "Vertragsunterlagen"]),
+        fileName: z.string(),
+        fileData: z.string(), // base64 encoded file data
+        mimeType: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { uploadFile, getPropertyFolderName } = await import("./lib/webdav-client");
+        
+        // Get property to build folder name
+        const property = await db.getPropertyById(input.propertyId);
+        if (!property) {
+          throw new Error("Property not found");
+        }
+        
+        // Convert base64 to buffer
+        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        
+        // Generate folder name from property address
+        const propertyFolderName = getPropertyFolderName(property);
+        
+        // Upload to NAS
+        const nasPath = await uploadFile(
+          propertyFolderName,
+          input.category,
+          input.fileName,
+          fileBuffer
+        );
+        
+        // If category is "Bilder", also save to database
+        if (input.category === "Bilder") {
+          await db.createPropertyImage({
+            propertyId: input.propertyId,
+            imageUrl: `/nas/${propertyFolderName}/${input.category}/${input.fileName}`,
+            nasPath,
+            title: input.fileName,
+            imageType: "other",
+          });
+        }
+        
+        return { 
+          success: true, 
+          nasPath,
+          url: `/nas/${propertyFolderName}/${input.category}/${input.fileName}`
+        };
+      }),
+
+    listNASFiles: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        category: z.enum(["Bilder", "Objektunterlagen", "Sensible Daten", "Vertragsunterlagen"]),
+      }))
+      .query(async ({ input }) => {
+        const { listFiles, getPropertyFolderName } = await import("./lib/webdav-client");
+        
+        // Get property to build folder name
+        const property = await db.getPropertyById(input.propertyId);
+        if (!property) {
+          throw new Error("Property not found");
+        }
+        
+        const propertyFolderName = getPropertyFolderName(property);
+        const files = await listFiles(propertyFolderName, input.category);
+        
+        return files;
+      }),
+
+    deleteFromNAS: protectedProcedure
+      .input(z.object({
+        nasPath: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { deleteFile } = await import("./lib/webdav-client");
+        
+        await deleteFile(input.nasPath);
+        
+        return { success: true };
+      }),
+
     generateDescription: protectedProcedure
       .input(z.object({
         propertyData: z.any(),
@@ -309,28 +390,60 @@ export const appRouter = router({
         const p = input.propertyData;
         const details: string[] = [];
         
-        if (p.marketingType) details.push(`${p.marketingType}`);
-        if (p.propertyType) details.push(`${p.propertyType}`);
+        // Basic info
+        if (p.title) details.push(`Titel: ${p.title}`);
+        if (p.street && p.houseNumber && p.city) {
+          details.push(`Adresse: ${p.street} ${p.houseNumber}, ${p.zipCode || ''} ${p.city}`.trim());
+        }
+        
+        // Type and marketing
+        const typeMap: Record<string, string> = {
+          'apartment': 'Wohnung',
+          'house': 'Haus',
+          'commercial': 'Gewerbe',
+          'land': 'Grundstück',
+          'parking': 'Stellplatz',
+          'other': 'Sonstige'
+        };
+        const marketingMap: Record<string, string> = {
+          'sale': 'Verkauf',
+          'rent': 'Vermietung',
+          'lease': 'Pacht'
+        };
+        if (p.propertyType) details.push(`Immobilientyp: ${typeMap[p.propertyType] || p.propertyType}`);
+        if (p.marketingType) details.push(`Vermarktungsart: ${marketingMap[p.marketingType] || p.marketingType}`);
+        
+        // Price
+        if (p.price) {
+          const priceStr = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(p.price);
+          details.push(`Preis: ${priceStr}`);
+        }
+        
+        // Dimensions
         if (p.rooms) details.push(`${p.rooms} Zimmer`);
         if (p.bedrooms) details.push(`${p.bedrooms} Schlafzimmer`);
-        if (p.bathrooms) details.push(`${p.bathrooms} Bäder`);
-        if (p.livingArea) details.push(`${p.livingArea} m²`);
-        if (p.plotArea) details.push(`Grundstück ${p.plotArea} m²`);
-        if (p.gardenArea) details.push(`Gartenfläche ${p.gardenArea} m²`);
-        if (p.floor) details.push(`${p.floor} Etagen`);
-        if (p.yearBuilt) details.push(`letzte Modernisierung ${p.yearBuilt}`);
-        if (p.condition) details.push(p.condition);
-        if (p.equipmentQuality) details.push(`Ausstattung ${p.equipmentQuality}`);
+        if (p.bathrooms) details.push(`${p.bathrooms} Badezimmer`);
+        if (p.livingArea) details.push(`Wohnfläche: ${p.livingArea} m²`);
+        if (p.plotArea) details.push(`Grundstücksfläche: ${p.plotArea} m²`);
+        if (p.gardenArea) details.push(`Gartenfläche: ${p.gardenArea} m²`);
+        if (p.floor && p.totalFloors) details.push(`${p.floor}. Etage von ${p.totalFloors}`);
+        else if (p.floor) details.push(`${p.floor}. Etage`);
+        
+        // Building details
+        if (p.yearBuilt) details.push(`Baujahr: ${p.yearBuilt}`);
+        if (p.lastModernization) details.push(`Letzte Modernisierung: ${p.lastModernization}`);
+        if (p.condition) details.push(`Zustand: ${p.condition}`);
+        if (p.equipmentQuality) details.push(`Ausstattungsqualität: ${p.equipmentQuality}`);
         
         // Flooring
         if (p.flooringTypes) {
           const floors = p.flooringTypes.split(',').filter(Boolean);
-          if (floors.length > 0) details.push(`Bodenbelag ${floors.join(', ')}`);
+          if (floors.length > 0) details.push(`Bodenbelag: ${floors.join(', ')}`);
         }
         
         // Parking
-        if (p.parkingType) details.push(p.parkingType);
-        if (p.parkingCount) details.push(`${p.parkingCount} Parkplätze`);
+        if (p.parkingType) details.push(`Parkplatz: ${p.parkingType}`);
+        if (p.parkingCount) details.push(`${p.parkingCount} Stellplätze`);
         
         // Features
         const features: string[] = [];
@@ -339,9 +452,14 @@ export const appRouter = router({
         if (p.hasGarden) features.push('Garten');
         if (p.hasElevator) features.push('Aufzug');
         if (p.hasBasement) features.push('Keller');
-        if (p.hasAttic) features.push('Abstellraum');
+        if (p.hasAttic) features.push('Dachboden');
         if (p.hasGuestToilet) features.push('Gäste-WC');
         if (p.hasBuiltInKitchen) features.push('Einbauküche');
+        if (p.hasChimney) features.push('Kamin');
+        if (p.hasAirConditioning) features.push('Klimaanlage');
+        if (p.hasAlarmSystem) features.push('Alarmanlage');
+        if (p.hasSwimmingPool) features.push('Schwimmbad');
+        if (p.hasSauna) features.push('Sauna');
         
         // Bathroom features
         if (p.bathroomFeatures) {
@@ -349,12 +467,27 @@ export const appRouter = router({
           features.push(...bathFeatures);
         }
         
-        // Heating
-        if (p.heatingType) features.push(p.heatingType);
+        // Heating & Energy
+        if (p.heatingType) features.push(`Heizung: ${p.heatingType}`);
+        if (p.energyClass) features.push(`Energieklasse: ${p.energyClass}`);
+        if (p.energyConsumption) features.push(`Energieverbrauch: ${p.energyConsumption} kWh/(m²·a)`);
         
-        if (features.length > 0) details.push(features.join(', '));
+        if (features.length > 0) details.push(`Ausstattung: ${features.join(', ')}`);
         
-        const prompt = `Erstelle eine professionelle Objektbeschreibung für eine Immobilienanzeige mit folgenden Details: ${details.join(', ')}. Die Beschreibung soll ansprechend und verkaufsfördernd sein.`;
+        // Location highlights
+        if (p.distancePublicTransport) details.push(`ÖPNV: ${p.distancePublicTransport}`);
+        if (p.distanceHighway) details.push(`Autobahn: ${p.distanceHighway}`);
+        
+        const prompt = `Erstelle eine professionelle und ansprechende Objektbeschreibung für eine Immobilienanzeige mit folgenden Informationen:
+
+${details.join('\n')}
+
+Die Beschreibung soll:
+- Verkaufsfördernd und emotional ansprechend sein
+- Die wichtigsten Merkmale hervorheben
+- Potenzielle Käufer/Mieter ansprechen
+- Professionell formuliert sein
+- Etwa 150-250 Wörter umfassen`;
         
         const description = await generateText({
           messages: [
