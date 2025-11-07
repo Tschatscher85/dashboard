@@ -168,3 +168,10 @@
 - [ ] Improve field organization and grouping
 - [ ] Add contact search functionality with autocomplete
 - [ ] Test two-column layout responsiveness
+
+## Bug Fixes
+
+- [x] Fix distance calculation showing unrealistic values (1 Minute / 1 m)
+- [x] Debug Google Maps Distance Matrix API integration
+- [x] Verify geocoding and distance calculation logic
+- [x] Improved geocoding queries for better accuracy

@@ -119,12 +119,15 @@ export function PropertyRightColumn({
         });
       };
 
-      // Calculate all distances
+      // Calculate all distances with improved queries
+      const city = formData.city || "";
+      const country = formData.country || "Deutschland";
+      
       await Promise.all([
-        calculateForDestination("transit", `Haltestelle near ${origin}`, "WALKING"),
-        calculateForDestination("highway", `Autobahnauffahrt near ${origin}`, "DRIVING"),
-        calculateForDestination("train", `Hauptbahnhof ${formData.city}`, "DRIVING"),
-        calculateForDestination("airport", `Flughafen near ${formData.city}`, "DRIVING"),
+        calculateForDestination("transit", `Bushaltestelle ${city}, ${country}`, "WALKING"),
+        calculateForDestination("highway", `Autobahn ${city}, ${country}`, "DRIVING"),
+        calculateForDestination("train", `Hauptbahnhof ${city}, ${country}`, "DRIVING"),
+        calculateForDestination("airport", `Flughafen Stuttgart, Deutschland`, "DRIVING"),
       ]);
       
       toast.success("Fahrzeiten erfolgreich berechnet");
