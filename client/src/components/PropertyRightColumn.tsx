@@ -229,7 +229,7 @@ export function PropertyRightColumn({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Portal-Export (3)</Label>
+            <Label>Portal-Export (2)</Label>
             <Button size="sm" variant="outline" disabled={!isEditing}>
               <Globe className="h-4 w-4 mr-2" />
               Überall veröffentlichen
@@ -238,31 +238,32 @@ export function PropertyRightColumn({
 
           {/* Portal List */}
           <div className="space-y-2">
+            {/* Homepage Export */}
             <div className="p-3 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">allianzjaeger</span>
-                <Button size="sm" variant="outline" disabled={!isEditing}>
+                <div>
+                  <span className="font-medium">Homepage</span>
+                  <span className="text-sm text-muted-foreground ml-2">Export zur eigenen Website</span>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Button size="sm" variant="outline" className="text-blue-600" disabled={!isEditing}>
                   <Globe className="h-4 w-4 mr-1" />
                   Veröffentlichen
+                </Button>
+                <Button size="sm" variant="outline" className="text-green-600" disabled={!isEditing}>
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Aktualisieren
                 </Button>
               </div>
             </div>
 
-            <div className="p-3 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">Allianz Jaeger - Versicherung - Immobilien</span>
-                <Button size="sm" variant="outline" disabled={!isEditing}>
-                  <Globe className="h-4 w-4 mr-1" />
-                  Veröffentlichen
-                </Button>
-              </div>
-            </div>
-
+            {/* ImmoScout24 */}
             <div className="p-3 border rounded-lg bg-green-50">
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <span className="font-medium">ImmoScout24</span>
-                  <span className="text-sm text-muted-foreground ml-2">29.10.2025 15:07</span>
+                  <span className="text-sm text-muted-foreground ml-2">Veröffentlicht</span>
                 </div>
               </div>
               <div className="flex gap-2 mt-2">

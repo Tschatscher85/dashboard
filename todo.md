@@ -155,3 +155,16 @@
 - [x] Test all sections and navigation
 - [x] Fetch property images from database and display in gallery
 - [ ] Add Grundrisse section for floor plan display (if needed)
+
+## Propstack-Style Property Detail Page Improvements
+
+- [x] Implement two-column layout (left: property data, right: contacts & portals)
+- [x] Add Ansprechpartner sidebar with contact fields (Eigentümer, Käufer, Notar, Hausverwaltung, Mieter)
+- [x] Add Portal-Export section with ImmoScout24 and Homepage export status
+- [x] Add Homepage Export portal with Veröffentlichen and Aktualisieren buttons
+- [x] Add export action buttons (Veröffentlichen, Aktualisieren, Deaktivieren) for ImmoScout24
+- [ ] Replace checkboxes with toggle switches for boolean fields (partially done)
+- [ ] Add colored field indicators/badges
+- [ ] Improve field organization and grouping
+- [ ] Add contact search functionality with autocomplete
+- [ ] Test two-column layout responsiveness
