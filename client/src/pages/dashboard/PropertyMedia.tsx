@@ -6,12 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PropertyMedia() {
   const { id } = useParams();
   const propertyId = parseInt(id || "0");
+  
+  const [renamingImage, setRenamingImage] = useState<{ id?: number; nasPath?: string; currentName: string } | null>(null);
+  const [newName, setNewName] = useState("");
   
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
   
@@ -296,10 +299,11 @@ export default function PropertyMedia() {
                             <div className="hidden w-full h-48 bg-muted rounded-lg flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <div className="absolute top-2 right-2 flex gap-2">
                               <Button
                                 variant="destructive"
                                 size="icon"
+                                className="h-8 w-8 shadow-lg"
                                 onClick={() => {
                                   if (confirm(`Bild "${image.title || 'Unbenannt'}" wirklich löschen?`)) {
                                     // Delete from database
@@ -327,10 +331,11 @@ export default function PropertyMedia() {
                             <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <div className="absolute top-2 right-2 flex gap-2">
                               <Button
                                 variant="destructive"
                                 size="icon"
+                                className="h-8 w-8 shadow-lg"
                                 onClick={() => {
                                   if (confirm(`Bild "${file.basename}" wirklich löschen?`)) {
                                     deleteMutation.mutate({ nasPath: file.filename });

@@ -368,3 +368,14 @@
 - [x] Add fallback for broken images
 - [ ] Test NAS upload with real credentials
 - [ ] Verify images appear in both PropertyMedia and PropertyDetail pages
+
+## Add Delete, Rename Buttons and Fix NAS Upload
+
+- [x] Add delete button to each image in PropertyMedia gallery (always visible, top-right corner)
+- [ ] Add rename/edit button to each image in PropertyMedia gallery (postponed)
+- [x] Add delete button to each image in PropertyDetail Medien tab
+- [ ] Implement rename functionality with inline editing or dialog (postponed)
+- [x] Test NAS connection with current credentials (working - 15s timeout)
+- [x] Verify NAS upload path (correct: /Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/[Adresse]/Bilder/)
+- [x] Increase NAS timeout from 3s to 15s
+- [ ] Test actual NAS upload and verify file appears on NAS

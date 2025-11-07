@@ -327,10 +327,10 @@ export const appRouter = router({
         
         // Try to upload to NAS first
         try {
-          // Test connection with short timeout
+          // Test connection with timeout
           const connectionOk = await Promise.race([
             testConnection(),
-            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
           ]);
           
           if (connectionOk) {
