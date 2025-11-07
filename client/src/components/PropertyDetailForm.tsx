@@ -348,6 +348,49 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             </div>
           </div>
 
+          {/* Sync Information */}
+          {(formData.externalId || formData.syncSource) && (
+            <>
+              <div className="col-span-2">
+                <Separator className="my-2" />
+                <p className="text-sm text-muted-foreground mb-3">Synchronisierung</p>
+              </div>
+              
+              {formData.externalId && (
+                <div className="space-y-2">
+                  <Label>Externe ID</Label>
+                  <Input
+                    value={formData.externalId || ""}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              )}
+
+              {formData.syncSource && (
+                <div className="space-y-2">
+                  <Label>Sync-Quelle</Label>
+                  <Input
+                    value={formData.syncSource || ""}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              )}
+
+              {formData.lastSyncedAt && (
+                <div className="space-y-2">
+                  <Label>Letzte Synchronisierung</Label>
+                  <Input
+                    value={new Date(formData.lastSyncedAt).toLocaleString('de-DE')}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              )}
+            </>
+          )}
+
           <div className="col-span-2 space-y-2">
             <Label>Interne Notiz</Label>
             <Textarea

@@ -424,6 +424,132 @@ export const appRouter = router({
           throw new Error(`Sync fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
         }
       }),
+
+    // Sync properties from external systems (Homepage, ImmoScout24, etc.)
+    sync: publicProcedure
+      .input(z.object({
+        apiKey: z.string(),
+        properties: z.array(z.object({
+          externalId: z.string(),
+          title: z.string(),
+          description: z.string().optional(),
+          propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
+          status: z.enum(["acquisition", "preparation", "marketing", "reserved", "sold", "rented", "inactive"]).optional(),
+          price: z.number().optional(),
+          priceType: z.string().optional(), // kaufpreis, miete, pacht
+          street: z.string().optional(),
+          houseNumber: z.string().optional(),
+          postalCode: z.string().optional(),
+          city: z.string().optional(),
+          state: z.string().optional(),
+          country: z.string().optional(),
+          livingSpace: z.number().optional(),
+          plotSize: z.number().optional(),
+          rooms: z.number().optional(),
+          bedrooms: z.number().optional(),
+          bathrooms: z.number().optional(),
+          buildYear: z.number().optional(),
+          features: z.string().optional(), // JSON array as string
+          images: z.string().optional(), // JSON array as string
+        })),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Validate API key
+        const validApiKey = process.env.PROPERTY_SYNC_API_KEY || 'mein-geheimer-sync-key-2024';
+        if (input.apiKey !== validApiKey) {
+          throw new Error('Invalid API key');
+        }
+
+        // Import sync helper
+        const { upsertPropertyByExternalId } = await import('./db-sync');
+
+        // Get user ID (use system user if not authenticated)
+        const userId = ctx.user?.id || 1;
+
+        // Process each property
+        const results = await Promise.all(
+          input.properties.map(async (prop) => {
+            try {
+              // Parse features and images from JSON strings
+              let features: string[] = [];
+              let images: string[] = [];
+              
+              if (prop.features) {
+                try {
+                  features = JSON.parse(prop.features);
+                } catch (e) {
+                  console.error('Failed to parse features:', e);
+                }
+              }
+              
+              if (prop.images) {
+                try {
+                  images = JSON.parse(prop.images);
+                } catch (e) {
+                  console.error('Failed to parse images:', e);
+                }
+              }
+
+              // Map to internal property structure
+              const propertyData = {
+                title: prop.title,
+                description: prop.description,
+                propertyType: prop.propertyType,
+                marketingType: prop.priceType === 'miete' || prop.priceType === 'pacht' ? 'rent' as const : 'sale' as const,
+                status: prop.status || 'marketing' as const,
+                street: prop.street,
+                houseNumber: prop.houseNumber,
+                zipCode: prop.postalCode,
+                city: prop.city,
+                region: prop.state,
+                country: prop.country || 'Deutschland',
+                livingArea: prop.livingSpace,
+                plotArea: prop.plotSize,
+                rooms: prop.rooms,
+                bedrooms: prop.bedrooms,
+                bathrooms: prop.bathrooms,
+                price: prop.price,
+                yearBuilt: prop.buildYear,
+                // Parse features into boolean fields
+                hasBalcony: features.some(f => f.toLowerCase().includes('balkon')),
+                hasTerrace: features.some(f => f.toLowerCase().includes('terrasse')),
+                hasGarden: features.some(f => f.toLowerCase().includes('garten')),
+                hasElevator: features.some(f => f.toLowerCase().includes('aufzug')),
+                hasParking: features.some(f => f.toLowerCase().includes('garage') || f.toLowerCase().includes('stellplatz')),
+                hasBasement: features.some(f => f.toLowerCase().includes('keller')),
+                hasBuiltInKitchen: features.some(f => f.toLowerCase().includes('einbauküche')),
+              };
+
+              // Upsert property
+              const result = await upsertPropertyByExternalId(
+                prop.externalId,
+                'homepage', // sync source
+                propertyData,
+                userId
+              );
+
+              // TODO: Handle images (upload to S3 and create propertyImages records)
+              // For now, we just track the image URLs in the property data
+
+              return { externalId: prop.externalId, success: true, created: result.created, id: result.id };
+            } catch (error) {
+              console.error(`Failed to sync property ${prop.externalId}:`, error);
+              return { externalId: prop.externalId, success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+            }
+          })
+        );
+
+        const successCount = results.filter(r => r.success).length;
+        const failedCount = results.filter(r => !r.success).length;
+
+        return {
+          success: true,
+          synced: successCount,
+          failed: failedCount,
+          message: `${successCount} properties synced successfully${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
+          results,
+        };
+      }),
   }),
 
   // ============ CONTACTS ============
@@ -755,6 +881,114 @@ export const appRouter = router({
         const lists = await brevo.getLists();
         return lists;
       }),
+
+    // Send inquiry notification email to admin
+    sendInquiryNotification: protectedProcedure
+      .input(z.object({
+        inquiryId: z.number(),
+        adminEmail: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        // Get inquiry from inquiries table
+        const inquiry = await db.getInquiryById(input.inquiryId);
+        if (!inquiry) {
+          throw new Error('Inquiry not found');
+        }
+
+        // Get property details if propertyId exists
+        let propertyTitle: string | undefined;
+        let propertyAddress: string | undefined;
+        if (inquiry.propertyId) {
+          const property = await db.getPropertyById(inquiry.propertyId);
+          if (property) {
+            propertyTitle = property.title || undefined;
+            propertyAddress = property.street && property.city 
+              ? `${property.street} ${property.houseNumber || ''}, ${property.zipCode || ''} ${property.city}`.trim()
+              : undefined;
+          }
+        }
+
+        const brevo = getBrevoClient();
+        await brevo.sendInquiryNotification({
+          adminEmail: input.adminEmail,
+          inquiryType: 'property',
+          contactName: inquiry.contactName || 'Unbekannt',
+          contactEmail: inquiry.contactEmail || '',
+          contactPhone: inquiry.contactPhone || undefined,
+          message: inquiry.messageText || undefined,
+          propertyTitle,
+          propertyAddress,
+        });
+
+        return { success: true };
+      }),
+
+    // Send appointment confirmation email
+    sendAppointmentConfirmation: protectedProcedure
+      .input(z.object({
+        contactEmail: z.string().email(),
+        contactName: z.string(),
+        appointmentDate: z.string(),
+        appointmentTime: z.string(),
+        propertyId: z.number().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Get property details if propertyId exists
+        let propertyTitle: string | undefined;
+        let propertyAddress: string | undefined;
+        if (input.propertyId) {
+          const property = await db.getPropertyById(input.propertyId);
+          if (property) {
+            propertyTitle = property.title || undefined;
+            propertyAddress = property.street && property.city 
+              ? `${property.street} ${property.houseNumber || ''}, ${property.zipCode || ''} ${property.city}`.trim()
+              : undefined;
+          }
+        }
+
+        const brevo = getBrevoClient();
+        await brevo.sendAppointmentConfirmation({
+          contactEmail: input.contactEmail,
+          contactName: input.contactName,
+          appointmentDate: input.appointmentDate,
+          appointmentTime: input.appointmentTime,
+          propertyTitle,
+          propertyAddress,
+          notes: input.notes,
+        });
+
+        return { success: true };
+      }),
+
+    // Send follow-up email
+    sendFollowUpEmail: protectedProcedure
+      .input(z.object({
+        contactEmail: z.string().email(),
+        contactName: z.string(),
+        subject: z.string(),
+        message: z.string(),
+        propertyId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Get property title if propertyId exists
+        let propertyTitle: string | undefined;
+        if (input.propertyId) {
+          const property = await db.getPropertyById(input.propertyId);
+          propertyTitle = property?.title || undefined;
+        }
+
+        const brevo = getBrevoClient();
+        await brevo.sendFollowUpEmail({
+          contactEmail: input.contactEmail,
+          contactName: input.contactName,
+          subject: input.subject,
+          message: input.message,
+          propertyTitle,
+        });
+
+        return { success: true };
+      }),
   }),
 
   // ============ LEADS ============
@@ -807,6 +1041,119 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.deleteLead(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ============ INQUIRIES ============
+  inquiries: router({
+    list: protectedProcedure
+      .input(z.object({
+        status: z.string().optional(),
+        channel: z.string().optional(),
+        propertyId: z.number().optional(),
+        contactId: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllInquiries(input);
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getInquiryById(input.id);
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        channel: z.enum(["whatsapp", "facebook", "instagram", "telegram", "email", "phone", "form", "other"]),
+        propertyId: z.number().optional(),
+        contactId: z.number().optional(),
+        contactName: z.string().optional(),
+        contactPhone: z.string().optional(),
+        contactEmail: z.string().optional(),
+        subject: z.string().optional(),
+        messageText: z.string().optional(),
+        status: z.enum(["new", "in_progress", "replied", "closed"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createInquiry(input);
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          status: z.enum(["new", "in_progress", "replied", "closed"]).optional(),
+          assignedTo: z.number().optional(),
+          contactId: z.number().optional(),
+          propertyId: z.number().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateInquiry(input.id, input.data);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteInquiry(input.id);
+        return { success: true };
+      }),
+
+    // Send reply via Superchat
+    sendReply: protectedProcedure
+      .input(z.object({
+        inquiryId: z.number(),
+        channelId: z.string(), // Superchat channel ID
+        message: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Get inquiry details
+        const inquiry = await db.getInquiryById(input.inquiryId);
+        if (!inquiry) {
+          throw new Error('Inquiry not found');
+        }
+
+        // Determine recipient identifier
+        let recipientIdentifier = '';
+        if (inquiry.channel === 'whatsapp' || inquiry.channel === 'telegram') {
+          recipientIdentifier = inquiry.contactPhone || '';
+        } else if (inquiry.channel === 'email') {
+          recipientIdentifier = inquiry.contactEmail || '';
+        } else if (inquiry.superchatContactId) {
+          recipientIdentifier = inquiry.superchatContactId;
+        }
+
+        if (!recipientIdentifier) {
+          throw new Error('No recipient identifier found for this inquiry');
+        }
+
+        // Send message via Superchat
+        const { getSuperchatClient } = await import('./superchatClient');
+        const superchat = getSuperchatClient();
+        
+        const result = await superchat.sendTextMessage({
+          to: recipientIdentifier,
+          channelId: input.channelId,
+          text: input.message,
+        });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to send message');
+        }
+
+        // Update inquiry status and response tracking
+        const now = new Date();
+        await db.updateInquiry(input.inquiryId, {
+          status: 'replied',
+          lastResponseAt: now,
+          firstResponseAt: inquiry.firstResponseAt || now,
+          responseCount: (inquiry.responseCount || 0) + 1,
+        });
+
+        return { success: true, messageId: result.messageId };
       }),
   }),
 

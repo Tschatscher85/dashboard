@@ -78,6 +78,13 @@
       "when": 1762460169785,
       "tag": "0010_nostalgic_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1762516243988,
+      "tag": "0011_yielding_slayback",
+      "breakpoints": true
     }
   ]
 }

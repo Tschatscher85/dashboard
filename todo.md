@@ -106,3 +106,22 @@
 - [x] Fix condition field validation error (invalid value being sent)
 - [x] Make property title editable in edit mode (add input field for title in header)
 - [ ] Fix date field saving and display issue - dates (e.g., "Verfügbar ab") are saved to database but not displayed correctly after page reload
+
+## API Integrations
+
+- [x] Extend database schema with ImmoScout24-compatible fields (marketingType, interiorQuality, energyCertificateType, etc.)
+- [x] Add sync-specific fields (externalId, syncSource, lastSyncedAt) to properties table
+- [x] Add rental-specific fields (deposit, serviceCharge, heatingCosts, petsAllowed)
+- [x] Create inquiries table for Superchat contact management
+- [x] Implement properties.sync tRPC endpoint with API key authentication
+- [x] Integrate Brevo API for email notifications (sendInquiryNotification, sendAppointmentConfirmation, sendFollowUpEmail)
+- [x] Implement Superchat webhook endpoint for incoming messages (/api/webhooks/superchat)
+- [x] Create Superchat client for sending outbound messages
+- [x] Add inquiries tRPC router with CRUD operations and sendReply endpoint
+- [x] Add database functions for inquiry management
+- [x] Update PropertyDetailForm to support new sync fields (externalId, syncSource)
+- [ ] Create UI for managing inquiries (list view, detail view, reply interface)
+- [ ] Add Superchat channel configuration in settings
+- [ ] Test Property-Sync API endpoint with external system
+- [ ] Test Brevo email sending with real email addresses
+- [ ] Test Superchat webhook integration with real messages

@@ -210,6 +210,14 @@ export const properties = mysqlTable("properties", {
   drivingTimeToAirport: int("drivingTimeToAirport"), // in minutes
   distanceToAirport: int("distanceToAirport"), // in meters
   
+  // Sync fields (for API integrations)
+  externalId: varchar("externalId", { length: 255 }).unique(), // Unique ID from external system
+  syncSource: varchar("syncSource", { length: 100 }), // Source of sync (e.g., "homepage", "immoscout24")
+  lastSyncedAt: timestamp("lastSyncedAt"), // Last sync timestamp
+  
+  // Rental-specific fields
+  petsAllowed: boolean("petsAllowed").default(false), // Haustiere erlaubt
+  
   // Auto-export settings
   autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
   
@@ -635,3 +643,50 @@ export const utilityBills = mysqlTable("utilityBills", {
 
 export type UtilityBill = typeof utilityBills.$inferSelect;
 export type InsertUtilityBill = typeof utilityBills.$inferInsert;
+
+/**
+ * Inquiries - Contact inquiries from various channels (Superchat, forms, etc.)
+ * Tracks all incoming messages and inquiries about properties
+ */
+export const inquiries = mysqlTable("inquiries", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Relations
+  propertyId: int("propertyId"), // can be null for general inquiries
+  contactId: int("contactId"), // linked contact if exists
+  
+  // Channel information
+  channel: mysqlEnum("channel", [
+    "whatsapp", "facebook", "instagram", "telegram", "email", "phone", "form", "other"
+  ]).notNull(),
+  
+  // Superchat integration
+  superchatContactId: varchar("superchatContactId", { length: 255 }), // Superchat contact ID
+  superchatConversationId: varchar("superchatConversationId", { length: 255 }), // Superchat conversation ID
+  superchatMessageId: varchar("superchatMessageId", { length: 255 }), // Superchat message ID
+  
+  // Contact information
+  contactName: varchar("contactName", { length: 255 }),
+  contactPhone: varchar("contactPhone", { length: 50 }),
+  contactEmail: varchar("contactEmail", { length: 320 }),
+  
+  // Message content
+  subject: varchar("subject", { length: 500 }),
+  messageText: text("messageText"),
+  
+  // Status and assignment
+  status: mysqlEnum("status", ["new", "in_progress", "replied", "closed"]).default("new"),
+  assignedTo: int("assignedTo"), // User ID of assigned agent
+  
+  // Response tracking
+  firstResponseAt: timestamp("firstResponseAt"),
+  lastResponseAt: timestamp("lastResponseAt"),
+  responseCount: int("responseCount").default(0),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Inquiry = typeof inquiries.$inferSelect;
+export type InsertInquiry = typeof inquiries.$inferInsert;

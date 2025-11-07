@@ -17,6 +17,26 @@ interface BrevoList {
   totalSubscribers: number;
 }
 
+interface BrevoEmailRecipient {
+  email: string;
+  name?: string;
+}
+
+interface BrevoEmailParams {
+  to: BrevoEmailRecipient[];
+  subject: string;
+  htmlContent?: string;
+  textContent?: string;
+  sender?: BrevoEmailRecipient;
+  replyTo?: BrevoEmailRecipient;
+  templateId?: number;
+  params?: Record<string, any>;
+}
+
+interface BrevoSendEmailResponse {
+  messageId: string;
+}
+
 /**
  * Brevo API Client for contact synchronization
  * Documentation: https://developers.brevo.com/
@@ -177,6 +197,169 @@ export class BrevoClient {
     await this.createOrUpdateContact({
       email: data.email,
       attributes,
+    });
+  }
+
+  /**
+   * Send a transactional email via Brevo
+   */
+  async sendEmail(params: BrevoEmailParams): Promise<BrevoSendEmailResponse> {
+    const payload: any = {
+      to: params.to,
+      subject: params.subject,
+      sender: params.sender || {
+        email: 'noreply@immo-jaeger.eu',
+        name: 'Immo-Jaeger',
+      },
+    };
+
+    if (params.htmlContent) {
+      payload.htmlContent = params.htmlContent;
+    }
+
+    if (params.textContent) {
+      payload.textContent = params.textContent;
+    }
+
+    if (params.replyTo) {
+      payload.replyTo = params.replyTo;
+    }
+
+    if (params.templateId) {
+      payload.templateId = params.templateId;
+      payload.params = params.params || {};
+    }
+
+    return this.request<BrevoSendEmailResponse>('/smtp/email', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Send inquiry notification email to admin
+   */
+  async sendInquiryNotification(data: {
+    adminEmail: string;
+    inquiryType: 'property' | 'owner' | 'general';
+    contactName: string;
+    contactEmail: string;
+    contactPhone?: string;
+    message?: string;
+    propertyTitle?: string;
+    propertyAddress?: string;
+  }): Promise<void> {
+    const typeLabels = {
+      property: 'Immobilienanfrage',
+      owner: 'Eigentümeranfrage',
+      general: 'Allgemeine Anfrage',
+    };
+
+    const subject = `Neue ${typeLabels[data.inquiryType]}: ${data.contactName}`;
+
+    let htmlContent = `
+      <h2>Neue ${typeLabels[data.inquiryType]}</h2>
+      <p><strong>Von:</strong> ${data.contactName}</p>
+      <p><strong>E-Mail:</strong> ${data.contactEmail}</p>
+    `;
+
+    if (data.contactPhone) {
+      htmlContent += `<p><strong>Telefon:</strong> ${data.contactPhone}</p>`;
+    }
+
+    if (data.propertyTitle) {
+      htmlContent += `<p><strong>Immobilie:</strong> ${data.propertyTitle}</p>`;
+    }
+
+    if (data.propertyAddress) {
+      htmlContent += `<p><strong>Adresse:</strong> ${data.propertyAddress}</p>`;
+    }
+
+    if (data.message) {
+      htmlContent += `<p><strong>Nachricht:</strong></p><p>${data.message.replace(/\n/g, '<br>')}</p>`;
+    }
+
+    await this.sendEmail({
+      to: [{ email: data.adminEmail, name: 'Immo-Jaeger Admin' }],
+      subject,
+      htmlContent,
+      replyTo: { email: data.contactEmail, name: data.contactName },
+    });
+  }
+
+  /**
+   * Send appointment confirmation email to contact
+   */
+  async sendAppointmentConfirmation(data: {
+    contactEmail: string;
+    contactName: string;
+    appointmentDate: string;
+    appointmentTime: string;
+    propertyTitle?: string;
+    propertyAddress?: string;
+    notes?: string;
+  }): Promise<void> {
+    const subject = 'Terminbestätigung - Immo-Jaeger';
+
+    let htmlContent = `
+      <h2>Terminbestätigung</h2>
+      <p>Sehr geehrte/r ${data.contactName},</p>
+      <p>Ihr Termin wurde erfolgreich bestätigt:</p>
+      <p><strong>Datum:</strong> ${data.appointmentDate}</p>
+      <p><strong>Uhrzeit:</strong> ${data.appointmentTime}</p>
+    `;
+
+    if (data.propertyTitle) {
+      htmlContent += `<p><strong>Immobilie:</strong> ${data.propertyTitle}</p>`;
+    }
+
+    if (data.propertyAddress) {
+      htmlContent += `<p><strong>Adresse:</strong> ${data.propertyAddress}</p>`;
+    }
+
+    if (data.notes) {
+      htmlContent += `<p><strong>Hinweise:</strong></p><p>${data.notes.replace(/\n/g, '<br>')}</p>`;
+    }
+
+    htmlContent += `
+      <p>Wir freuen uns auf Ihren Besuch!</p>
+      <p>Mit freundlichen Grüßen,<br>Ihr Immo-Jaeger Team</p>
+    `;
+
+    await this.sendEmail({
+      to: [{ email: data.contactEmail, name: data.contactName }],
+      subject,
+      htmlContent,
+    });
+  }
+
+  /**
+   * Send follow-up email to contact
+   */
+  async sendFollowUpEmail(data: {
+    contactEmail: string;
+    contactName: string;
+    subject: string;
+    message: string;
+    propertyTitle?: string;
+  }): Promise<void> {
+    let htmlContent = `
+      <p>Sehr geehrte/r ${data.contactName},</p>
+      ${data.message.replace(/\n/g, '<br>')}
+    `;
+
+    if (data.propertyTitle) {
+      htmlContent += `<p><strong>Bezug:</strong> ${data.propertyTitle}</p>`;
+    }
+
+    htmlContent += `
+      <p>Mit freundlichen Grüßen,<br>Ihr Immo-Jaeger Team</p>
+    `;
+
+    await this.sendEmail({
+      to: [{ email: data.contactEmail, name: data.contactName }],
+      subject: data.subject,
+      htmlContent,
     });
   }
 }

@@ -10,7 +10,8 @@ import {
   documents, InsertDocument,
   appointments, InsertAppointment,
   activities, InsertActivity,
-  leads, InsertLead
+  leads, InsertLead,
+  inquiries, InsertInquiry
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -679,5 +680,92 @@ export async function deleteUtilityBill(id: number) {
   const { utilityBills } = await import("../drizzle/schema");
   
   const result = await db.delete(utilityBills).where(eq(utilityBills.id, id));
+  return result;
+}
+
+// ============ INQUIRY OPERATIONS ============
+
+export async function createInquiry(inquiry: InsertInquiry) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(inquiries).values(inquiry);
+  return result;
+}
+
+export async function getInquiryById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(inquiries).where(eq(inquiries.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllInquiries(filters?: {
+  status?: string;
+  channel?: string;
+  propertyId?: number;
+  contactId?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  let query = db.select().from(inquiries);
+
+  if (filters) {
+    const conditions = [];
+    if (filters.status) conditions.push(eq(inquiries.status, filters.status as any));
+    if (filters.channel) conditions.push(eq(inquiries.channel, filters.channel as any));
+    if (filters.propertyId) conditions.push(eq(inquiries.propertyId, filters.propertyId));
+    if (filters.contactId) conditions.push(eq(inquiries.contactId, filters.contactId));
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+  }
+
+  const result = await query.orderBy(desc(inquiries.createdAt));
+  return result;
+}
+
+export async function updateInquiry(id: number, updates: Partial<InsertInquiry>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.update(inquiries).set(updates).where(eq(inquiries.id, id));
+  return result;
+}
+
+export async function deleteInquiry(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.delete(inquiries).where(eq(inquiries.id, id));
+  return result;
+}
+
+export async function getInquiriesByProperty(propertyId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(inquiries)
+    .where(eq(inquiries.propertyId, propertyId))
+    .orderBy(desc(inquiries.createdAt));
+  
+  return result;
+}
+
+export async function getInquiriesByContact(contactId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(inquiries)
+    .where(eq(inquiries.contactId, contactId))
+    .orderBy(desc(inquiries.createdAt));
+  
   return result;
 }

@@ -35,6 +35,13 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Webhook endpoints
+  app.post('/api/webhooks/superchat', async (req, res) => {
+    const { handleSuperchatWebhook } = await import('../webhooks/superchat');
+    return handleSuperchatWebhook(req, res);
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",
