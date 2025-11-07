@@ -125,3 +125,16 @@
 - [ ] Test Property-Sync API endpoint with external system
 - [ ] Test Brevo email sending with real email addresses
 - [ ] Test Superchat webhook integration with real messages
+
+## Settings Page Enhancements
+
+- [x] Create user management section in settings
+- [x] Add "Neuer Benutzer" button and form
+- [x] Implement user creation with email, name, and role selection
+- [x] Add user list with edit/delete functionality
+- [x] Create API configuration section in settings
+- [x] Add form fields for API keys (Superchat, Brevo, Property-Sync, OpenAI)
+- [x] Implement secure API key storage and retrieval
+- [x] Add backend endpoint for creating new users (users.create, users.list, users.delete)
+- [x] Add backend endpoint for saving API configuration (settings.getApiKeys, settings.saveApiKeys)
+- [x] Test user creation and API key management

@@ -20,6 +20,83 @@ export const appRouter = router({
     }),
   }),
 
+  // ============ USERS ============
+  users: router({
+    list: protectedProcedure
+      .query(async () => {
+        return await db.getAllUsers();
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        email: z.string().email(),
+        role: z.enum(["user", "admin"]).default("user"),
+      }))
+      .mutation(async ({ input }) => {
+        // Generate a temporary openId for the user
+        // In production, this should be replaced with proper OAuth flow
+        const tempOpenId = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
+        await db.upsertUser({
+          openId: tempOpenId,
+          name: input.name,
+          email: input.email,
+          role: input.role,
+        });
+        
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Prevent deleting yourself
+        if (input.id === ctx.user.id) {
+          throw new Error("Sie können sich nicht selbst löschen");
+        }
+        
+        await db.deleteUser(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ============ SETTINGS ============
+  settings: router({
+    getApiKeys: protectedProcedure
+      .query(async () => {
+        // In production, these should be stored in a secure settings table
+        // For now, we return empty strings as placeholders
+        return {
+          superchat: process.env.SUPERCHAT_API_KEY || "",
+          brevo: process.env.BREVO_API_KEY || "",
+          propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
+          openai: process.env.OPENAI_API_KEY || "",
+        };
+      }),
+
+    saveApiKeys: protectedProcedure
+      .input(z.object({
+        superchat: z.string().optional(),
+        brevo: z.string().optional(),
+        propertySync: z.string().optional(),
+        openai: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // In production, save these to a secure settings table or update .env file
+        // For now, we just return success
+        // TODO: Implement proper API key storage
+        console.log("API Keys to save:", {
+          superchat: input.superchat ? "***" : "(empty)",
+          brevo: input.brevo ? "***" : "(empty)",
+          propertySync: input.propertySync ? "***" : "(empty)",
+          openai: input.openai ? "***" : "(empty)",
+        });
+        
+        return { success: true };
+      }),
+  }),
+
   // ============ PROPERTIES ============
   properties: router({
     list: protectedProcedure

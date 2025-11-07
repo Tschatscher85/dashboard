@@ -16,7 +16,8 @@ import Insurances from "./pages/dashboard/Insurances";
 import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
 import PropertyManagement from "./pages/dashboard/PropertyManagement";
 import PropertyLanding from "./pages/PropertyLanding";
-import { Building2, Users, Mail, Calendar, FileText, Settings, Shield, Wrench } from "lucide-react";
+import Settings from "./pages/Settings";
+import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench } from "lucide-react";
 
 const dashboardNavItems = [
   {
@@ -62,7 +63,7 @@ const dashboardNavItems = [
   {
     title: "Einstellungen",
     href: "/dashboard/settings",
-    icon: Settings,
+    icon: SettingsIcon,
   },
 ];
 
@@ -150,14 +151,7 @@ function Router() {
         )}
       </Route>
       <Route path="/dashboard/settings">
-        {() => (
-          <DashboardLayout navItems={dashboardNavItems}>
-            <div className="space-y-6">
-              <h1 className="text-3xl font-bold">Einstellungen</h1>
-              <p className="text-muted-foreground">Einstellungen kommen bald...</p>
-            </div>
-          </DashboardLayout>
-        )}
+        {() => <Settings />}
       </Route>
       <Route path="/dashboard">
         {() => (

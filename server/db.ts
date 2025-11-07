@@ -110,6 +110,23 @@ export async function getUserById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(users).orderBy(users.createdAt);
+}
+
+export async function deleteUser(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete user: database not available");
+    return;
+  }
+  
+  await db.delete(users).where(eq(users.id, id));
+}
+
 // ============ PROPERTY OPERATIONS ============
 
 export async function createProperty(property: InsertProperty) {
