@@ -297,3 +297,16 @@
 - [x] Show file count badges in image gallery header
 - [x] Show file count for each document category
 - [x] Display file sizes in KB for all files
+
+## Fix Upload Hanging and Navigation Issues
+
+- [x] Debug why upload hangs at "Bilder werden hochgeladen..." (NAS connection timeout)
+- [x] Check server logs for NAS connection errors
+- [x] Add better error handling to upload mutation with specific error messages
+- [x] Add 3-second timeout to NAS connection test
+- [x] Implement S3 fallback when NAS is not reachable
+- [x] Show specific success/warning messages to user (NAS vs Cloud storage)
+- [x] Add "Zurück" (Back) button to PropertyMedia page header with ArrowLeft icon
+- [x] Navigate back using window.history.back()
+- [ ] Test upload with small image file to verify fallback works
+- [ ] Verify error messages are displayed correctly

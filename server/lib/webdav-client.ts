@@ -134,6 +134,12 @@ export async function uploadFile(
   const client = getWebDAVClient();
 
   try {
+    // Test connection first
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      throw new Error('NAS nicht erreichbar. Bitte prüfen Sie die Netzwerkverbindung.');
+    }
+
     // Ensure folders exist
     await ensurePropertyFolders(propertyFolderName);
 
@@ -145,9 +151,21 @@ export async function uploadFile(
 
     console.log(`[WebDAV] Uploaded file: ${filePath}`);
     return filePath;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[WebDAV] Error uploading file:', error);
-    throw new Error(`Failed to upload file: ${error}`);
+    
+    // Provide more specific error messages
+    if (error.message?.includes('ECONNREFUSED')) {
+      throw new Error('NAS-Verbindung fehlgeschlagen: Server nicht erreichbar');
+    } else if (error.message?.includes('ETIMEDOUT')) {
+      throw new Error('NAS-Verbindung fehlgeschlagen: Zeitüberschreitung');
+    } else if (error.message?.includes('401')) {
+      throw new Error('NAS-Verbindung fehlgeschlagen: Zugangsdaten ungültig');
+    } else if (error.message?.includes('nicht erreichbar')) {
+      throw error; // Already has good message
+    } else {
+      throw new Error(`Upload fehlgeschlagen: ${error.message || 'Unbekannter Fehler'}`);
+    }
   }
 }
 

@@ -306,7 +306,8 @@ export const appRouter = router({
         mimeType: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { uploadFile, getPropertyFolderName } = await import("./lib/webdav-client");
+        const { uploadFile, getPropertyFolderName, testConnection } = await import("./lib/webdav-client");
+        const { storagePut } = await import("./storage");
         
         // Get property to build folder name
         const property = await db.getPropertyById(input.propertyId);
@@ -320,19 +321,50 @@ export const appRouter = router({
         // Generate folder name from property address
         const propertyFolderName = getPropertyFolderName(property);
         
-        // Upload to NAS
-        const nasPath = await uploadFile(
-          propertyFolderName,
-          input.category,
-          input.fileName,
-          fileBuffer
-        );
+        let nasPath: string;
+        let url: string;
+        let usedFallback = false;
+        
+        // Try to upload to NAS first
+        try {
+          // Test connection with short timeout
+          const connectionOk = await Promise.race([
+            testConnection(),
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+          ]);
+          
+          if (connectionOk) {
+            nasPath = await uploadFile(
+              propertyFolderName,
+              input.category,
+              input.fileName,
+              fileBuffer
+            );
+            url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+          } else {
+            throw new Error('NAS not reachable');
+          }
+        } catch (error) {
+          console.warn('[Upload] NAS upload failed, using S3 fallback:', error);
+          usedFallback = true;
+          
+          // Fallback: Save to S3
+          const s3Key = `properties/${input.propertyId}/${input.category}/${Date.now()}-${input.fileName}`;
+          const s3Result = await storagePut(
+            s3Key,
+            fileBuffer,
+            input.mimeType || 'application/octet-stream'
+          );
+          
+          nasPath = s3Key;
+          url = s3Result.url;
+        }
         
         // If category is "Bilder", also save to database
         if (input.category === "Bilder") {
           await db.createPropertyImage({
             propertyId: input.propertyId,
-            imageUrl: `/nas/${propertyFolderName}/${input.category}/${input.fileName}`,
+            imageUrl: url,
             nasPath,
             title: input.fileName,
             imageType: "other",
@@ -342,7 +374,11 @@ export const appRouter = router({
         return { 
           success: true, 
           nasPath,
-          url: `/nas/${propertyFolderName}/${input.category}/${input.fileName}`
+          url,
+          usedFallback,
+          message: usedFallback 
+            ? 'Datei wurde in Cloud gespeichert (NAS nicht erreichbar)' 
+            : 'Datei erfolgreich zum NAS hochgeladen'
         };
       }),
 

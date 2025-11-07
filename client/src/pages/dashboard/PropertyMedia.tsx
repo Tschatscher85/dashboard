@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2 } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PropertyMedia() {
@@ -64,8 +64,14 @@ export default function PropertyMedia() {
   };
 
   const uploadMutation = trpc.properties.uploadToNAS.useMutation({
-    onSuccess: (_, variables) => {
-      toast.success("Datei erfolgreich hochgeladen");
+    onSuccess: (data, variables) => {
+      // Show appropriate message based on whether fallback was used
+      if (data.usedFallback) {
+        toast.warning(data.message || "Datei in Cloud gespeichert (NAS nicht erreichbar)");
+      } else {
+        toast.success(data.message || "Datei erfolgreich hochgeladen");
+      }
+      
       // Refetch the appropriate category
       if (variables.category === "Bilder") refetchImages();
       else if (variables.category === "Objektunterlagen") refetchObjektunterlagen();
@@ -168,10 +174,21 @@ export default function PropertyMedia() {
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">{property.title}</h1>
-        <p className="text-muted-foreground">
-          {property.street} {property.houseNumber}, {property.zipCode} {property.city}
-        </p>
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{property.title}</h1>
+            <p className="text-muted-foreground">
+              {property.street} {property.houseNumber}, {property.zipCode} {property.city}
+            </p>
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="medien" className="space-y-4">
