@@ -138,3 +138,20 @@
 - [x] Add backend endpoint for creating new users (users.create, users.list, users.delete)
 - [x] Add backend endpoint for saving API configuration (settings.getApiKeys, settings.saveApiKeys)
 - [x] Test user creation and API key management
+
+## Propstack-Style Landing Page Redesign
+
+- [x] Implement sticky navigation bar with smooth scroll to sections
+- [x] Redesign hero section with full-width image and emoji-enhanced title
+- [x] Create Objektbeschreibung section with emoji icons (🏡, ✨)
+- [x] Add green checkmark (✅) list for Ausstattung & Highlights
+- [x] Implement two-column Objektdaten table with all property details
+- [x] Implement Bilder section with image gallery (3-column grid)
+- [x] Add Lage section with OpenStreetMap integration
+- [x] Create Kontakt section with contact form and lead submission
+- [x] Add "Exposé drucken" (Print) functionality with print styles
+- [x] Integrate WhatsApp contact button with phone link
+- [x] Ensure mobile-responsive design
+- [x] Test all sections and navigation
+- [x] Fetch property images from database and display in gallery
+- [ ] Add Grundrisse section for floor plan display (if needed)

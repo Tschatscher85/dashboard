@@ -1,37 +1,13 @@
 import { trpc } from "@/lib/trpc";
 import { useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Building2,
-  MapPin,
-  Ruler,
-  Bed,
-  Bath,
-  Calendar,
-  Mail,
-  Phone,
-  Euro,
-  Home,
-  Car,
-  Leaf,
-  Sun,
-} from "lucide-react";
-import { useState } from "react";
+import { Check, Printer, Phone } from "lucide-react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
+import { APP_LOGO } from "@/const";
 
 export default function PropertyLanding() {
   const [, params] = useRoute("/property/:id");
@@ -65,7 +41,8 @@ export default function PropertyLanding() {
     },
   });
 
-  const handleSubmitLead = () => {
+  const handleSubmitLead = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!leadData.firstName || !leadData.lastName || !leadData.email) {
       toast.error("Bitte füllen Sie alle Pflichtfelder aus");
       return;
@@ -80,6 +57,19 @@ export default function PropertyLanding() {
       source: `Property Landing Page - ${property?.title}`,
       propertyId: propertyId,
     });
+  };
+
+  const objektdatenRef = useRef<HTMLDivElement>(null);
+  const bilderRef = useRef<HTMLDivElement>(null);
+  const lageRef = useRef<HTMLDivElement>(null);
+  const kontaktRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (isLoading) {
@@ -110,6 +100,8 @@ export default function PropertyLanding() {
     return new Intl.NumberFormat("de-DE", {
       style: "currency",
       currency: "EUR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(cents / 100);
   };
 
@@ -134,360 +126,392 @@ export default function PropertyLanding() {
     return labels[type] || type;
   };
 
+  const getConditionLabel = (condition: string | null) => {
+    if (!condition) return null;
+    const labels: Record<string, string> = {
+      first_time_use: "Erstbezug",
+      mint_condition: "Neuwertig",
+      refurbished: "Saniert",
+      modernized: "Modernisiert",
+      fully_renovated: "Vollständig renoviert",
+      well_kept: "Gepflegt",
+      negotiable: "Verhandlungsbasis",
+      in_need_of_renovation: "Renovierungsbedürftig",
+      demolished: "Abbruchreif",
+    };
+    return labels[condition] || condition;
+  };
+
+  // Build features list with checkmarks
+  const features: string[] = [];
+  
+  if (property.hasBalcony) features.push("Balkon");
+  if (property.hasTerrace) features.push("Terrasse");
+  if (property.hasGarden) features.push("Garten / -mitbenutzung");
+  if (property.hasElevator) features.push("Aufzug");
+  if (property.hasParking) features.push("Parkplatz");
+  if (property.hasBasement) features.push("Keller");
+  if (property.hasGuestToilet) features.push("Gäste-WC");
+  if (property.hasBuiltInKitchen) features.push("Einbauküche vorhanden");
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Hero Section */}
-      <div className="relative h-[60vh] bg-gradient-to-br from-primary/10 to-primary/5">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="container mx-auto h-full flex flex-col justify-center px-4">
-          <div className="max-w-3xl">
-            <Badge variant="secondary" className="mb-4">
-              {getPropertyTypeLabel(property.propertyType)} • {getMarketingTypeLabel(property.marketingType)}
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {property.title}
-            </h1>
-            <div className="flex items-center gap-2 text-muted-foreground mb-6">
-              <MapPin className="h-5 w-5" />
-              <span className="text-lg">
-                {[property.street, property.houseNumber, property.zipCode, property.city]
-                  .filter(Boolean)
-                  .join(" ")}
-              </span>
+    <div className="min-h-screen bg-white">
+      {/* Sticky Navigation */}
+      <nav className="sticky top-0 z-50 bg-white border-b shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              {APP_LOGO && (
+                <img src={APP_LOGO} alt="Logo" className="h-8 w-auto" />
+              )}
             </div>
-            <div className="text-4xl font-bold text-primary">
-              {property.price !== null ? formatPrice(property.price) : "Preis auf Anfrage"}
+            <div className="hidden md:flex items-center gap-6">
+              <button
+                onClick={() => scrollToSection(objektdatenRef)}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Objektdaten
+              </button>
+              <button
+                onClick={() => scrollToSection(bilderRef)}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Bilder
+              </button>
+              <button
+                onClick={() => scrollToSection(lageRef)}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Lage
+              </button>
+              <button
+                onClick={() => scrollToSection(kontaktRef)}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Kontakt
+              </button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Exposé drucken
+              </Button>
             </div>
           </div>
         </div>
+      </nav>
+
+      {/* Hero Section with Property Image */}
+      <div className="relative">
+        {property.images && property.images.length > 0 ? (
+          <div className="w-full h-[500px] overflow-hidden">
+            <img
+              src={property.images[0]}
+              alt={property.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-[500px] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+            <p className="text-gray-400 text-lg">Kein Bild verfügbar</p>
+          </div>
+        )}
       </div>
 
-      {/* Key Facts */}
-      <div className="container mx-auto -mt-16 px-4 mb-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {property.livingArea && (
-            <Card className="bg-background/95 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Ruler className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{property.livingArea}</div>
-                    <div className="text-sm text-muted-foreground">m² Wohnfläche</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {property.rooms && (
-            <Card className="bg-background/95 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Home className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{property.rooms}</div>
-                    <div className="text-sm text-muted-foreground">Zimmer</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {property.bedrooms && (
-            <Card className="bg-background/95 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Bed className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{property.bedrooms}</div>
-                    <div className="text-sm text-muted-foreground">Schlafzimmer</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {property.bathrooms && (
-            <Card className="bg-background/95 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Bath className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{property.bathrooms}</div>
-                    <div className="text-sm text-muted-foreground">Badezimmer</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      {/* Title Section */}
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          🏡 {property.title}
+        </h1>
+        <p className="text-gray-600">
+          {[property.street, property.houseNumber, property.zipCode, property.city]
+            .filter(Boolean)
+            .join(", ")}
+        </p>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-16">
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Left Column - Details */}
-          <div className="md:col-span-2 space-y-8">
-            {/* Description */}
-            {property.description && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">Objektbeschreibung</h2>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {property.description}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+        {/* Objektbeschreibung Section */}
+        {property.description && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">🏡 Objektbeschreibung</h2>
+            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {property.description}
+            </div>
+          </section>
+        )}
 
-            {/* Features */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">Ausstattung</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {property.hasBalcony && (
-                    <div className="flex items-center gap-2">
-                      <Sun className="h-5 w-5 text-primary" />
-                      <span>Balkon</span>
-                    </div>
-                  )}
-                  {property.hasTerrace && (
-                    <div className="flex items-center gap-2">
-                      <Sun className="h-5 w-5 text-primary" />
-                      <span>Terrasse</span>
-                    </div>
-                  )}
-                  {property.hasGarden && (
-                    <div className="flex items-center gap-2">
-                      <Leaf className="h-5 w-5 text-primary" />
-                      <span>Garten</span>
-                    </div>
-                  )}
-                  {property.hasElevator && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-primary" />
-                      <span>Aufzug</span>
-                    </div>
-                  )}
-                  {property.hasParking && (
-                    <div className="flex items-center gap-2">
-                      <Car className="h-5 w-5 text-primary" />
-                      <span>Parkplatz</span>
-                    </div>
-                  )}
-                  {property.hasBasement && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-primary" />
-                      <span>Keller</span>
-                    </div>
-                  )}
+        {/* Ausstattung & Highlights */}
+        {features.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">✨ Ausstattung & Highlights</h2>
+            <div className="space-y-2">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">{feature}</span>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
+          </section>
+        )}
 
-            {/* Details */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">Objektdetails</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {property.plotArea && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Grundstücksfläche</div>
-                      <div className="font-semibold">{property.plotArea} m²</div>
-                    </div>
-                  )}
-                  {property.floor !== null && property.floor !== undefined && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Etage</div>
-                      <div className="font-semibold">{property.floor}</div>
-                    </div>
-                  )}
-                  {property.yearBuilt && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Baujahr</div>
-                      <div className="font-semibold">{property.yearBuilt}</div>
-                    </div>
-                  )}
-                  {property.availableFrom && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Verfügbar ab</div>
-                      <div className="font-semibold">
-                        {new Date(property.availableFrom).toLocaleDateString("de-DE")}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Energy */}
-            {(property.energyClass || property.energyConsumption) && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">Energieausweis</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {property.energyClass && (
-                      <div>
-                        <div className="text-sm text-muted-foreground">Energieeffizienzklasse</div>
-                        <div className="font-semibold text-2xl">{property.energyClass}</div>
-                      </div>
-                    )}
-                    {property.energyConsumption && (
-                      <div>
-                        <div className="text-sm text-muted-foreground">Energieverbrauch</div>
-                        <div className="font-semibold">{property.energyConsumption} kWh/(m²*a)</div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Right Column - Contact */}
-          <div className="md:col-span-1">
-            <Card className="sticky top-4">
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">Interesse?</h2>
-                <p className="text-muted-foreground mb-6">
-                  Kontaktieren Sie uns für weitere Informationen oder eine Besichtigung.
-                </p>
-
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="w-full mb-4" size="lg">
-                      <Mail className="mr-2 h-5 w-5" />
-                      Anfrage senden
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Anfrage senden</DialogTitle>
-                      <DialogDescription>
-                        Senden Sie uns eine Nachricht zu dieser Immobilie. Wir melden uns
-                        schnellstmöglich bei Ihnen.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName">Vorname *</Label>
-                          <Input
-                            id="firstName"
-                            value={leadData.firstName}
-                            onChange={(e) =>
-                              setLeadData({ ...leadData, firstName: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName">Nachname *</Label>
-                          <Input
-                            id="lastName"
-                            value={leadData.lastName}
-                            onChange={(e) =>
-                              setLeadData({ ...leadData, lastName: e.target.value })
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">E-Mail *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={leadData.email}
-                          onChange={(e) =>
-                            setLeadData({ ...leadData, email: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Telefon</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={leadData.phone}
-                          onChange={(e) =>
-                            setLeadData({ ...leadData, phone: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="message">Nachricht</Label>
-                        <Textarea
-                          id="message"
-                          rows={4}
-                          value={leadData.message}
-                          onChange={(e) =>
-                            setLeadData({ ...leadData, message: e.target.value })
-                          }
-                          placeholder="Ihre Nachricht an uns..."
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button onClick={handleSubmitLead} className="w-full">
-                        Anfrage absenden
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                    <span>Telefonisch erreichbar</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Besichtigung nach Vereinbarung</span>
-                  </div>
-                </div>
-
-                {/* Costs */}
-                {(property.additionalCosts || property.heatingCosts || property.deposit) && (
-                  <div className="mt-6 pt-6 border-t space-y-3">
-                    <h3 className="font-semibold mb-3">Kosten</h3>
-                    {property.additionalCosts && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Nebenkosten</span>
-                        <span className="font-semibold">
-                          {formatPrice(property.additionalCosts)}
-                        </span>
-                      </div>
-                    )}
-                    {property.heatingCosts && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Heizkosten</span>
-                        <span className="font-semibold">
-                          {formatPrice(property.heatingCosts)}
-                        </span>
-                      </div>
-                    )}
-                    {property.deposit && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Kaution</span>
-                        <span className="font-semibold">
-                          {formatPrice(property.deposit)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+        {/* Objektdaten Section */}
+        <section ref={objektdatenRef} className="mb-12 scroll-mt-20">
+          <h2 className="text-2xl font-bold mb-6">Objektdaten</h2>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <tbody className="divide-y">
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-600 font-medium">Kategorie</td>
+                  <td className="px-4 py-3">
+                    {getMarketingTypeLabel(property.marketingType)} – {getPropertyTypeLabel(property.propertyType)}
+                  </td>
+                </tr>
+                {property.price !== null && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Preis</td>
+                    <td className="px-4 py-3 font-semibold">{formatPrice(property.price)}</td>
+                  </tr>
                 )}
-              </CardContent>
-            </Card>
+                {property.rooms && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Zimmer</td>
+                    <td className="px-4 py-3">{property.rooms}</td>
+                  </tr>
+                )}
+                {property.livingArea && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Wohnfläche ca.</td>
+                    <td className="px-4 py-3">{property.livingArea} m²</td>
+                  </tr>
+                )}
+                {property.plotArea && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Grundstücksfläche ca.</td>
+                    <td className="px-4 py-3">{property.plotArea} m²</td>
+                  </tr>
+                )}
+                {property.bedrooms && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Anzahl Schlafzimmer</td>
+                    <td className="px-4 py-3">{property.bedrooms}</td>
+                  </tr>
+                )}
+                {property.bathrooms && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Anzahl Badezimmer</td>
+                    <td className="px-4 py-3">{property.bathrooms}</td>
+                  </tr>
+                )}
+                {property.condition && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Objektzustand</td>
+                    <td className="px-4 py-3">{getConditionLabel(property.condition)}</td>
+                  </tr>
+                )}
+                {property.yearBuilt && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Baujahr ca.</td>
+                    <td className="px-4 py-3">{property.yearBuilt}</td>
+                  </tr>
+                )}
+                {property.availableFrom && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Verfügbar ab</td>
+                    <td className="px-4 py-3">
+                      {new Date(property.availableFrom).toLocaleDateString("de-DE", {
+                        year: "numeric",
+                        month: "long",
+                      })}
+                    </td>
+                  </tr>
+                )}
+                {property.hasBalcony && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Balkon / Terrasse</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+                {property.hasGarden && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Garten / -mitbenutzung</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+                {property.hasBasement && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Keller</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+                {property.hasGuestToilet && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Gäste-WC</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+                {property.hasBuiltInKitchen && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Einbauküche</td>
+                    <td className="px-4 py-3">Ja</td>
+                  </tr>
+                )}
+                {property.hasParking && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Stellplatztyp</td>
+                    <td className="px-4 py-3">Garage</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
+        </section>
+
+        {/* Bilder Section */}
+        {property.images && property.images.length > 0 && (
+          <section ref={bilderRef} className="mb-12 scroll-mt-20">
+            <h2 className="text-2xl font-bold mb-6">Bilder</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {property.images.map((image: string, index: number) => (
+                <div key={index} className="aspect-video overflow-hidden rounded-lg border">
+                  <img
+                    src={image}
+                    alt={`${property.title} - Bild ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Lage Section */}
+        <section ref={lageRef} className="mb-12 scroll-mt-20">
+          <h2 className="text-2xl font-bold mb-6">Lage</h2>
+          <div className="prose max-w-none mb-6">
+            <p className="text-gray-700">
+              Entdecken Sie die ideale Lage dieser Immobilie in{" "}
+              {[property.city, property.zipCode].filter(Boolean).join(" ")}.
+            </p>
+          </div>
+          {property.latitude && property.longitude && (
+            <div className="w-full h-[400px] bg-gray-100 rounded-lg border overflow-hidden">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                style={{ border: 0 }}
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(property.longitude) - 0.01},${Number(property.latitude) - 0.01},${Number(property.longitude) + 0.01},${Number(property.latitude) + 0.01}&layer=mapnik&marker=${property.latitude},${property.longitude}`}
+                allowFullScreen
+              ></iframe>
+            </div>
+          )}
+        </section>
+
+        {/* Kontakt Section */}
+        <section ref={kontaktRef} className="scroll-mt-20">
+          <h2 className="text-2xl font-bold mb-6">Kontakt</h2>
+          <div className="max-w-2xl">
+            <div className="bg-gray-50 border rounded-lg p-6 mb-6">
+              <p className="text-gray-700 mb-2">📞 Kontaktieren Sie uns direkt!</p>
+              <p className="text-gray-700">
+                📲 Gerne auch per WhatsApp:{" "}
+                <a href="tel:073319460350" className="text-primary hover:underline font-medium">
+                  07331 9460350
+                </a>
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmitLead} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">Vorname *</Label>
+                  <Input
+                    id="firstName"
+                    value={leadData.firstName}
+                    onChange={(e) =>
+                      setLeadData({ ...leadData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Nachname *</Label>
+                  <Input
+                    id="lastName"
+                    value={leadData.lastName}
+                    onChange={(e) =>
+                      setLeadData({ ...leadData, lastName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="email">E-Mail *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={leadData.email}
+                  onChange={(e) =>
+                    setLeadData({ ...leadData, email: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Telefon</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={leadData.phone}
+                  onChange={(e) =>
+                    setLeadData({ ...leadData, phone: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="message">Nachricht</Label>
+                <Textarea
+                  id="message"
+                  rows={4}
+                  value={leadData.message}
+                  onChange={(e) =>
+                    setLeadData({ ...leadData, message: e.target.value })
+                  }
+                  placeholder="Ihre Nachricht an uns..."
+                />
+              </div>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full"
+                disabled={createLeadMutation.isPending}
+              >
+                {createLeadMutation.isPending ? "Wird gesendet..." : "Anfrage senden"}
+              </Button>
+            </form>
+          </div>
+        </section>
       </div>
+
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          nav, button {
+            display: none !important;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -126,7 +126,13 @@ export const appRouter = router({
           (property as any).availableFrom = dateValue.toISOString().split('T')[0];
         }
         
-        return property;
+        // Fetch images for this property
+        const images = await db.getPropertyImages(input.id);
+        
+        return {
+          ...property,
+          images: images.map(img => img.imageUrl),
+        };
       }),
 
     getBySlug: publicProcedure
