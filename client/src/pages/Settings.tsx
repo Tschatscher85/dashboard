@@ -24,6 +24,7 @@ export default function Settings() {
     is24ConsumerSecret: false,
     is24AccessToken: false,
     is24AccessTokenSecret: false,
+    googleClientSecret: false,
   });
 
   // User form state
@@ -43,6 +44,8 @@ export default function Settings() {
     brevoPropertyManagementListId: "",
     brevoAutoSync: "false",
     brevoDefaultInquiryType: "property_inquiry",
+    googleClientId: "",
+    googleClientSecret: "",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -114,6 +117,8 @@ export default function Settings() {
         brevoPropertyManagementListId: currentApiKeys.brevoPropertyManagementListId || "",
         brevoAutoSync: currentApiKeys.brevoAutoSync || "false",
         brevoDefaultInquiryType: currentApiKeys.brevoDefaultInquiryType || "property_inquiry",
+        googleClientId: currentApiKeys.googleClientId || "",
+        googleClientSecret: currentApiKeys.googleClientSecret || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -468,6 +473,67 @@ export default function Settings() {
                       </p>
                     </div>
                   )}
+                </div>
+
+                {/* Google Calendar OAuth */}
+                <div className="grid gap-4 p-4 border rounded-lg bg-purple-50/50">
+                  <div>
+                    <h4 className="font-semibold text-purple-900 mb-2">Google Calendar Integration</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Termine automatisch mit Google Calendar synchronisieren
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="googleClientId">Google OAuth Client ID</Label>
+                    <Input
+                      id="googleClientId"
+                      type="text"
+                      value={apiKeys.googleClientId || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, googleClientId: e.target.value })}
+                      placeholder="123456789-abcdefg.apps.googleusercontent.com"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Aus Google Cloud Console → APIs & Services → Credentials
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="googleClientSecret">Google OAuth Client Secret</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="googleClientSecret"
+                        type={showApiKeys.googleClientSecret ? "text" : "password"}
+                        value={apiKeys.googleClientSecret || ''}
+                        onChange={(e) => setApiKeys({ ...apiKeys, googleClientSecret: e.target.value })}
+                        placeholder="GOCSPX-***"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => toggleShowApiKey("googleClientSecret")}
+                      >
+                        {showApiKeys.googleClientSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Aus Google Cloud Console → APIs & Services → Credentials
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="googleRedirectUri">Redirect URI (Read-Only)</Label>
+                    <Input
+                      id="googleRedirectUri"
+                      type="text"
+                      value={`${window.location.origin}/api/oauth/google/callback`}
+                      readOnly
+                      className="bg-gray-100"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Diese URI in Google Cloud Console unter "Authorized redirect URIs" eintragen
+                    </p>
+                  </div>
                 </div>
 
                 {/* Property-Sync API Key */}

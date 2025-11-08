@@ -777,3 +777,12 @@
 - [ ] Add "Zu Google Calendar hinzufügen" button
 - [ ] Show Google Calendar events in appointments list
 - [ ] Two-way sync (create/update/delete)
+
+## Google Calendar API Integration
+
+- [x] Datenbank-Schema mit Google Calendar-Feldern erweitern (googleCalendarEventId, googleCalendarLink, lastSyncedToGoogleCalendar)
+- [x] Settings-Seite mit Google OAuth Credentials erweitern (Client ID, Client Secret, Redirect URI)
+- [x] Backend Google Calendar-Integration Modul erstellen (OAuth 2.0 Flow, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, listUpcomingEvents)
+- [ ] Sync-Buttons zu Termine-Seite hinzufügen (einzeln + Mehrfachauswahl)
+- [ ] Google Calendar Status-Anzeige in Termin-Details
+- [ ] OAuth Callback-Route implementieren (/api/oauth/google/callback)

@@ -76,6 +76,8 @@ export const appRouter = router({
           brevoPropertyManagementListId: process.env.BREVO_PROPERTY_MANAGEMENT_LIST_ID || "21",
           brevoAutoSync: process.env.BREVO_AUTO_SYNC || "false",
           brevoDefaultInquiryType: process.env.BREVO_DEFAULT_INQUIRY_TYPE || "property_inquiry",
+          googleClientId: process.env.GOOGLE_CLIENT_ID || "",
+          googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
           // ImmoScout24 API
@@ -116,6 +118,8 @@ export const appRouter = router({
         brevoPropertyManagementListId: z.string().optional(),
         brevoAutoSync: z.string().optional(),
         brevoDefaultInquiryType: z.string().optional(),
+        googleClientId: z.string().optional(),
+        googleClientSecret: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
         // ImmoScout24 API
@@ -171,6 +175,10 @@ export const appRouter = router({
         if (input.brevoPropertyManagementListId) process.env.BREVO_PROPERTY_MANAGEMENT_LIST_ID = input.brevoPropertyManagementListId;
         if (input.brevoAutoSync !== undefined) process.env.BREVO_AUTO_SYNC = input.brevoAutoSync;
         if (input.brevoDefaultInquiryType) process.env.BREVO_DEFAULT_INQUIRY_TYPE = input.brevoDefaultInquiryType;
+        
+        // Save Google Calendar credentials
+        if (input.googleClientId) process.env.GOOGLE_CLIENT_ID = input.googleClientId;
+        if (input.googleClientSecret) process.env.GOOGLE_CLIENT_SECRET = input.googleClientSecret;
         
         // Save ImmoScout24 credentials
         if (input.is24ConsumerKey) process.env.IS24_CONSUMER_KEY = input.is24ConsumerKey;
