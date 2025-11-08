@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -51,6 +51,9 @@ export default function PropertyMedia() {
   
   // Image category selection
   const [selectedImageCategory, setSelectedImageCategory] = useState("hausansicht");
+  
+  // View size control
+  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("medium");
   
   // Links state
   const [virtualTourLink, setVirtualTourLink] = useState("");
@@ -385,6 +388,36 @@ export default function PropertyMedia() {
                             </label>
                           )}
                         </div>
+                        <div className="flex items-center gap-2">
+                          {totalImages > 0 && (
+                            <div className="flex items-center gap-1 border rounded-md p-1">
+                              <Button
+                                variant={viewSize === "small" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setViewSize("small")}
+                                className="h-8 px-2"
+                              >
+                                <LayoutGrid className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant={viewSize === "medium" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setViewSize("medium")}
+                                className="h-8 px-2"
+                              >
+                                <Grid3x3 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant={viewSize === "large" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setViewSize("large")}
+                                className="h-8 px-2"
+                              >
+                                <Grid2x2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                         {selectedImages.size > 0 && (
                           <Button
                             variant="destructive"
@@ -412,7 +445,11 @@ export default function PropertyMedia() {
                           </Button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <div className={`grid gap-4 ${
+                        viewSize === "small" ? "grid-cols-3 md:grid-cols-4 lg:grid-cols-6" :
+                        viewSize === "medium" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
+                        "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                      }`}>
                         {/* Database images (S3) */}
                         {dbImages.map((image: any, index: number) => {
                           const imageId = `db-${image.id || index}`;
@@ -437,14 +474,22 @@ export default function PropertyMedia() {
                             <img
                               src={image.imageUrl}
                               alt={image.title || `Bild ${index + 1}`}
-                              className="w-full h-48 object-cover rounded-lg pointer-events-none"
+                              className={`w-full object-cover rounded-lg pointer-events-none ${
+                                viewSize === "small" ? "h-32" :
+                                viewSize === "medium" ? "h-48" :
+                                "h-64"
+                              }`}
                               onError={(e) => {
                                 // Fallback if image fails to load
                                 (e.target as HTMLImageElement).style.display = 'none';
                                 (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                               }}
                             />
-                            <div className="hidden w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+                            <div className={`hidden w-full bg-muted rounded-lg flex items-center justify-center ${
+                              viewSize === "small" ? "h-32" :
+                              viewSize === "medium" ? "h-48" :
+                              "h-64"
+                            }`}>
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
                             <div className="absolute top-2 right-2 flex gap-2 z-30">
@@ -501,7 +546,11 @@ export default function PropertyMedia() {
                               }}
                               className="absolute top-2 left-2 w-5 h-5 z-10 cursor-pointer"
                             />
-                            <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
+                            <div className={`w-full bg-muted rounded-lg flex items-center justify-center ${
+                              viewSize === "small" ? "h-32" :
+                              viewSize === "medium" ? "h-48" :
+                              "h-64"
+                            }`}>
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
                             <div className="absolute top-2 right-2 flex gap-2 z-30">
