@@ -296,27 +296,83 @@ export function PropertyRightColumn({
             </div>
 
             {/* ImmoScout24 */}
-            <div className="p-3 border rounded-lg bg-green-50">
+            <div className={`p-3 border rounded-lg ${
+              formData.is24PublishStatus === "published" ? "bg-green-50 border-green-200" :
+              formData.is24PublishStatus === "error" ? "bg-red-50 border-red-200" :
+              formData.is24PublishStatus === "unpublished" ? "bg-yellow-50 border-yellow-200" :
+              "bg-gray-50 border-gray-200"
+            }`}>
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <span className="font-medium">ImmoScout24</span>
-                  <span className="text-sm text-muted-foreground ml-2">Veröffentlicht</span>
+                  <span className={`text-sm ml-2 font-medium ${
+                    formData.is24PublishStatus === "published" ? "text-green-700" :
+                    formData.is24PublishStatus === "error" ? "text-red-700" :
+                    formData.is24PublishStatus === "unpublished" ? "text-yellow-700" :
+                    "text-gray-600"
+                  }`}>
+                    {formData.is24PublishStatus === "published" ? "✓ Veröffentlicht" :
+                     formData.is24PublishStatus === "error" ? "⚠️ Fehler" :
+                     formData.is24PublishStatus === "unpublished" ? "Deaktiviert" :
+                     "Entwurf"}
+                  </span>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2">
-                <Button size="sm" variant="outline" className="text-green-600" disabled={!isEditing}>
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Aktualisieren
-                </Button>
-                <Button size="sm" variant="outline" className="text-yellow-600" disabled={!isEditing}>
-                  <Ban className="h-4 w-4 mr-1" />
-                  Deaktivieren
-                </Button>
-                <Button size="sm" variant="outline" className="text-red-600" disabled={!isEditing}>
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Löschen
-                </Button>
+              
+              {formData.is24ExternalId && (
+                <p className="text-xs text-muted-foreground mb-2">
+                  ID: {formData.is24ExternalId}
+                </p>
+              )}
+              
+              {formData.is24LastSyncedAt && (
+                <p className="text-xs text-muted-foreground mb-2">
+                  Zuletzt synchronisiert: {new Date(formData.is24LastSyncedAt).toLocaleString("de-DE")}
+                </p>
+              )}
+              
+              <div className="flex flex-col gap-2 mt-2">
+                {!formData.is24ExternalId ? (
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700 text-white w-full"
+                    disabled
+                    onClick={() => toast.info("⚠️ Veröffentlichung wird in der finalen API-Integration aktiviert")}
+                  >
+                    <Globe className="h-4 w-4 mr-1" />
+                    Veröffentlichen
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-blue-600 border-blue-300 hover:bg-blue-50 w-full"
+                      disabled
+                      onClick={() => toast.info("⚠️ Aktualisierung wird in der finalen API-Integration aktiviert")}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      Aktualisieren
+                    </Button>
+                    {formData.is24PublishStatus === "published" && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-yellow-600 border-yellow-300 hover:bg-yellow-50 w-full"
+                        disabled
+                        onClick={() => toast.info("⚠️ Deaktivierung wird in der finalen API-Integration aktiviert")}
+                      >
+                        <Ban className="h-4 w-4 mr-1" />
+                        Deaktivieren
+                      </Button>
+                    )}
+                  </>
+                )}
               </div>
+              
+              <p className="text-xs text-muted-foreground mt-2 italic">
+                ⚠️ Buttons werden mit API-Integration aktiviert
+              </p>
             </div>
           </div>
 

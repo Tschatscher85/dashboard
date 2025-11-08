@@ -173,9 +173,32 @@ export const properties = mysqlTable("properties", {
   // Portale (Portal Export)
   portalExports: text("portalExports"), // JSON array of portal exports
   is24ContactPerson: varchar("is24ContactPerson", { length: 255 }), // IS24-Ansprechpartner
-  is24Id: varchar("is24Id", { length: 100 }), // IS24-ID
+  is24Id: varchar("is24Id", { length: 100 }), // IS24-ID (deprecated, use is24ExternalId)
   is24GroupNumber: varchar("is24GroupNumber", { length: 100 }), // IS24-Gruppen-Nr
   translations: text("translations"), // Übersetzungen (JSON)
+  
+  // ImmoScout24 API Integration Fields
+  is24ExternalId: varchar("is24ExternalId", { length: 100 }), // IS24 real estate object ID
+  is24PublishStatus: mysqlEnum("is24PublishStatus", [
+    "draft",      // Not yet published
+    "published",  // Active on IS24
+    "unpublished",// Removed from IS24
+    "error"       // Sync error occurred
+  ]).default("draft"),
+  is24LastSyncedAt: timestamp("is24LastSyncedAt"), // Last successful sync to IS24
+  is24ContactId: varchar("is24ContactId", { length: 100 }), // Contact person ID in IS24 system
+  is24ErrorMessage: text("is24ErrorMessage"), // Last error message if sync failed
+  
+  // Additional IS24-required fields
+  interiorQuality: mysqlEnum("interiorQuality", [
+    "simple",        // Einfach
+    "normal",        // Normal
+    "sophisticated", // Gehoben
+    "luxury"         // Luxus
+  ]),
+  numberOfBathrooms: int("numberOfBathrooms"), // Anzahl Badezimmer (for IS24)
+  numberOfBedrooms: int("numberOfBedrooms"),   // Anzahl Schlafzimmer (for IS24)
+  freeFrom: timestamp("freeFrom"), // Verfügbar ab (for IS24)
   
   // Auftrag (Assignment)
   assignmentType: varchar("assignmentType", { length: 100 }), // Auftragsart (Alleinauftrag, etc.)

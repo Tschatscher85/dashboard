@@ -640,3 +640,80 @@
 - [ ] Add "Dokumente" tab to PropertyDetail
 - [ ] Show document count in PropertyDetail
 - [ ] Test document upload, download, and deletion
+
+## ImmoScout24 API Integration Preparation
+
+- [ ] Extend database schema with IS24-specific fields
+  - [ ] Add is24ExternalId (varchar) - IS24 object ID
+  - [ ] Add is24PublishStatus (enum: draft, published, unpublished, error)
+  - [ ] Add is24LastSyncedAt (timestamp) - Last sync time
+  - [ ] Add is24ContactId (varchar) - Contact person ID in IS24
+  - [ ] Add is24GroupNumber (varchar) - Group number for organization
+  - [ ] Add is24ErrorMessage (text) - Last error message if sync failed
+
+- [ ] Add IS24 credentials to Settings page
+  - [ ] Create IS24 configuration section in settings UI
+  - [ ] Add form fields: Consumer Key, Consumer Secret, Access Token, Access Token Secret
+  - [ ] Add Sandbox/Production toggle
+  - [ ] Add "Mit IS24 verbinden" OAuth button
+  - [ ] Add connection test button
+  - [ ] Create backend endpoint for saving IS24 credentials
+  - [ ] Create backend endpoint for testing IS24 connection
+
+- [ ] Create backend endpoint placeholders for IS24 operations
+  - [ ] Create /server/is24.ts with OAuth utilities
+  - [ ] Add is24.publishProperty endpoint (placeholder)
+  - [ ] Add is24.updateProperty endpoint (placeholder)
+  - [ ] Add is24.unpublishProperty endpoint (placeholder)
+  - [ ] Add is24.syncImages endpoint (placeholder)
+  - [ ] Add is24.getStatus endpoint (placeholder)
+  - [ ] Add OAuth callback handler /api/oauth/is24/callback
+
+- [ ] Update PropertyDetailForm with IS24-specific fields
+  - [ ] Add IS24 section in form
+  - [ ] Add interiorQuality field (dropdown)
+  - [ ] Add numberOfBathrooms field
+  - [ ] Add numberOfBedrooms field
+  - [ ] Add plotArea field (for houses/plots)
+  - [ ] Add yearConstructed field
+  - [ ] Add freeFrom date field
+  - [ ] Mark IS24-required fields with indicator
+
+- [ ] Create IS24 data mapping utilities
+  - [ ] Create /shared/is24-mapping.ts
+  - [ ] Add propertyType mapping function
+  - [ ] Add marketingType mapping function
+  - [ ] Add status mapping function
+  - [ ] Add validation function for IS24 requirements
+  - [ ] Add function to convert property to IS24 format
+
+- [ ] Update PropertyRightColumn with functional IS24 controls
+  - [ ] Display IS24 publish status badge (color-coded)
+  - [ ] Show IS24 external ID if published
+  - [ ] Show last sync timestamp
+  - [ ] Make "Veröffentlichen" button functional (call backend)
+  - [ ] Make "Aktualisieren" button functional (call backend)
+  - [ ] Make "Deaktivieren" button functional (call backend)
+  - [ ] Add loading states for sync operations
+  - [ ] Add error display for sync failures
+  - [ ] Disable buttons based on current status
+
+- [ ] Test IS24 integration preparation
+  - [ ] Verify all database fields are created
+  - [ ] Test settings page credential storage
+  - [ ] Test UI field additions in property form
+  - [ ] Verify data mapping functions work correctly
+  - [ ] Test button states and loading indicators
+
+## ImmoScout24 API Integration Preparation
+
+- [x] Datenbank-Schema mit IS24-Feldern erweitern (interiorQuality, numberOfBedrooms, numberOfBathrooms, freeFrom, is24ExternalId, is24PublishStatus, is24ContactId, is24ContactPerson, is24GroupNumber, is24LastSyncedAt, is24ErrorMessage)
+- [x] Settings-Seite mit IS24-Credentials erweitern (Consumer Key, Consumer Secret, Access Token, Access Token Secret, Sandbox Mode)
+- [x] Backend-Endpunkte (Platzhalter) erstellen (testConnection, publishProperty, updateProperty, unpublishProperty, syncProperty, getStatus, uploadImages)
+- [x] PropertyDetailForm mit IS24-Feldern erweitern (ImmoScout24 Integration Card mit allen Status- und Konfigurationsfeldern)
+- [x] IS24 Daten-Mapping-Utilities erstellen (shared/is24-mapping.ts mit Validierung und Konvertierung)
+- [x] PropertyRightColumn mit IS24-Buttons aktualisieren (dynamischer Status, Veröffentlichen/Aktualisieren/Deaktivieren Buttons)
+- [ ] OAuth 1.0a Authentifizierung implementieren (wird mit finaler API-Integration umgesetzt)
+- [ ] Echte API-Calls zu ImmoScout24 implementieren (Platzhalter-Funktionen in server/is24.ts ersetzen)
+- [ ] Bild-Upload zu ImmoScout24 implementieren
+- [ ] Synchronisations-Logik für Objektdaten implementieren

@@ -19,6 +19,10 @@ export default function Settings() {
     brevo: false,
     propertySync: false,
     openai: false,
+    is24ConsumerKey: false,
+    is24ConsumerSecret: false,
+    is24AccessToken: false,
+    is24AccessTokenSecret: false,
   });
 
   // User form state
@@ -34,6 +38,12 @@ export default function Settings() {
     brevo: "",
     propertySync: "",
     openai: "",
+    // ImmoScout24 API
+    is24ConsumerKey: "",
+    is24ConsumerSecret: "",
+    is24AccessToken: "",
+    is24AccessTokenSecret: "",
+    is24UseSandbox: false,
     // WebDAV configuration (primary)
     webdavUrl: "",
     webdavPort: "2002",
@@ -93,6 +103,12 @@ export default function Settings() {
         brevo: currentApiKeys.brevo || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
+        // ImmoScout24 API
+        is24ConsumerKey: currentApiKeys.is24ConsumerKey || "",
+        is24ConsumerSecret: currentApiKeys.is24ConsumerSecret || "",
+        is24AccessToken: currentApiKeys.is24AccessToken || "",
+        is24AccessTokenSecret: currentApiKeys.is24AccessTokenSecret || "",
+        is24UseSandbox: currentApiKeys.is24UseSandbox || false,
         // WebDAV (primary)
         webdavUrl: currentApiKeys.webdavUrl || currentApiKeys.nasUrl || "",
         webdavPort: currentApiKeys.webdavPort || "2002",
@@ -379,6 +395,126 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">
                     Für KI-gestützte Immobilienbeschreibungen
                   </p>
+                </div>
+
+                {/* ImmoScout24 API Configuration */}
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-4">ImmoScout24 API</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    OAuth 1.0a Credentials für ImmoScout24 Integration. Erhalten Sie diese in Ihrem <a href="https://api.immobilienscout24.de" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">IS24 Developer Account</a>.
+                  </p>
+                  
+                  <div className="space-y-4 mb-6 p-4 border rounded-lg bg-green-50/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-green-900">OAuth Credentials</h4>
+                      <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">OAuth 1.0a</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="is24ConsumerKey">Consumer Key</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="is24ConsumerKey"
+                            type={showApiKeys.is24ConsumerKey ? "text" : "password"}
+                            value={apiKeys.is24ConsumerKey}
+                            onChange={(e) => setApiKeys({ ...apiKeys, is24ConsumerKey: e.target.value })}
+                            placeholder="IS24 Consumer Key"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => toggleShowApiKey("is24ConsumerKey")}
+                          >
+                            {showApiKeys.is24ConsumerKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="is24ConsumerSecret">Consumer Secret</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="is24ConsumerSecret"
+                            type={showApiKeys.is24ConsumerSecret ? "text" : "password"}
+                            value={apiKeys.is24ConsumerSecret}
+                            onChange={(e) => setApiKeys({ ...apiKeys, is24ConsumerSecret: e.target.value })}
+                            placeholder="IS24 Consumer Secret"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => toggleShowApiKey("is24ConsumerSecret")}
+                          >
+                            {showApiKeys.is24ConsumerSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="is24AccessToken">Access Token</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="is24AccessToken"
+                            type={showApiKeys.is24AccessToken ? "text" : "password"}
+                            value={apiKeys.is24AccessToken}
+                            onChange={(e) => setApiKeys({ ...apiKeys, is24AccessToken: e.target.value })}
+                            placeholder="IS24 Access Token"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => toggleShowApiKey("is24AccessToken")}
+                          >
+                            {showApiKeys.is24AccessToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="is24AccessTokenSecret">Access Token Secret</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="is24AccessTokenSecret"
+                            type={showApiKeys.is24AccessTokenSecret ? "text" : "password"}
+                            value={apiKeys.is24AccessTokenSecret}
+                            onChange={(e) => setApiKeys({ ...apiKeys, is24AccessTokenSecret: e.target.value })}
+                            placeholder="IS24 Access Token Secret"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => toggleShowApiKey("is24AccessTokenSecret")}
+                          >
+                            {showApiKeys.is24AccessTokenSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="is24UseSandbox"
+                        checked={apiKeys.is24UseSandbox}
+                        onChange={(e) => setApiKeys({ ...apiKeys, is24UseSandbox: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="is24UseSandbox" className="cursor-pointer">Sandbox-Modus verwenden (für Tests)</Label>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" size="sm" disabled>
+                        Mit IS24 verbinden (OAuth)
+                      </Button>
+                      <Button variant="outline" size="sm" disabled>
+                        Verbindung testen
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      ⚠️ OAuth-Flow und Verbindungstest werden in der finalen Integration aktiviert.
+                    </p>
+                  </div>
                 </div>
 
                 {/* NAS Configuration */}

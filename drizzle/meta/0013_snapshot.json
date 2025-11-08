@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e8abeb52-e4c0-487b-a19e-6dbaf927b6c1",
-  "prevId": "97f63ed3-3379-4879-b5a1-5a8f16feef7c",
+  "id": "b4c8d7b4-2dd0-4129-a1a7-c062623ce171",
+  "prevId": "31eecbea-7415-4635-a28a-9ebc219d5c11",
   "tables": {
     "activities": {
       "name": "activities",
@@ -1988,6 +1988,70 @@
           "notNull": false,
           "autoincrement": false
         },
+        "is24ExternalId": {
+          "name": "is24ExternalId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24PublishStatus": {
+          "name": "is24PublishStatus",
+          "type": "enum('draft','published','unpublished','error')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'draft'"
+        },
+        "is24LastSyncedAt": {
+          "name": "is24LastSyncedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24ContactId": {
+          "name": "is24ContactId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24ErrorMessage": {
+          "name": "is24ErrorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "interiorQuality": {
+          "name": "interiorQuality",
+          "type": "enum('simple','normal','sophisticated','luxury')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numberOfBathrooms": {
+          "name": "numberOfBathrooms",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numberOfBedrooms": {
+          "name": "numberOfBedrooms",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "freeFrom": {
+          "name": "freeFrom",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "assignmentType": {
           "name": "assignmentType",
           "type": "varchar(100)",
@@ -2303,7 +2367,7 @@
         },
         "imageType": {
           "name": "imageType",
-          "type": "enum('hausansicht','kueche','bad','wohnzimmer','schlafzimmer','garten','balkon','keller','dachboden','garage','grundrisse','sonstiges')",
+          "type": "enum('hausansicht','kueche','bad','wohnzimmer','schlafzimmer','garten','balkon','keller','dachboden','garage','grundrisse','sonstiges','main','exterior','interior','floorplan','map','other')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,

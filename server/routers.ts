@@ -72,6 +72,12 @@ export const appRouter = router({
           brevo: process.env.BREVO_API_KEY || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
+          // ImmoScout24 API
+          is24ConsumerKey: process.env.IS24_CONSUMER_KEY || "",
+          is24ConsumerSecret: process.env.IS24_CONSUMER_SECRET || "",
+          is24AccessToken: process.env.IS24_ACCESS_TOKEN || "",
+          is24AccessTokenSecret: process.env.IS24_ACCESS_TOKEN_SECRET || "",
+          is24UseSandbox: process.env.IS24_USE_SANDBOX === "true" || false,
           // WebDAV (primary)
           webdavUrl: process.env.WEBDAV_URL || process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
           webdavPort: process.env.WEBDAV_PORT || "2002",
@@ -100,6 +106,12 @@ export const appRouter = router({
         brevo: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
+        // ImmoScout24 API
+        is24ConsumerKey: z.string().optional(),
+        is24ConsumerSecret: z.string().optional(),
+        is24AccessToken: z.string().optional(),
+        is24AccessTokenSecret: z.string().optional(),
+        is24UseSandbox: z.boolean().optional(),
         // WebDAV
         webdavUrl: z.string().optional(),
         webdavPort: z.string().optional(),
@@ -129,11 +141,23 @@ export const appRouter = router({
           brevo: input.brevo ? "***" : "(empty)",
           propertySync: input.propertySync ? "***" : "(empty)",
           openai: input.openai ? "***" : "(empty)",
+          is24ConsumerKey: input.is24ConsumerKey ? "***" : "(empty)",
+          is24ConsumerSecret: input.is24ConsumerSecret ? "***" : "(empty)",
+          is24AccessToken: input.is24AccessToken ? "***" : "(empty)",
+          is24AccessTokenSecret: input.is24AccessTokenSecret ? "***" : "(empty)",
+          is24UseSandbox: input.is24UseSandbox || false,
           nasUrl: input.nasUrl ? "***" : "(empty)",
           nasUsername: input.nasUsername ? "***" : "(empty)",
           nasPassword: input.nasPassword ? "***" : "(empty)",
           nasBasePath: input.nasBasePath || "(default)",
         });
+        
+        // Save ImmoScout24 credentials
+        if (input.is24ConsumerKey) process.env.IS24_CONSUMER_KEY = input.is24ConsumerKey;
+        if (input.is24ConsumerSecret) process.env.IS24_CONSUMER_SECRET = input.is24ConsumerSecret;
+        if (input.is24AccessToken) process.env.IS24_ACCESS_TOKEN = input.is24AccessToken;
+        if (input.is24AccessTokenSecret) process.env.IS24_ACCESS_TOKEN_SECRET = input.is24AccessTokenSecret;
+        if (input.is24UseSandbox !== undefined) process.env.IS24_USE_SANDBOX = input.is24UseSandbox.toString();
         
         // Save WebDAV credentials
         if (input.webdavUrl) process.env.WEBDAV_URL = input.webdavUrl;
@@ -2052,6 +2076,66 @@ Die Beschreibung soll:
       .mutation(async ({ input }) => {
         await db.deleteUtilityBill(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ============ IMMOSCOUT24 ============
+  is24: router({
+    testConnection: protectedProcedure
+      .mutation(async () => {
+        const { testIS24Connection } = await import("./is24");
+        return await testIS24Connection();
+      }),
+
+    publishProperty: protectedProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { publishPropertyToIS24 } = await import("./is24");
+        return await publishPropertyToIS24(input.propertyId);
+      }),
+
+    updateProperty: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        is24ExternalId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updatePropertyOnIS24 } = await import("./is24");
+        return await updatePropertyOnIS24(input.propertyId, input.is24ExternalId);
+      }),
+
+    unpublishProperty: protectedProcedure
+      .input(z.object({ is24ExternalId: z.string() }))
+      .mutation(async ({ input }) => {
+        const { unpublishPropertyFromIS24 } = await import("./is24");
+        return await unpublishPropertyFromIS24(input.is24ExternalId);
+      }),
+
+    syncProperty: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        is24ExternalId: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { syncPropertyToIS24 } = await import("./is24");
+        return await syncPropertyToIS24(input.propertyId, input.is24ExternalId);
+      }),
+
+    getStatus: protectedProcedure
+      .input(z.object({ is24ExternalId: z.string() }))
+      .query(async ({ input }) => {
+        const { getIS24PropertyStatus } = await import("./is24");
+        return await getIS24PropertyStatus(input.is24ExternalId);
+      }),
+
+    uploadImages: protectedProcedure
+      .input(z.object({
+        is24ExternalId: z.string(),
+        imageUrls: z.array(z.string()),
+      }))
+      .mutation(async ({ input }) => {
+        const { uploadImagesToIS24 } = await import("./is24");
+        return await uploadImagesToIS24(input.is24ExternalId, input.imageUrls);
       }),
   }),
 

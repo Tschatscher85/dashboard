@@ -921,6 +921,165 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             </Select>
           </div>
 
+          {/* IS24-specific fields */}
+          <div className="space-y-2">
+            <Label>Innenausstattung (für IS24) <span className="text-xs text-muted-foreground">*Pflichtfeld für ImmoScout24</span></Label>
+            <Select
+              value={formData.interiorQuality || ""}
+              onValueChange={(value: any) => handleChange("interiorQuality", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Innenausstattung wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="luxury">Luxus</SelectItem>
+                <SelectItem value="sophisticated">Gehoben</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="simple">Einfach</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Anzahl Schlafzimmer (für IS24)</Label>
+            <Input
+              type="number"
+              value={formData.numberOfBedrooms || ""}
+              onChange={(e) => handleChange("numberOfBedrooms", parseInt(e.target.value || "0"))}
+              disabled={!isEditing}
+              placeholder="Anzahl Schlafzimmer"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Anzahl Badezimmer (für IS24)</Label>
+            <Input
+              type="number"
+              value={formData.numberOfBathrooms || ""}
+              onChange={(e) => handleChange("numberOfBathrooms", parseInt(e.target.value || "0"))}
+              disabled={!isEditing}
+              placeholder="Anzahl Badezimmer"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Frei ab (für IS24)</Label>
+            <Input
+              type="date"
+              value={
+                formData.freeFrom instanceof Date
+                  ? formData.freeFrom.toISOString().split('T')[0]
+                  : (typeof formData.freeFrom === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.freeFrom as string)
+                      ? (formData.freeFrom as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                handleChange("freeFrom", e.target.value || null);
+              }}
+              disabled={!isEditing}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ImmoScout24 Integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            ImmoScout24 Integration
+            <span className="text-xs font-normal text-muted-foreground">(Vorbereitet für API-Integration)</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>IS24 Externe ID</Label>
+            <Input
+              value={formData.is24ExternalId || ""}
+              disabled
+              placeholder="Wird nach Veröffentlichung vergeben"
+              className="bg-muted"
+            />
+            <p className="text-xs text-muted-foreground">
+              Automatisch von ImmoScout24 nach Veröffentlichung
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>IS24 Status</Label>
+            <Input
+              value={
+                formData.is24PublishStatus === "published" ? "Veröffentlicht" :
+                formData.is24PublishStatus === "unpublished" ? "Deaktiviert" :
+                formData.is24PublishStatus === "error" ? "Fehler" :
+                "Entwurf"
+              }
+              disabled
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>IS24 Kontakt-ID</Label>
+            <Input
+              value={formData.is24ContactId || ""}
+              onChange={(e) => handleChange("is24ContactId", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Kontakt-ID in IS24"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>IS24 Ansprechpartner</Label>
+            <Input
+              value={formData.is24ContactPerson || ""}
+              onChange={(e) => handleChange("is24ContactPerson", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Name des Ansprechpartners"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>IS24 Gruppen-Nr.</Label>
+            <Input
+              value={formData.is24GroupNumber || ""}
+              onChange={(e) => handleChange("is24GroupNumber", e.target.value)}
+              disabled={!isEditing}
+              placeholder="Gruppennummer"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Letzte Synchronisierung</Label>
+            <Input
+              value={
+                formData.is24LastSyncedAt
+                  ? new Date(formData.is24LastSyncedAt).toLocaleString("de-DE")
+                  : "Noch nie synchronisiert"
+              }
+              disabled
+              className="bg-muted"
+            />
+          </div>
+
+          {formData.is24ErrorMessage && (
+            <div className="col-span-2 space-y-2">
+              <Label className="text-red-600">Letzter Fehler</Label>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+                {formData.is24ErrorMessage}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Ausstattung */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ausstattung</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+
           <div className="space-y-2">
             <Label>Anzahl Parkplätze</Label>
             <Input

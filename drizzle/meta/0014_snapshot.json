@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "31eecbea-7415-4635-a28a-9ebc219d5c11",
-  "prevId": "e8abeb52-e4c0-487b-a19e-6dbaf927b6c1",
+  "id": "bb577bc3-c1d9-46e8-b1d9-f609dce3ca1f",
+  "prevId": "31eecbea-7415-4635-a28a-9ebc219d5c11",
   "tables": {
     "activities": {
       "name": "activities",
@@ -1984,6 +1984,70 @@
         "translations": {
           "name": "translations",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24ExternalId": {
+          "name": "is24ExternalId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24PublishStatus": {
+          "name": "is24PublishStatus",
+          "type": "enum('draft','published','unpublished','error')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'draft'"
+        },
+        "is24LastSyncedAt": {
+          "name": "is24LastSyncedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24ContactId": {
+          "name": "is24ContactId",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is24ErrorMessage": {
+          "name": "is24ErrorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "interiorQuality": {
+          "name": "interiorQuality",
+          "type": "enum('simple','normal','sophisticated','luxury')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numberOfBathrooms": {
+          "name": "numberOfBathrooms",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numberOfBedrooms": {
+          "name": "numberOfBedrooms",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "freeFrom": {
+          "name": "freeFrom",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
