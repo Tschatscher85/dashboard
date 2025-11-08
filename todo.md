@@ -717,3 +717,14 @@
 - [ ] Echte API-Calls zu ImmoScout24 implementieren (Platzhalter-Funktionen in server/is24.ts ersetzen)
 - [ ] Bild-Upload zu ImmoScout24 implementieren
 - [ ] Synchronisations-Logik für Objektdaten implementieren
+
+## Brevo CRM Contact Sync Integration
+
+- [x] Datenbank-Schema mit Brevo-Feldern erweitern (brevoContactId, brevoSyncStatus, brevoLastSyncedAt, brevoListId, brevoErrorMessage, inquiryType)
+- [x] Settings-Seite mit Brevo List IDs erweitern (Immobilienanfragen List ID, Eigentümeranfragen List ID)
+- [x] Backend Brevo-Integration Modul erstellen (server/brevo.ts mit syncContact, updateContact, getContactStatus)
+- [x] Brevo Daten-Mapping erstellen (shared/brevo-mapping.ts mit Validierung und Konvertierung)
+- [x] Sync-Buttons zu Kontakte-Liste hinzufügen (einzeln + Mehrfachauswahl)
+- [x] Inquiry-Type Auswahl implementieren (Immobilienanfrage vs Eigentümeranfrage)
+- [ ] ContactDetail mit Brevo-Status und Sync-Feldern erweitern
+- [ ] Später: Objekt-Referenz und Anschrift zu Brevo-Sync hinzufügen

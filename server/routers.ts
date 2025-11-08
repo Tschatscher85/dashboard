@@ -70,6 +70,8 @@ export const appRouter = router({
         return {
           superchat: process.env.SUPERCHAT_API_KEY || "",
           brevo: process.env.BREVO_API_KEY || "",
+          brevoPropertyInquiryListId: process.env.BREVO_PROPERTY_INQUIRY_LIST_ID || "18",
+          brevoOwnerInquiryListId: process.env.BREVO_OWNER_INQUIRY_LIST_ID || "19",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
           // ImmoScout24 API
@@ -104,6 +106,8 @@ export const appRouter = router({
       .input(z.object({
         superchat: z.string().optional(),
         brevo: z.string().optional(),
+        brevoPropertyInquiryListId: z.string().optional(),
+        brevoOwnerInquiryListId: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
         // ImmoScout24 API
@@ -1708,6 +1712,65 @@ Die Beschreibung soll:
 
         return { success: true };
       }),
+
+    // ===== NEW: Contact Sync with Inquiry Types =====
+    testConnection: protectedProcedure
+      .mutation(async () => {
+        const { testBrevoConnection } = await import("./brevo");
+        const apiKey = process.env.BREVO_API_KEY || "";
+        
+        if (!apiKey) {
+          return { success: false, error: "Brevo API Key nicht konfiguriert" };
+        }
+        
+        return await testBrevoConnection(apiKey);
+      }),
+
+    syncContactWithInquiry: protectedProcedure
+      .input(z.object({
+        contactId: z.number(),
+        inquiryType: z.enum(["property_inquiry", "owner_inquiry"]),
+        propertyId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { syncContactToBrevo } = await import("./brevo");
+        
+        const apiKey = process.env.BREVO_API_KEY || "";
+        if (!apiKey) {
+          return { success: false, error: "Brevo API Key nicht konfiguriert" };
+        }
+        
+        const listId = input.inquiryType === "property_inquiry"
+          ? parseInt(process.env.BREVO_PROPERTY_INQUIRY_LIST_ID || "18")
+          : parseInt(process.env.BREVO_OWNER_INQUIRY_LIST_ID || "19");
+        
+        const contact = await db.getContactById(input.contactId);
+        if (!contact) {
+          return { success: false, error: "Kontakt nicht gefunden" };
+        }
+        
+        const brevoContact = {
+          email: contact.email || `contact${contact.id}@placeholder.local`,
+          attributes: {
+            VORNAME: contact.firstName || "",
+            NACHNAME: contact.lastName || "",
+            WHATSAPP: contact.mobile || "",
+            SMS: contact.phone || "",
+            EXT_ID: contact.id.toString(),
+            LEAD: [input.inquiryType === "property_inquiry" ? "Immobilienanfrage" : "Eigentümeranfrage"],
+          },
+          listIds: [listId],
+          updateEnabled: true,
+        };
+        
+        const result = await syncContactToBrevo(brevoContact, {
+          apiKey,
+          listId,
+          inquiryType: input.inquiryType,
+        });
+        
+        return result;
+      }),
   }),
 
   // ============ LEADS ============
@@ -2145,6 +2208,9 @@ Die Beschreibung soll:
       return await db.getDashboardStats();
     }),
   }),
+
+  // Note: Brevo router already exists above (line 1546)
+  // New endpoints for Immobilienanfragen/Eigentümeranfragen will be added there
 });
 
 export type AppRouter = typeof appRouter;

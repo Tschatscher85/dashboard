@@ -36,6 +36,8 @@ export default function Settings() {
   const [apiKeys, setApiKeys] = useState({
     superchat: "",
     brevo: "",
+    brevoPropertyInquiryListId: "",
+    brevoOwnerInquiryListId: "",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -101,6 +103,8 @@ export default function Settings() {
       setApiKeys({
         superchat: currentApiKeys.superchat || "",
         brevo: currentApiKeys.brevo || "",
+        brevoPropertyInquiryListId: currentApiKeys.brevoPropertyInquiryListId || "",
+        brevoOwnerInquiryListId: currentApiKeys.brevoOwnerInquiryListId || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -347,6 +351,44 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">
                     Für E-Mail-Marketing und Transaktions-E-Mails
                   </p>
+                </div>
+
+                {/* Brevo List IDs */}
+                <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-blue-50/50">
+                  <div className="col-span-2">
+                    <h4 className="font-semibold text-blue-900 mb-2">Brevo Listen-Konfiguration</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Kontakte werden automatisch den entsprechenden Listen zugeordnet
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brevoPropertyInquiryListId">Immobilienanfragen List ID</Label>
+                    <Input
+                      id="brevoPropertyInquiryListId"
+                      type="number"
+                      value={apiKeys.brevoPropertyInquiryListId || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, brevoPropertyInquiryListId: e.target.value })}
+                      placeholder="18"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Standard: #18 (Immobilienanfragen)
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brevoOwnerInquiryListId">Eigentümeranfragen List ID</Label>
+                    <Input
+                      id="brevoOwnerInquiryListId"
+                      type="number"
+                      value={apiKeys.brevoOwnerInquiryListId || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, brevoOwnerInquiryListId: e.target.value })}
+                      placeholder="19"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Standard: #19 (Eigentümeranfragen)
+                    </p>
+                  </div>
                 </div>
 
                 {/* Property-Sync API Key */}

@@ -84,14 +84,36 @@ export default function Contacts() {
     },
   });
 
-  const syncBrevoMutation = trpc.brevo.syncContact.useMutation({
+  // Brevo sync with inquiry type
+  const [brevoSyncDialogOpen, setBrevoSyncDialogOpen] = useState(false);
+  const [selectedContactForSync, setSelectedContactForSync] = useState<number | null>(null);
+  const [inquiryType, setInquiryType] = useState<"property_inquiry" | "owner_inquiry">("property_inquiry");
+
+  const syncBrevoMutation = trpc.brevo.syncContactWithInquiry.useMutation({
     onSuccess: () => {
       toast.success("Kontakt erfolgreich zu Brevo synchronisiert");
+      setBrevoSyncDialogOpen(false);
+      setSelectedContactForSync(null);
+      refetch();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error("Brevo-Sync fehlgeschlagen: " + error.message);
     },
   });
+
+  const handleBrevoSyncClick = (contactId: number) => {
+    setSelectedContactForSync(contactId);
+    setBrevoSyncDialogOpen(true);
+  };
+
+  const handleBrevoSync = () => {
+    if (selectedContactForSync) {
+      syncBrevoMutation.mutate({
+        contactId: selectedContactForSync,
+        inquiryType,
+      });
+    }
+  };
 
   const handleCreate = () => {
     createMutation.mutate({
@@ -369,7 +391,7 @@ export default function Contacts() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => syncBrevoMutation.mutate({ contactId: contact.id })}
+                        onClick={() => handleBrevoSyncClick(contact.id)}
                         title="Zu Brevo synchronisieren"
                       >
                         <Upload className="h-4 w-4" />
@@ -400,6 +422,59 @@ export default function Contacts() {
           </Table>
         </div>
       )}
+
+      {/* Brevo Sync Dialog */}
+      <Dialog open={brevoSyncDialogOpen} onOpenChange={setBrevoSyncDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Zu Brevo synchronisieren</DialogTitle>
+            <DialogDescription>
+              Wählen Sie den Anfragetyp für die Synchronisierung zu Brevo CRM.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="inquiryType">Anfragetyp</Label>
+              <Select
+                value={inquiryType}
+                onValueChange={(value) => setInquiryType(value as "property_inquiry" | "owner_inquiry")}
+              >
+                <SelectTrigger id="inquiryType">
+                  <SelectValue placeholder="Anfragetyp wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="property_inquiry">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Immobilienanfrage</span>
+                      <span className="text-xs text-muted-foreground">Lead interessiert sich für Immobilie</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="owner_inquiry">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Eigentümeranfrage</span>
+                      <span className="text-xs text-muted-foreground">Eigentümer möchte verkaufen</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                {inquiryType === "property_inquiry" 
+                  ? "Kontakt wird zu Liste #18 (Immobilienanfragen) hinzugefügt"
+                  : "Kontakt wird zu Liste #19 (Eigentümeranfragen) hinzugefügt"
+                }
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBrevoSyncDialogOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button onClick={handleBrevoSync} disabled={syncBrevoMutation.isPending}>
+              {syncBrevoMutation.isPending ? "Synchronisiere..." : "Synchronisieren"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

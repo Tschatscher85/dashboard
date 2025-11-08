@@ -294,7 +294,12 @@ export const contacts = mysqlTable("contacts", {
   
   // Brevo sync
   brevoContactId: varchar("brevoContactId", { length: 100 }),
-  lastSyncedToBrevo: timestamp("lastSyncedToBrevo"),
+  brevoSyncStatus: mysqlEnum("brevoSyncStatus", ["not_synced", "synced", "error"]).default("not_synced"),
+  brevoLastSyncedAt: timestamp("brevoLastSyncedAt"),
+  brevoListId: int("brevoListId"),
+  brevoErrorMessage: text("brevoErrorMessage"),
+  inquiryType: mysqlEnum("inquiryType", ["property_inquiry", "owner_inquiry"]),
+  lastSyncedToBrevo: timestamp("lastSyncedToBrevo"), // deprecated, keep for backwards compatibility
   
   // Metadata
   createdBy: int("createdBy").notNull(),
