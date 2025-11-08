@@ -529,3 +529,60 @@
 - [x] Updated deletePropertyImage to delete from S3 before database
 - [x] Fix page refresh after deletion (NAS files not updating)
 - [x] Add proper refetch for both database images and NAS files after delete
+
+
+## CRITICAL: Cloud Image Deletion Still Not Working
+
+- [x] Debug why deleteImageMutation is not working - onClick handler was not triggered
+- [x] Deleted Cloud images manually from database using SQL
+- [x] Verified images are gone from UI
+- [ ] Fix delete button onClick handler for future use
+- [ ] Test delete button after fixing
+
+
+## Fix Delete Button onClick Handler
+
+- [x] Simplify button structure to ensure onClick works
+- [x] Remove any overlapping elements that block clicks - added pointer-events-none to images
+- [x] Increased z-index to z-30 (higher than checkbox z-10)
+- [x] Added pointer-events-auto to buttons
+- [ ] Test button is actually clickable (waiting for test image upload)
+- [ ] Verify alert appears when clicking delete
+- [ ] Verify deletion works end-to-end
+
+
+## Fix Missing Image ID in Frontend
+
+- [x] Check why property.images doesn't include id field - getById only returned imageUrl strings
+- [x] Verify getPropertyImages returns id - it does
+- [x] Fixed getById to return full image objects with all fields
+- [x] Fixed PropertyDetail, PropertyLanding to handle image objects
+- [ ] Test delete functionality with proper IDs
+
+
+## Add Separate WebDAV and FTP Test Buttons
+
+- [ ] Create separate tRPC endpoints: testWebDAV and testFTP
+- [ ] Add "WebDAV testen" button to PropertyMedia
+- [ ] Add "FTP testen" button to PropertyMedia
+- [ ] Show separate test results for each connection
+- [ ] Test both connections independently
+
+
+## Fix WebDAV URL Trailing Slash Issue
+
+- [x] Remove trailing slash from WebDAV URL in env or code
+- [x] Added automatic trailing slash removal in getWebDAVClient
+
+## Show NAS Images in PropertyDetail Medien Tab
+
+- [x] PropertyDetail now loads both Cloud images (from database) and NAS images
+- [x] Load NAS images via listNASFiles query
+- [x] Combine Cloud + NAS images in allImages array
+- [x] Show proper image count in Medien tab
+
+## Fix Back Button Navigation to Medien Tab
+
+- [x] Back button now goes to /dashboard/properties/:id#media
+- [x] PropertyDetail detects #media hash and opens Medien tab
+- [x] Added activeTab state with hash detection

@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { PropertyDetailForm, type Property, type PropertyDetailFormHandle } from "@/components/PropertyDetailForm";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function PropertyDetail() {
   const [, params] = useRoute("/dashboard/properties/:id");
@@ -32,6 +32,15 @@ export default function PropertyDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const formRef = useRef<PropertyDetailFormHandle>(null);
+  const [activeTab, setActiveTab] = useState("details");
+
+  // Check URL hash on mount and when hash changes
+  useEffect(() => {
+    const hash = window.location.hash.slice(1); // Remove #
+    if (hash === 'media') {
+      setActiveTab('media');
+    }
+  }, []);
 
   // Initialize editedTitle when entering edit mode
   const handleEditClick = () => {
@@ -48,6 +57,23 @@ export default function PropertyDetail() {
   const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
     id: propertyId,
   });
+
+  // Load NAS images (Bilder category)
+  const { data: nasImages } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: 'Bilder' },
+    { enabled: !!propertyId }
+  );
+
+  // Combine Cloud images (from database) and NAS images
+  const allImages = [
+    ...(property?.images || []),
+    ...(nasImages || []).map(nasFile => ({
+      imageUrl: `/nas/${nasFile.filename}`, // Use filename as URL path
+      title: nasFile.basename,
+      nasPath: nasFile.filename,
+      isNAS: true,
+    }))
+  ];
 
   const updateMutation = trpc.properties.update.useMutation({
     onSuccess: () => {
@@ -318,7 +344,7 @@ export default function PropertyDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="details" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="activities">Aktivitäten</TabsTrigger>
@@ -377,16 +403,16 @@ export default function PropertyDetail() {
         <TabsContent value="media">
           <Card>
             <CardHeader>
-              <CardTitle>Medien ({property.images?.length || 0})</CardTitle>
+              <CardTitle>Medien ({allImages.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              {property.images && property.images.length > 0 ? (
+              {allImages.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {property.images.map((imageUrl: string, index: number) => (
+                  {allImages.map((image: any, index: number) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg border group">
                       <img
-                        src={imageUrl}
-                        alt={`Bild ${index + 1}`}
+                        src={image.imageUrl || image}
+                        alt={image.title || `Bild ${index + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3EBild%3C/text%3E%3C/svg%3E';

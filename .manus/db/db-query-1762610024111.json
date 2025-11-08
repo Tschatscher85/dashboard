@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, propertyId, title, imageUrl, nasPath FROM propertyImages WHERE propertyId = 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT id, propertyId, title, imageUrl, nasPath FROM propertyImages WHERE propertyId = 2;",
+  "rows": [
+    {
+      "id": "120001",
+      "propertyId": "2",
+      "title": "TEST1.jpg",
+      "imageUrl": "https://forge.manus.ai/v1/storage/download/adMp5MhjUDWojVT6XFjhgM/properties/2/Bilder/1762608670018-TEST1.jpg",
+      "nasPath": "properties/2/Bilder/1762608670018-TEST1.jpg"
+    },
+    {
+      "id": "120002",
+      "propertyId": "2",
+      "title": "TEST2.jpg",
+      "imageUrl": "/nas/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/TEST2.jpg",
+      "nasPath": "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/TEST2.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpropertyId\ttitle\timageUrl\tnasPath\n120001\t2\tTEST1.jpg\thttps://forge.manus.ai/v1/storage/download/adMp5MhjUDWojVT6XFjhgM/properties/2/Bilder/1762608670018-TEST1.jpg\tproperties/2/Bilder/1762608670018-TEST1.jpg\n120002\t2\tTEST2.jpg\t/nas/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/TEST2.jpg\t/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/TEST2.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 414
+}

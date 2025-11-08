@@ -1,0 +1,32 @@
+{
+  "query": "SELECT * FROM propertyImages WHERE propertyId = 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT * FROM propertyImages WHERE propertyId = 2;",
+  "rows": [
+    {
+      "id": "150001",
+      "propertyId": "2",
+      "imageUrl": "https://forge.manus.ai/v1/storage/download/Vj94uCEqLx4k8UP7TfPqr7/properties/2/Bilder/1762610922280-TEST1.jpg",
+      "nasPath": "properties/2/Bilder/1762610922280-TEST1.jpg",
+      "title": "TEST1.jpg",
+      "description": "NULL",
+      "imageType": "other",
+      "sortOrder": "0",
+      "createdAt": "2025-11-08 14:08:42"
+    },
+    {
+      "id": "150002",
+      "propertyId": "2",
+      "imageUrl": "https://forge.manus.ai/v1/storage/download/Lxir945V8ubCvc8s4F8qi5/properties/2/Bilder/1762610939062-TEST2.jpg",
+      "nasPath": "properties/2/Bilder/1762610939062-TEST2.jpg",
+      "title": "TEST2.jpg",
+      "description": "NULL",
+      "imageType": "other",
+      "sortOrder": "0",
+      "createdAt": "2025-11-08 14:08:59"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpropertyId\timageUrl\tnasPath\ttitle\tdescription\timageType\tsortOrder\tcreatedAt\n150001\t2\thttps://forge.manus.ai/v1/storage/download/Vj94uCEqLx4k8UP7TfPqr7/properties/2/Bilder/1762610922280-TEST1.jpg\tproperties/2/Bilder/1762610922280-TEST1.jpg\tTEST1.jpg\tNULL\tother\t0\t2025-11-08 14:08:42\n150002\t2\thttps://forge.manus.ai/v1/storage/download/Lxir945V8ubCvc8s4F8qi5/properties/2/Bilder/1762610939062-TEST2.jpg\tproperties/2/Bilder/1762610939062-TEST2.jpg\tTEST2.jpg\tNULL\tother\t0\t2025-11-08 14:08:59\n",
+  "stderr": "",
+  "execution_time_ms": 398
+}

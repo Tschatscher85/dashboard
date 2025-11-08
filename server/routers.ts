@@ -202,7 +202,7 @@ export const appRouter = router({
         
         return {
           ...property,
-          images: images.map(img => img.imageUrl),
+          images: images, // Return full image objects with all fields including id
         };
       }),
 
@@ -668,6 +668,157 @@ export const appRouter = router({
               error: error.message,
             });
           }
+        }
+        
+        // Summary
+        const successCount = results.tests.filter((t: any) => t.success).length;
+        const totalCount = results.tests.length;
+        results.summary = {
+          passed: successCount,
+          failed: totalCount - successCount,
+          total: totalCount,
+          allPassed: successCount === totalCount,
+        };
+        
+        return results;
+      }),
+
+    testWebDAVConnection: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { testConnection: testWebDAV, getPropertyFolderName } = await import("./lib/webdav-client");
+        
+        const results: any = {
+          timestamp: new Date().toISOString(),
+          tests: [],
+        };
+        
+        // Test WebDAV connection
+        try {
+          const startTime = Date.now();
+          const connected = await testWebDAV();
+          const duration = Date.now() - startTime;
+          results.tests.push({
+            name: 'WebDAV Connection',
+            success: connected,
+            duration: `${duration}ms`,
+            message: connected ? 'WebDAV is reachable' : 'WebDAV is not reachable',
+          });
+        } catch (error: any) {
+          results.tests.push({
+            name: 'WebDAV Connection',
+            success: false,
+            error: error.message,
+          });
+        }
+        
+        // Get property folder name
+        try {
+          const property = await db.getPropertyById(input.propertyId);
+          if (!property) {
+            throw new Error('Property not found');
+          }
+          const folderName = getPropertyFolderName(property);
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: true,
+            folderName,
+          });
+          results.propertyFolderName = folderName;
+        } catch (error: any) {
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: false,
+            error: error.message,
+          });
+        }
+        
+        // Summary
+        const successCount = results.tests.filter((t: any) => t.success).length;
+        const totalCount = results.tests.length;
+        results.summary = {
+          passed: successCount,
+          failed: totalCount - successCount,
+          total: totalCount,
+          allPassed: successCount === totalCount,
+        };
+        
+        return results;
+      }),
+
+    testFTPConnection: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { testConnection: testFTP, getPropertyFolderName } = await import("./lib/ftp-client");
+        
+        const results: any = {
+          timestamp: new Date().toISOString(),
+          tests: [],
+        };
+        
+        // Get FTP config from env
+        const ftpHost = process.env.FTP_HOST || "";
+        const ftpPort = parseInt(process.env.FTP_PORT || "21");
+        const ftpUsername = process.env.FTP_USERNAME || process.env.NAS_USERNAME || "";
+        const ftpPassword = process.env.FTP_PASSWORD || process.env.NAS_PASSWORD || "";
+        
+        if (!ftpHost || !ftpUsername || !ftpPassword) {
+          results.tests.push({
+            name: 'FTP Configuration',
+            success: false,
+            error: 'FTP credentials not configured',
+          });
+          results.summary = { passed: 0, failed: 1, total: 1, allPassed: false };
+          return results;
+        }
+        
+        // Test FTP connection
+        try {
+          const startTime = Date.now();
+          const connected = await testFTP({
+            host: ftpHost,
+            port: ftpPort,
+            user: ftpUsername,
+            password: ftpPassword,
+          });
+          const duration = Date.now() - startTime;
+          results.tests.push({
+            name: 'FTP Connection',
+            success: connected,
+            duration: `${duration}ms`,
+            message: connected ? 'FTP is reachable' : 'FTP is not reachable',
+          });
+        } catch (error: any) {
+          results.tests.push({
+            name: 'FTP Connection',
+            success: false,
+            error: error.message,
+          });
+        }
+        
+        // Get property folder name
+        try {
+          const property = await db.getPropertyById(input.propertyId);
+          if (!property) {
+            throw new Error('Property not found');
+          }
+          const folderName = getPropertyFolderName(property);
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: true,
+            folderName,
+          });
+          results.propertyFolderName = folderName;
+        } catch (error: any) {
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: false,
+            error: error.message,
+          });
         }
         
         // Summary

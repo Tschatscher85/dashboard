@@ -25,7 +25,11 @@ interface WebDAVConfig {
  */
 export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
   if (!webdavClient) {
-    const url = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
+    let url = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
+    // Remove trailing slash if present (causes connection issues)
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
     const username = config?.username || process.env.NAS_USERNAME || 'tschatscher';
     const password = config?.password || process.env.NAS_PASSWORD || '';
 

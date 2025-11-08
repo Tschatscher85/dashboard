@@ -203,7 +203,7 @@ export default function PropertyMedia() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => window.location.href = `/dashboard/properties/${propertyId}`}
+              onClick={() => window.location.href = `/dashboard/properties/${propertyId}#media`}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -391,7 +391,7 @@ export default function PropertyMedia() {
                             <img
                               src={image.imageUrl}
                               alt={image.title || `Bild ${index + 1}`}
-                              className="w-full h-48 object-cover rounded-lg"
+                              className="w-full h-48 object-cover rounded-lg pointer-events-none"
                               onError={(e) => {
                                 // Fallback if image fails to load
                                 (e.target as HTMLImageElement).style.display = 'none';
@@ -401,17 +401,23 @@ export default function PropertyMedia() {
                             <div className="hidden w-full h-48 bg-muted rounded-lg flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
-                            <div className="absolute top-2 right-2 flex gap-2">
+                            <div className="absolute top-2 right-2 flex gap-2 z-30">
                               <Button
                                 variant="destructive"
                                 size="icon"
-                                className="h-8 w-8 shadow-lg"
-                                onClick={() => {
+                                className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  alert(`Delete button clicked! Image ID: ${image.id}, Title: ${image.title}`);
+                                  
+                                  if (!image.id) {
+                                    alert('Fehler: Bild hat keine ID!');
+                                    return;
+                                  }
+                                  
                                   if (confirm(`Bild "${image.title || 'Unbenannt'}" wirklich löschen?`)) {
-                                    // Delete from database
-                                    if (image.id) {
-                                      deleteImageMutation.mutate({ id: image.id });
-                                    }
+                                    deleteImageMutation.mutate({ id: image.id });
                                   }
                                 }}
                               >
@@ -452,11 +458,11 @@ export default function PropertyMedia() {
                             <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
-                            <div className="absolute top-2 right-2 flex gap-2">
+                            <div className="absolute top-2 right-2 flex gap-2 z-30">
                               <Button
                                 variant="destructive"
                                 size="icon"
-                                className="h-8 w-8 shadow-lg"
+                                className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
                                 onClick={() => {
                                   if (confirm(`Bild "${file.basename}" wirklich löschen?`)) {
                                     deleteMutation.mutate({ nasPath: file.filename });

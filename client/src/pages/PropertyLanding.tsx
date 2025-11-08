@@ -209,7 +209,7 @@ export default function PropertyLanding() {
         {property.images && property.images.length > 0 ? (
           <div className="w-full h-[500px] overflow-hidden">
             <img
-              src={property.images[0]}
+              src={(typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || ''}
               alt={property.title}
               className="w-full h-full object-cover"
             />
@@ -467,10 +467,10 @@ export default function PropertyLanding() {
           <section ref={bilderRef} className="mb-12 scroll-mt-20">
             <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Bildergalerie</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {property.images.map((image: string, index: number) => (
+              {property.images.map((image: any, index: number) => (
                 <div key={index} className="aspect-video overflow-hidden rounded-lg border">
                   <img
-                    src={image}
+                    src={image.imageUrl || image}
                     alt={`${property.title} - Bild ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
