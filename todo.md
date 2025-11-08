@@ -786,3 +786,21 @@
 - [ ] Sync-Buttons zu Termine-Seite hinzufügen (einzeln + Mehrfachauswahl)
 - [ ] Google Calendar Status-Anzeige in Termin-Details
 - [ ] OAuth Callback-Route implementieren (/api/oauth/google/callback)
+
+## Exposé und Landing Page Verbesserungen
+
+### Exposé PDF
+- [x] Besseres Layout mit professionellem Design (zweispaltig, Boxen)
+- [x] Mehr Objektinformationen (Ausstattung, Lage, etc.)
+- [x] Bildergalerie mit Kategorien (Hinweis auf digitale Version)
+- [x] Energieausweis-Informationen prominent mit Farbcodierung
+- [x] Kontaktinformationen am Ende
+
+### Landing Page
+- [ ] Modernes, responsives Design
+- [ ] Hero-Section mit Hauptbild
+- [ ] Bildergalerie mit Kategorien
+- [ ] Interaktive Karte mit Umgebung
+- [ ] Kontaktformular mit Anfrage-Funktion
+- [ ] Social Sharing Buttons
+- [ ] SEO-Optimierung (Meta-Tags, Schema.org)

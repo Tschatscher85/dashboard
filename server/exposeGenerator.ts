@@ -1,9 +1,14 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFPage } from 'pdf-lib';
 import type { Property } from '../drizzle/schema';
+
+interface ExposeImage {
+  url: string;
+  type: string;
+}
 
 interface ExposeOptions {
   property: Property;
-  images?: { url: string; type: string }[];
+  images?: ExposeImage[];
   template?: 'modern' | 'classic' | 'luxury';
 }
 
@@ -16,30 +21,39 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  // Page 1: Cover with main image and title
-  const coverPage = pdfDoc.addPage([595, 842]); // A4 size
-  const { width, height } = coverPage.getSize();
+  const A4_WIDTH = 595;
+  const A4_HEIGHT = 842;
+  const MARGIN = 50;
+  const CONTENT_WIDTH = A4_WIDTH - (MARGIN * 2);
+
+  // ==================== PAGE 1: COVER ====================
+  const coverPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+  let yPos = A4_HEIGHT - MARGIN;
 
   // Header with property type and marketing type
   const propertyTypeLabel = getPropertyTypeLabel(property.propertyType);
   const marketingTypeLabel = getMarketingTypeLabel(property.marketingType);
   
   coverPage.drawText(`${propertyTypeLabel} zu ${marketingTypeLabel}`, {
-    x: 50,
-    y: height - 50,
+    x: MARGIN,
+    y: yPos,
     size: 12,
     font: helveticaFont,
     color: rgb(0.4, 0.4, 0.4),
   });
+  yPos -= 50;
 
   // Title
-  coverPage.drawText(property.title, {
-    x: 50,
-    y: height - 100,
-    size: 24,
-    font: helveticaBoldFont,
-    color: rgb(0, 0, 0),
-    maxWidth: width - 100,
+  const titleLines = wrapText(property.title, 50);
+  titleLines.forEach((line) => {
+    coverPage.drawText(line, {
+      x: MARGIN,
+      y: yPos,
+      size: 24,
+      font: helveticaBoldFont,
+      color: rgb(0, 0, 0),
+    });
+    yPos -= 30;
   });
 
   // Location
@@ -49,125 +63,156 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
   
   if (location) {
     coverPage.drawText(location, {
-      x: 50,
-      y: height - 130,
+      x: MARGIN,
+      y: yPos,
       size: 14,
       font: helveticaFont,
       color: rgb(0.3, 0.3, 0.3),
     });
+    yPos -= 50;
   }
 
   // Price box
   if (property.price) {
     const priceText = formatPrice(property.price);
-    const priceBoxY = height - 200;
     
     // Draw price box background
     coverPage.drawRectangle({
-      x: 50,
-      y: priceBoxY - 10,
-      width: 200,
-      height: 50,
-      color: rgb(0.95, 0.95, 0.95),
+      x: MARGIN,
+      y: yPos - 40,
+      width: 250,
+      height: 60,
+      color: rgb(0, 0.4, 0.8),
     });
 
     coverPage.drawText(priceText, {
-      x: 60,
-      y: priceBoxY + 10,
-      size: 22,
+      x: MARGIN + 15,
+      y: yPos - 20,
+      size: 26,
       font: helveticaBoldFont,
-      color: rgb(0, 0.4, 0.8),
+      color: rgb(1, 1, 1),
     });
+    yPos -= 80;
   }
 
-  // Key facts
-  let yPosition = height - 300;
+  // Key facts in boxes
+  yPos -= 20;
   const facts = [];
 
   if (property.livingArea) {
-    facts.push(`Wohnfläche: ${property.livingArea} m²`);
+    facts.push({ label: 'Wohnfläche', value: `${property.livingArea} m²` });
   }
   if (property.rooms) {
-    facts.push(`Zimmer: ${property.rooms}`);
+    facts.push({ label: 'Zimmer', value: property.rooms.toString() });
   }
   if (property.bedrooms) {
-    facts.push(`Schlafzimmer: ${property.bedrooms}`);
+    facts.push({ label: 'Schlafzimmer', value: property.bedrooms.toString() });
   }
   if (property.bathrooms) {
-    facts.push(`Badezimmer: ${property.bathrooms}`);
+    facts.push({ label: 'Badezimmer', value: property.bathrooms.toString() });
   }
   if (property.yearBuilt) {
-    facts.push(`Baujahr: ${property.yearBuilt}`);
+    facts.push({ label: 'Baujahr', value: property.yearBuilt.toString() });
+  }
+  if (property.plotArea) {
+    facts.push({ label: 'Grundstück', value: `${property.plotArea} m²` });
   }
 
-  facts.forEach((fact) => {
-    coverPage.drawText(fact, {
-      x: 50,
-      y: yPosition,
-      size: 12,
-      font: helveticaFont,
-      color: rgb(0.2, 0.2, 0.2),
+  // Draw facts in 2 columns
+  const boxWidth = (CONTENT_WIDTH - 20) / 2;
+  const boxHeight = 60;
+  let xPos = MARGIN;
+  let factIndex = 0;
+
+  facts.forEach((fact, index) => {
+    if (index > 0 && index % 2 === 0) {
+      yPos -= boxHeight + 10;
+      xPos = MARGIN;
+    } else if (index > 0) {
+      xPos = MARGIN + boxWidth + 20;
+    }
+
+    // Draw box
+    coverPage.drawRectangle({
+      x: xPos,
+      y: yPos - boxHeight,
+      width: boxWidth,
+      height: boxHeight,
+      color: rgb(0.95, 0.95, 0.95),
+      borderColor: rgb(0.8, 0.8, 0.8),
+      borderWidth: 1,
     });
-    yPosition -= 20;
+
+    // Draw label
+    coverPage.drawText(fact.label, {
+      x: xPos + 10,
+      y: yPos - 25,
+      size: 10,
+      font: helveticaFont,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+
+    // Draw value
+    coverPage.drawText(fact.value, {
+      x: xPos + 10,
+      y: yPos - 45,
+      size: 16,
+      font: helveticaBoldFont,
+      color: rgb(0, 0, 0),
+    });
+
+    factIndex++;
   });
 
-  // Page 2: Details
-  const detailsPage = pdfDoc.addPage([595, 842]);
-  yPosition = height - 50;
+  // ==================== PAGE 2: DESCRIPTION & DETAILS ====================
+  const detailsPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+  yPos = A4_HEIGHT - MARGIN;
 
   // Description
   detailsPage.drawText('Objektbeschreibung', {
-    x: 50,
-    y: yPosition,
+    x: MARGIN,
+    y: yPos,
     size: 18,
     font: helveticaBoldFont,
     color: rgb(0, 0, 0),
   });
-  yPosition -= 30;
+  yPos -= 30;
 
   if (property.description) {
-    const descriptionLines = wrapText(property.description, 70);
+    const descriptionLines = wrapText(property.description, 80);
     descriptionLines.forEach((line) => {
-      if (yPosition < 100) {
+      if (yPos < 100) {
         // Start new page if needed
-        const newPage = pdfDoc.addPage([595, 842]);
-        yPosition = height - 50;
-        newPage.drawText(line, {
-          x: 50,
-          y: yPosition,
-          size: 11,
-          font: timesRomanFont,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-      } else {
-        detailsPage.drawText(line, {
-          x: 50,
-          y: yPosition,
-          size: 11,
-          font: timesRomanFont,
-          color: rgb(0.2, 0.2, 0.2),
-        });
+        const newPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+        yPos = A4_HEIGHT - MARGIN;
       }
-      yPosition -= 18;
+      detailsPage.drawText(line, {
+        x: MARGIN,
+        y: yPos,
+        size: 11,
+        font: timesRomanFont,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+      yPos -= 18;
     });
   }
 
-  yPosition -= 30;
+  yPos -= 30;
 
-  // Property details section
-  if (yPosition < 200) {
-    const newPage = pdfDoc.addPage([595, 842]);
-    yPosition = height - 50;
+  // Property details in 2 columns
+  if (yPos < 300) {
+    const newPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+    yPos = A4_HEIGHT - MARGIN;
   }
 
   detailsPage.drawText('Objektdetails', {
-    x: 50,
-    y: yPosition,
+    x: MARGIN,
+    y: yPos,
     size: 18,
     font: helveticaBoldFont,
     color: rgb(0, 0, 0),
   });
-  yPosition -= 30;
+  yPos -= 30;
 
   const details = [];
 
@@ -195,50 +240,76 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
   if (property.floor !== null && property.floor !== undefined) {
     details.push(['Etage:', property.floor.toString()]);
   }
+  if (property.totalFloors) {
+    details.push(['Anzahl Etagen:', property.totalFloors.toString()]);
+  }
   if (property.yearBuilt) {
     details.push(['Baujahr:', property.yearBuilt.toString()]);
   }
   if (property.condition) {
     details.push(['Zustand:', getConditionLabel(property.condition)]);
   }
+  if (property.availableFrom) {
+    const dateStr = property.availableFrom instanceof Date 
+      ? property.availableFrom.toLocaleDateString('de-DE')
+      : new Date(property.availableFrom as any).toLocaleDateString('de-DE');
+    details.push(['Verfügbar ab:', dateStr]);
+  }
 
-  details.forEach(([label, value]) => {
+  // Draw details in 2 columns
+  const columnWidth = (CONTENT_WIDTH - 30) / 2;
+  let currentColumn = 0;
+  let columnYPos = yPos;
+
+  details.forEach(([label, value], index) => {
+    const xOffset = currentColumn === 0 ? MARGIN : MARGIN + columnWidth + 30;
+
     detailsPage.drawText(label, {
-      x: 50,
-      y: yPosition,
-      size: 11,
+      x: xOffset,
+      y: columnYPos,
+      size: 10,
       font: helveticaBoldFont,
       color: rgb(0.2, 0.2, 0.2),
     });
     detailsPage.drawText(value, {
-      x: 200,
-      y: yPosition,
-      size: 11,
+      x: xOffset + 120,
+      y: columnYPos,
+      size: 10,
       font: helveticaFont,
       color: rgb(0.2, 0.2, 0.2),
     });
-    yPosition -= 20;
+
+    columnYPos -= 20;
+
+    // Switch to second column after half the details
+    if (index === Math.floor(details.length / 2) - 1) {
+      currentColumn = 1;
+      columnYPos = yPos;
+    }
   });
 
+  yPos = Math.min(columnYPos, yPos - (Math.ceil(details.length / 2) * 20));
+  yPos -= 40;
+
   // Costs section
-  yPosition -= 30;
-  if (yPosition < 200) {
-    const newPage = pdfDoc.addPage([595, 842]);
-    yPosition = height - 50;
+  if (yPos < 200) {
+    const newPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+    yPos = A4_HEIGHT - MARGIN;
   }
 
   detailsPage.drawText('Kosten', {
-    x: 50,
-    y: yPosition,
+    x: MARGIN,
+    y: yPos,
     size: 18,
     font: helveticaBoldFont,
     color: rgb(0, 0, 0),
   });
-  yPosition -= 30;
+  yPos -= 30;
 
   const costs = [];
   if (property.price) {
-    costs.push(['Kaufpreis / Miete:', formatPrice(property.price)]);
+    const label = property.marketingType === 'sale' ? 'Kaufpreis:' : 'Kaltmiete:';
+    costs.push([label, formatPrice(property.price)]);
   }
   if (property.additionalCosts) {
     costs.push(['Nebenkosten:', formatPrice(property.additionalCosts)]);
@@ -252,107 +323,254 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
 
   costs.forEach(([label, value]) => {
     detailsPage.drawText(label, {
-      x: 50,
-      y: yPosition,
+      x: MARGIN,
+      y: yPos,
       size: 11,
       font: helveticaBoldFont,
       color: rgb(0.2, 0.2, 0.2),
     });
     detailsPage.drawText(value, {
-      x: 200,
-      y: yPosition,
+      x: MARGIN + 150,
+      y: yPos,
       size: 11,
       font: helveticaFont,
       color: rgb(0.2, 0.2, 0.2),
     });
-    yPosition -= 20;
+    yPos -= 22;
   });
 
   // Features section
-  yPosition -= 30;
-  if (yPosition < 200) {
-    const newPage = pdfDoc.addPage([595, 842]);
-    yPosition = height - 50;
+  yPos -= 30;
+  if (yPos < 200) {
+    const newPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+    yPos = A4_HEIGHT - MARGIN;
   }
 
   detailsPage.drawText('Ausstattung', {
-    x: 50,
-    y: yPosition,
+    x: MARGIN,
+    y: yPos,
     size: 18,
     font: helveticaBoldFont,
     color: rgb(0, 0, 0),
   });
-  yPosition -= 30;
+  yPos -= 30;
 
   const features = [];
-  if (property.hasBalcony) features.push('Balkon');
-  if (property.hasTerrace) features.push('Terrasse');
-  if (property.hasGarden) features.push('Garten');
-  if (property.hasElevator) features.push('Aufzug');
-  if (property.hasParking) features.push('Parkplatz');
-  if (property.hasBasement) features.push('Keller');
+  if (property.hasBalcony) features.push('✓ Balkon');
+  if (property.hasTerrace) features.push('✓ Terrasse');
+  if (property.hasGarden) features.push('✓ Garten');
+  if (property.hasElevator) features.push('✓ Aufzug');
+  if (property.hasParking) features.push('✓ Parkplatz');
+  if (property.hasBasement) features.push('✓ Keller');
 
   if (features.length > 0) {
-    const featuresText = features.join(' • ');
-    detailsPage.drawText(featuresText, {
-      x: 50,
-      y: yPosition,
-      size: 11,
-      font: helveticaFont,
-      color: rgb(0.2, 0.2, 0.2),
-      maxWidth: width - 100,
+    // Draw features in 2 columns
+    features.forEach((feature, index) => {
+      const xOffset = index % 2 === 0 ? MARGIN : MARGIN + columnWidth + 30;
+      const yOffset = yPos - (Math.floor(index / 2) * 22);
+
+      detailsPage.drawText(feature, {
+        x: xOffset,
+        y: yOffset,
+        size: 11,
+        font: helveticaFont,
+        color: rgb(0, 0.6, 0),
+      });
     });
+
+    yPos -= Math.ceil(features.length / 2) * 22 + 20;
   }
 
   // Energy information
-  yPosition -= 60;
+  yPos -= 20;
   if (property.energyClass || property.energyConsumption) {
-    if (yPosition < 150) {
-      const newPage = pdfDoc.addPage([595, 842]);
-      yPosition = height - 50;
+    if (yPos < 150) {
+      const newPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+      yPos = A4_HEIGHT - MARGIN;
     }
 
     detailsPage.drawText('Energieausweis', {
-      x: 50,
-      y: yPosition,
+      x: MARGIN,
+      y: yPos,
       size: 18,
       font: helveticaBoldFont,
       color: rgb(0, 0, 0),
     });
-    yPosition -= 30;
+    yPos -= 30;
 
     if (property.energyClass) {
-      detailsPage.drawText(`Energieeffizienzklasse: ${property.energyClass}`, {
-        x: 50,
-        y: yPosition,
+      // Draw energy class badge
+      const energyColor = getEnergyClassColor(property.energyClass);
+      detailsPage.drawRectangle({
+        x: MARGIN,
+        y: yPos - 30,
+        width: 80,
+        height: 40,
+        color: energyColor,
+      });
+
+      detailsPage.drawText(property.energyClass, {
+        x: MARGIN + 25,
+        y: yPos - 15,
+        size: 20,
+        font: helveticaBoldFont,
+        color: rgb(1, 1, 1),
+      });
+
+      detailsPage.drawText('Energieeffizienzklasse', {
+        x: MARGIN + 100,
+        y: yPos - 15,
         size: 11,
         font: helveticaFont,
         color: rgb(0.2, 0.2, 0.2),
       });
-      yPosition -= 20;
+
+      yPos -= 50;
     }
 
     if (property.energyConsumption) {
       detailsPage.drawText(`Energieverbrauch: ${property.energyConsumption} kWh/(m²*a)`, {
-        x: 50,
-        y: yPosition,
+        x: MARGIN,
+        y: yPos,
         size: 11,
         font: helveticaFont,
         color: rgb(0.2, 0.2, 0.2),
       });
-      yPosition -= 20;
+      yPos -= 22;
     }
 
     if (property.heatingType) {
       detailsPage.drawText(`Heizungsart: ${property.heatingType}`, {
-        x: 50,
-        y: yPosition,
+        x: MARGIN,
+        y: yPos,
         size: 11,
         font: helveticaFont,
         color: rgb(0.2, 0.2, 0.2),
       });
     }
   }
+
+  // ==================== PAGE 3+: IMAGE GALLERY ====================
+  if (images.length > 0) {
+    // Group images by category
+    const imagesByCategory: Record<string, ExposeImage[]> = {};
+    images.forEach((img) => {
+      const category = img.type || 'other';
+      if (!imagesByCategory[category]) {
+        imagesByCategory[category] = [];
+      }
+      imagesByCategory[category].push(img);
+    });
+
+    // Prioritize certain categories
+    const categoryOrder = [
+      'exterior_view',
+      'living_room',
+      'kitchen',
+      'bathroom',
+      'bedroom',
+      'garden',
+      'balcony_terrace',
+      'floor_plan',
+      'other',
+    ];
+
+    let imagePage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+    yPos = A4_HEIGHT - MARGIN;
+
+    imagePage.drawText('Bildergalerie', {
+      x: MARGIN,
+      y: yPos,
+      size: 18,
+      font: helveticaBoldFont,
+      color: rgb(0, 0, 0),
+    });
+    yPos -= 40;
+
+    // Add note about images (placeholder since we can't embed from URLs easily)
+    imagePage.drawText('Hinweis: Bilder sind in der digitalen Version verfügbar.', {
+      x: MARGIN,
+      y: yPos,
+      size: 10,
+      font: helveticaFont,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+    yPos -= 30;
+
+    // List images by category
+    categoryOrder.forEach((category) => {
+      const categoryImages = imagesByCategory[category];
+      if (categoryImages && categoryImages.length > 0) {
+        const categoryLabel = getImageCategoryLabel(category);
+
+        if (yPos < 100) {
+          imagePage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+          yPos = A4_HEIGHT - MARGIN;
+        }
+
+        imagePage.drawText(`${categoryLabel} (${categoryImages.length})`, {
+          x: MARGIN,
+          y: yPos,
+          size: 12,
+          font: helveticaBoldFont,
+          color: rgb(0, 0, 0),
+        });
+        yPos -= 25;
+      }
+    });
+  }
+
+  // ==================== FINAL PAGE: CONTACT ====================
+  const contactPage = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT]);
+  yPos = A4_HEIGHT - MARGIN;
+
+  contactPage.drawText('Kontakt', {
+    x: MARGIN,
+    y: yPos,
+    size: 18,
+    font: helveticaBoldFont,
+    color: rgb(0, 0, 0),
+  });
+  yPos -= 40;
+
+  contactPage.drawText('Für weitere Informationen und Besichtigungstermine kontaktieren Sie uns:', {
+    x: MARGIN,
+    y: yPos,
+    size: 11,
+    font: helveticaFont,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+  yPos -= 40;
+
+  // Contact details (placeholder - should be from settings/user)
+  const contactDetails = [
+    'Immobilienmakler',
+    'Telefon: +49 (0) 123 456789',
+    'E-Mail: info@immobilien.de',
+    'Web: www.immobilien.de',
+  ];
+
+  contactDetails.forEach((detail) => {
+    contactPage.drawText(detail, {
+      x: MARGIN,
+      y: yPos,
+      size: 11,
+      font: helveticaFont,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    yPos -= 22;
+  });
+
+  yPos -= 40;
+
+  // Disclaimer
+  contactPage.drawText('Alle Angaben ohne Gewähr. Irrtümer und Zwischenverkauf vorbehalten.', {
+    x: MARGIN,
+    y: yPos,
+    size: 9,
+    font: helveticaFont,
+    color: rgb(0.5, 0.5, 0.5),
+  });
 
   // Serialize the PDF to bytes
   const pdfBytes = await pdfDoc.save();
@@ -364,6 +582,8 @@ function formatPrice(cents: number): string {
   return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(cents / 100);
 }
 
@@ -390,13 +610,55 @@ function getMarketingTypeLabel(type: string): string {
 
 function getConditionLabel(condition: string): string {
   const labels: Record<string, string> = {
-    new: 'Neubau',
-    renovated: 'Saniert',
-    good: 'Gut',
-    needs_renovation: 'Renovierungsbedürftig',
-    demolished: 'Abbruchreif',
+    erstbezug: 'Erstbezug',
+    erstbezug_nach_sanierung: 'Erstbezug nach Sanierung',
+    neuwertig: 'Neuwertig',
+    saniert: 'Saniert',
+    teilsaniert: 'Teilsaniert',
+    sanierungsbedürftig: 'Sanierungsbedürftig',
+    baufällig: 'Baufällig',
+    modernisiert: 'Modernisiert',
+    vollständig_renoviert: 'Vollständig renoviert',
+    teilweise_renoviert: 'Teilweise renoviert',
+    gepflegt: 'Gepflegt',
+    renovierungsbedürftig: 'Renovierungsbedürftig',
+    nach_vereinbarung: 'Nach Vereinbarung',
+    abbruchreif: 'Abbruchreif',
   };
   return labels[condition] || condition;
+}
+
+function getImageCategoryLabel(category: string): string {
+  const labels: Record<string, string> = {
+    exterior_view: 'Hausansicht',
+    kitchen: 'Küche',
+    bathroom: 'Bad',
+    living_room: 'Wohnzimmer',
+    bedroom: 'Schlafzimmer',
+    garden: 'Garten',
+    balcony_terrace: 'Balkon/Terrasse',
+    basement: 'Keller',
+    attic: 'Dachboden',
+    garage: 'Garage',
+    floor_plan: 'Grundrisse',
+    other: 'Sonstiges',
+  };
+  return labels[category] || category;
+}
+
+function getEnergyClassColor(energyClass: string): [number, number, number] {
+  const colors: Record<string, [number, number, number]> = {
+    'A+': [0, 0.6, 0],
+    'A': [0.2, 0.7, 0],
+    'B': [0.5, 0.8, 0],
+    'C': [0.8, 0.9, 0],
+    'D': [1, 0.9, 0],
+    'E': [1, 0.7, 0],
+    'F': [1, 0.5, 0],
+    'G': [1, 0.3, 0],
+    'H': [1, 0, 0],
+  };
+  return colors[energyClass] || [0.5, 0.5, 0.5];
 }
 
 function wrapText(text: string, maxCharsPerLine: number): string[] {
