@@ -151,7 +151,7 @@ export default function NASTest() {
                         <div>
                           <span className="font-medium">Vollständiger Pfad:</span>{" "}
                           <code className="bg-muted px-2 py-1 rounded text-sm block mt-1">
-                            /volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/{testResults.propertyFolderName}/Bilder/
+                            /Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/{testResults.propertyFolderName}/Bilder/
                           </code>
                         </div>
                       </div>

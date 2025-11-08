@@ -405,3 +405,7 @@
 - [x] Test NAS connection with corrected paths
 - [x] Verify folder creation works
 - [x] Test file upload to NAS
+
+## NAS Settings UI Fix
+
+- [x] Update Settings page to show correct base path (/Daten/... instead of /volume1/Daten/...)

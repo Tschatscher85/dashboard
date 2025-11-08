@@ -90,7 +90,7 @@ export default function Settings() {
         nasUrl: currentApiKeys.nasUrl || "",
         nasUsername: currentApiKeys.nasUsername || "",
         nasPassword: currentApiKeys.nasPassword || "",
-        nasBasePath: currentApiKeys.nasBasePath || "/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+        nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
       });
     }
   }, [currentApiKeys]);
@@ -445,7 +445,7 @@ export default function Settings() {
                         type="text"
                         value={apiKeys.nasBasePath}
                         onChange={(e) => setApiKeys({ ...apiKeys, nasBasePath: e.target.value })}
-                        placeholder="/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
+                        placeholder="/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
                       />
                       <p className="text-sm text-muted-foreground">
                         Basis-Ordner für Immobilien-Dateien auf dem NAS
