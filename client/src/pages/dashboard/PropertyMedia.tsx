@@ -21,6 +21,10 @@ export default function PropertyMedia() {
   const [nasTestResults, setNasTestResults] = useState<any>(null);
   const [isTestRunning, setIsTestRunning] = useState(false);
   
+  // Multi-select state
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
   
   // Fetch NAS files for each category
@@ -303,16 +307,86 @@ export default function PropertyMedia() {
                   
                   return (
                     <>
-                      <h3 className="text-lg font-semibold mb-4">
-                        Bildergalerie
-                        {totalImages > 0 && (
-                          <span className="ml-2 text-sm text-muted-foreground">({totalImages} Bilder)</span>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <h3 className="text-lg font-semibold">
+                            Bildergalerie
+                            {totalImages > 0 && (
+                              <span className="ml-2 text-sm text-muted-foreground">({totalImages} Bilder)</span>
+                            )}
+                          </h3>
+                          {totalImages > 0 && (
+                            <label className="flex items-center gap-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectAll}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setSelectAll(checked);
+                                  if (checked) {
+                                    const allIds = new Set<string>();
+                                    dbImages.forEach((img: any, idx: number) => allIds.add(`db-${img.id || idx}`));
+                                    nasImages?.forEach((file: any, idx: number) => allIds.add(`nas-${file.filename}`));
+                                    setSelectedImages(allIds);
+                                  } else {
+                                    setSelectedImages(new Set());
+                                  }
+                                }}
+                                className="w-4 h-4"
+                              />
+                              Alle auswählen
+                            </label>
+                          )}
+                        </div>
+                        {selectedImages.size > 0 && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              if (confirm(`${selectedImages.size} ausgewählte Bilder wirklich löschen?`)) {
+                                // Delete selected images
+                                selectedImages.forEach(id => {
+                                  if (id.startsWith('db-')) {
+                                    const dbId = parseInt(id.replace('db-', ''));
+                                    if (!isNaN(dbId)) {
+                                      deleteImageMutation.mutate({ id: dbId });
+                                    }
+                                  } else if (id.startsWith('nas-')) {
+                                    const nasPath = id.replace('nas-', '');
+                                    deleteMutation.mutate({ nasPath });
+                                  }
+                                });
+                                setSelectedImages(new Set());
+                                setSelectAll(false);
+                              }
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Ausgewählte löschen ({selectedImages.size})
+                          </Button>
                         )}
-                      </h3>
+                      </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {/* Database images (S3) */}
-                        {dbImages.map((image: any, index: number) => (
-                          <div key={`db-${image.id || index}`} className="relative group">
+                        {dbImages.map((image: any, index: number) => {
+                          const imageId = `db-${image.id || index}`;
+                          const isSelected = selectedImages.has(imageId);
+                          return (
+                          <div key={imageId} className="relative group">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                const newSelected = new Set(selectedImages);
+                                if (e.target.checked) {
+                                  newSelected.add(imageId);
+                                } else {
+                                  newSelected.delete(imageId);
+                                  setSelectAll(false);
+                                }
+                                setSelectedImages(newSelected);
+                              }}
+                              className="absolute top-2 left-2 w-5 h-5 z-10 cursor-pointer"
+                            />
                             <img
                               src={image.imageUrl}
                               alt={image.title || `Bild ${index + 1}`}
@@ -350,11 +424,30 @@ export default function PropertyMedia() {
                               Cloud
                             </p>
                           </div>
-                        ))}
+                        );
+                        })}
                         
                         {/* NAS images */}
-                        {nasImages && nasImages.map((file: any, index: number) => (
-                          <div key={`nas-${index}`} className="relative group">
+                        {nasImages && nasImages.map((file: any, index: number) => {
+                          const imageId = `nas-${file.filename}`;
+                          const isSelected = selectedImages.has(imageId);
+                          return (
+                          <div key={imageId} className="relative group">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                const newSelected = new Set(selectedImages);
+                                if (e.target.checked) {
+                                  newSelected.add(imageId);
+                                } else {
+                                  newSelected.delete(imageId);
+                                  setSelectAll(false);
+                                }
+                                setSelectedImages(newSelected);
+                              }}
+                              className="absolute top-2 left-2 w-5 h-5 z-10 cursor-pointer"
+                            />
                             <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-muted-foreground" />
                             </div>
@@ -379,7 +472,8 @@ export default function PropertyMedia() {
                               NAS • {(file.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
-                        ))}
+                        );
+                        })}
                         
                         {totalImages === 0 && (
                           <p className="col-span-full text-center text-muted-foreground py-8">

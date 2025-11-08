@@ -25,9 +25,16 @@ interface WebDAVConfig {
  */
 export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
   if (!webdavClient) {
-    const url = config?.url || process.env.NAS_WEBDAV_URL || 'http://ugreen.tschatscher.eu:2001';
+    const url = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
     const username = config?.username || process.env.NAS_USERNAME || 'tschatscher';
-    const password = config?.password || process.env.NAS_PASSWORD || 'Survive1985#';
+    const password = config?.password || process.env.NAS_PASSWORD || '';
+
+    console.log('[WebDAV] Initializing client with config:', {
+      url,
+      username,
+      hasPassword: !!password,
+      basePath: BASE_PATH,
+    });
 
     webdavClient = createClient(url, {
       username,
@@ -101,26 +108,43 @@ export async function ensurePropertyFolders(propertyFolderName: string): Promise
   const client = getWebDAVClient();
   const propertyPath = getPropertyPath(propertyFolderName);
 
+  console.log('[WebDAV] Ensuring folders for property:', propertyFolderName);
+  console.log('[WebDAV] Property path:', propertyPath);
+
   try {
     // Create main property folder
+    console.log('[WebDAV] Checking if property folder exists...');
     const exists = await client.exists(propertyPath);
+    console.log('[WebDAV] Property folder exists:', exists);
+    
     if (!exists) {
-      await client.createDirectory(propertyPath);
-      console.log(`[WebDAV] Created property folder: ${propertyPath}`);
+      console.log('[WebDAV] Creating property folder:', propertyPath);
+      await client.createDirectory(propertyPath, { recursive: true });
+      console.log(`[WebDAV] ✓ Created property folder: ${propertyPath}`);
     }
 
     // Create category subfolders
     for (const category of PROPERTY_CATEGORIES) {
       const categoryPath = getCategoryPath(propertyFolderName, category);
+      console.log(`[WebDAV] Checking category folder: ${category}`);
       const categoryExists = await client.exists(categoryPath);
+      
       if (!categoryExists) {
+        console.log(`[WebDAV] Creating category folder: ${categoryPath}`);
         await client.createDirectory(categoryPath);
-        console.log(`[WebDAV] Created category folder: ${categoryPath}`);
+        console.log(`[WebDAV] ✓ Created category folder: ${category}`);
       }
     }
-  } catch (error) {
-    console.error('[WebDAV] Error creating folders:', error);
-    throw new Error(`Failed to create property folders: ${error}`);
+    
+    console.log('[WebDAV] ✓ All folders ready');
+  } catch (error: any) {
+    console.error('[WebDAV] ✗ Error creating folders');
+    console.error('[WebDAV] Error details:', {
+      message: error.message,
+      status: error.status,
+      response: error.response?.statusText,
+    });
+    throw new Error(`Failed to create property folders: ${error.message || error}`);
   }
 }
 
@@ -239,11 +263,19 @@ export async function getFileContent(filePath: string): Promise<Buffer> {
 export async function testConnection(): Promise<boolean> {
   const client = getWebDAVClient();
 
+  console.log('[WebDAV] Testing connection to:', BASE_PATH);
+  
   try {
-    await client.exists(BASE_PATH);
+    const exists = await client.exists(BASE_PATH);
+    console.log('[WebDAV] ✓ Connection successful, base path exists:', exists);
     return true;
-  } catch (error) {
-    console.error('[WebDAV] Connection test failed:', error);
+  } catch (error: any) {
+    console.error('[WebDAV] ✗ Connection test failed');
+    console.error('[WebDAV] Error details:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+    });
     return false;
   }
 }

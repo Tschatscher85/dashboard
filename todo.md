@@ -451,3 +451,24 @@
   - [ ] Fix WebDAV path construction
   - [ ] Test WebDAV connection with UGREEN NAS
   - [ ] Add protocol switching in UI
+
+## Urgent Fixes - Propstack-Style Media Page
+
+- [ ] Fix document upload to only upload to selected category (not all categories)
+- [ ] Redesign PropertyMedia page layout:
+  - [ ] Separate "Medien" section (images only) at top
+  - [ ] Separate "Dokumente" section below with folder structure
+  - [ ] Add view toggle for images (compact grid vs large grid)
+  - [ ] Add image category labels (Hausansicht, Küche, Bad, Grundrisse, etc.)
+- [ ] Fix NAS image display - images show placeholder icons instead of actual previews
+- [ ] Generate proper URLs for FTP-uploaded files (currently no URL available)
+- [ ] Enable deletion of old cloud images from database
+- [ ] Test document upload to NAS (PDF, DOCX to Objektunterlagen folder)
+
+## Cleanup and Multi-Select Deletion
+
+- [x] Delete old cloud images via SQL for clean testing (not needed - using multi-select instead)
+- [x] Implement multi-select feature with checkboxes
+- [x] Add "Select All" checkbox
+- [x] Add "Delete Selected" button (appears when items selected)
+- [x] Add confirmation dialog before bulk deletion

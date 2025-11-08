@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM propertyMedia WHERE propertyId = (SELECT id FROM properties WHERE address LIKE '%Klingenweg 15%') AND storageType = 'cloud'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute DELETE FROM propertyMedia WHERE propertyId = (SELECT id FROM properties WHERE address LIKE '%Klingenweg 15%') AND storageType = 'cloud'",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'nkyygabvvzpo6zrqu4mzva.propertyMedia' doesn't exist"
+  ]
+}
