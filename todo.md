@@ -586,3 +586,57 @@
 - [x] Back button now goes to /dashboard/properties/:id#media
 - [x] PropertyDetail detects #media hash and opens Medien tab
 - [x] Added activeTab state with hash detection
+
+
+## Fix NAS Image Display in PropertyDetail
+
+- [x] NAS images show placeholders instead of actual images - diagnosed
+- [x] Created /api/nas/* proxy endpoint to fetch from WebDAV
+- [x] Fixed double basePath issue in proxy endpoint
+- [x] Changed PropertyDetail to use /api/nas/ URLs
+- [ ] Test that images load properly in PropertyDetail Medien tab
+
+
+## Feature 1: Separate WebDAV/FTP Test Buttons
+
+- [ ] Add testWebDAVConnection endpoint to routers.ts
+- [ ] Add testFTPConnection endpoint to routers.ts
+- [ ] Replace single "NAS-Verbindung testen" button with two buttons
+- [ ] Add "WebDAV testen" button to PropertyMedia
+- [ ] Add "FTP testen" button to PropertyMedia
+- [ ] Show separate success/error messages for each connection type
+- [ ] Test both buttons work correctly
+
+## Feature 2: Image Categories System
+
+- [ ] Add imageCategory field to propertyImages table in schema
+- [ ] Define categories: Hausansicht, Innenansicht, Küche, Bad, Schlafzimmer, Wohnzimmer, Garten, Grundrisse, Sonstiges
+- [ ] Add category dropdown to upload form in PropertyMedia
+- [ ] Update upload mutation to save category
+- [ ] Add category filter dropdown in PropertyMedia gallery
+- [ ] Group images by category in display
+- [ ] Show category labels on image cards
+- [ ] Test category assignment and filtering
+
+## Feature 3: Multi-Select Deletion Improvements
+
+- [ ] Add "Ausgewählte löschen" button that appears when items are selected
+- [ ] Implement bulk delete mutation for multiple images
+- [ ] Add confirmation dialog showing count of selected items
+- [ ] Delete all selected images (Cloud + NAS) at once
+- [ ] Show progress indicator during bulk delete
+- [ ] Refresh gallery after successful deletion
+- [ ] Test multi-select deletion with mixed Cloud/NAS images
+
+## Feature 4: Document Management System
+
+- [ ] Add propertyDocuments table to schema (similar to propertyImages)
+- [ ] Define document categories: Grundbuch, Energieausweis, Kaufvertrag, Mietvertrag, Versicherung, Sonstiges
+- [ ] Create PropertyDocuments page (similar to PropertyMedia)
+- [ ] Add document upload with category selection
+- [ ] Support PDF, Word, Excel file types
+- [ ] Create document list view with download buttons
+- [ ] Add document deletion functionality
+- [ ] Add "Dokumente" tab to PropertyDetail
+- [ ] Show document count in PropertyDetail
+- [ ] Test document upload, download, and deletion

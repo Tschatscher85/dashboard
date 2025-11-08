@@ -296,7 +296,13 @@ export const propertyImages = mysqlTable("propertyImages", {
   // Image details
   title: varchar("title", { length: 255 }),
   description: text("description"),
-  imageType: mysqlEnum("imageType", ["main", "exterior", "interior", "floorplan", "map", "other"]).default("other"),
+  imageType: mysqlEnum("imageType", [
+    "hausansicht", "kueche", "bad", "wohnzimmer", "schlafzimmer", 
+    "garten", "balkon", "keller", "dachboden", "garage", 
+    "grundrisse", "sonstiges",
+    // Legacy values (will be migrated)
+    "main", "exterior", "interior", "floorplan", "map", "other"
+  ]).default("sonstiges"),
   sortOrder: int("sortOrder").default(0),
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),

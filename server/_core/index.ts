@@ -41,6 +41,50 @@ async function startServer() {
     const { handleSuperchatWebhook } = await import('../webhooks/superchat');
     return handleSuperchatWebhook(req, res);
   });
+
+  // NAS file proxy endpoint
+  app.get('/api/nas/*', async (req, res) => {
+    try {
+      // Extract path after /api/nas/
+      const nasPath = req.path.replace('/api/nas/', '');
+      console.log('[NAS Proxy] Fetching file:', nasPath);
+
+      // Try WebDAV first
+      try {
+        const { getWebDAVClient } = await import('../lib/webdav-client');
+        const client = getWebDAVClient();
+        // Decode URL-encoded path (e.g., %20 -> space)
+        const decodedPath = decodeURIComponent(nasPath);
+        const fullPath = `/${decodedPath}`;
+        
+        console.log('[NAS Proxy] WebDAV path:', fullPath);
+        const fileBuffer = await client.getFileContents(fullPath) as Buffer;
+        
+        // Determine content type from file extension
+        const ext = nasPath.split('.').pop()?.toLowerCase();
+        const contentTypes: Record<string, string> = {
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'png': 'image/png',
+          'gif': 'image/gif',
+          'webp': 'image/webp',
+          'pdf': 'application/pdf',
+        };
+        const contentType = contentTypes[ext || ''] || 'application/octet-stream';
+        
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.send(fileBuffer);
+        console.log('[NAS Proxy] ✅ File served successfully');
+      } catch (webdavError: any) {
+        console.error('[NAS Proxy] WebDAV error:', webdavError.message);
+        res.status(404).json({ error: 'File not found on NAS', details: webdavError.message });
+      }
+    } catch (error: any) {
+      console.error('[NAS Proxy] Error:', error);
+      res.status(500).json({ error: 'Failed to fetch file from NAS' });
+    }
+  });
   
   // tRPC API
   app.use(

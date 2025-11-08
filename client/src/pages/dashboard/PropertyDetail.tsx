@@ -68,7 +68,7 @@ export default function PropertyDetail() {
   const allImages = [
     ...(property?.images || []),
     ...(nasImages || []).map(nasFile => ({
-      imageUrl: `/nas/${nasFile.filename}`, // Use filename as URL path
+      imageUrl: `/api/nas/${nasFile.filename}`, // Proxy endpoint to fetch from NAS
       title: nasFile.basename,
       nasPath: nasFile.filename,
       isNAS: true,

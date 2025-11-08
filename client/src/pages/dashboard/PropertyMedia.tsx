@@ -49,6 +49,9 @@ export default function PropertyMedia() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingDocs, setUploadingDocs] = useState(false);
   
+  // Image category selection
+  const [selectedImageCategory, setSelectedImageCategory] = useState("hausansicht");
+  
   // Links state
   const [virtualTourLink, setVirtualTourLink] = useState("");
   const [businessCardLink, setBusinessCardLink] = useState("");
@@ -162,6 +165,7 @@ export default function PropertyMedia() {
           fileName: file.name,
           fileData,
           mimeType: file.type,
+          imageType: category === "images" ? (selectedImageCategory as "hausansicht" | "kueche" | "bad" | "wohnzimmer" | "schlafzimmer" | "garten" | "balkon" | "keller" | "dachboden" | "garage" | "grundrisse" | "sonstiges") : undefined,
         });
       }
       
@@ -214,26 +218,43 @@ export default function PropertyMedia() {
               </p>
             </div>
           </div>
-          <Dialog open={showNASTest} onOpenChange={setShowNASTest}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <TestTube2 className="w-4 h-4 mr-2" />
-                NAS-Verbindung testen
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>NAS-Verbindungstest</DialogTitle>
-              </DialogHeader>
-              <NASTestDialog
-                propertyId={propertyId}
-                results={nasTestResults}
-                setResults={setNasTestResults}
-                isRunning={isTestRunning}
-                setIsRunning={setIsTestRunning}
-              />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Dialog open={showNASTest} onOpenChange={setShowNASTest}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <TestTube2 className="w-4 h-4 mr-2" />
+                  WebDAV testen
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>WebDAV-Verbindungstest</DialogTitle>
+                </DialogHeader>
+                <WebDAVTestDialog
+                  propertyId={propertyId}
+                  results={nasTestResults}
+                  setResults={setNasTestResults}
+                  isRunning={isTestRunning}
+                  setIsRunning={setIsTestRunning}
+                />
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <TestTube2 className="w-4 h-4 mr-2" />
+                  FTP testen
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>FTP-Verbindungstest</DialogTitle>
+                </DialogHeader>
+                <FTPTestDialog propertyId={propertyId} />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
@@ -260,6 +281,31 @@ export default function PropertyMedia() {
               <CardTitle>Bilder hochladen</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Category Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Kategorie für neue Bilder auswählen:
+                </label>
+                <select
+                  value={selectedImageCategory}
+                  onChange={(e) => setSelectedImageCategory(e.target.value)}
+                  className="w-full p-2 border border-border rounded-md bg-background"
+                >
+                  <option value="hausansicht">Hausansicht</option>
+                  <option value="kueche">Küche</option>
+                  <option value="bad">Bad</option>
+                  <option value="wohnzimmer">Wohnzimmer</option>
+                  <option value="schlafzimmer">Schlafzimmer</option>
+                  <option value="garten">Garten</option>
+                  <option value="balkon">Balkon/Terrasse</option>
+                  <option value="keller">Keller</option>
+                  <option value="dachboden">Dachboden</option>
+                  <option value="garage">Garage/Stellplatz</option>
+                  <option value="grundrisse">Grundrisse</option>
+                  <option value="sonstiges">Sonstiges</option>
+                </select>
+              </div>
+
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -640,7 +686,315 @@ export default function PropertyMedia() {
   );
 }
 
-// NAS Test Dialog Component
+// WebDAV Test Dialog Component
+function WebDAVTestDialog({
+  propertyId,
+  results,
+  setResults,
+  isRunning,
+  setIsRunning,
+}: {
+  propertyId: number;
+  results: any;
+  setResults: (results: any) => void;
+  isRunning: boolean;
+  setIsRunning: (running: boolean) => void;
+}) {
+  const testQuery = trpc.properties.testWebDAVConnection.useQuery(
+    { propertyId },
+    { enabled: false }
+  );
+
+  const runTest = async () => {
+    setIsRunning(true);
+    setResults(null);
+    try {
+      const result = await testQuery.refetch();
+      setResults(result.data);
+    } catch (error: any) {
+      setResults({
+        error: true,
+        message: error.message,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Button
+        onClick={runTest}
+        disabled={isRunning}
+        className="w-full"
+      >
+        {isRunning ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Test läuft...
+          </>
+        ) : (
+          <>
+            <TestTube2 className="w-4 h-4 mr-2" />
+            WebDAV-Test starten
+          </>
+        )}
+      </Button>
+
+      {results && (
+        <>
+          {results.error ? (
+            <Alert variant="destructive">
+              <XCircle className="w-4 h-4" />
+              <AlertDescription>
+                <strong>Fehler:</strong> {results.message}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4 text-center p-4 bg-muted rounded-lg">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {results.summary.passed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Bestanden</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {results.summary.failed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Fehlgeschlagen</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">
+                    {results.summary.total}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Gesamt</div>
+                </div>
+              </div>
+
+              {results.summary.allPassed ? (
+                <Alert className="border-green-200 bg-green-50">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <strong>Alle Tests bestanden!</strong> WebDAV-Verbindung funktioniert einwandfrei.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert variant="destructive">
+                  <XCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    <strong>Einige Tests fehlgeschlagen.</strong> Bitte prüfen Sie die Details unten.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                {results.tests.map((test: any, index: number) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border ${
+                      test.success
+                        ? 'border-green-200 bg-green-50'
+                        : 'border-red-200 bg-red-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {test.success ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          )}
+                          <span className="font-medium">{test.name}</span>
+                        </div>
+                        {test.message && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {test.message}
+                          </p>
+                        )}
+                        {test.error && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {test.error}
+                          </p>
+                        )}
+                        {test.duration && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Dauer: {test.duration}
+                          </p>
+                        )}
+                        {test.folderName && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Ordner: {test.folderName}
+                          </p>
+                        )}
+                        {test.path && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Pfad: {test.path}
+                          </p>
+                        )}
+                        {test.fileUrl && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            URL: {test.fileUrl}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// FTP Test Dialog Component
+function FTPTestDialog({ propertyId }: { propertyId: number }) {
+  const [results, setResults] = useState<any>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  
+  const testQuery = trpc.properties.testFTPConnection.useQuery(
+    { propertyId },
+    { enabled: false }
+  );
+
+  const runTest = async () => {
+    setIsRunning(true);
+    setResults(null);
+    try {
+      const result = await testQuery.refetch();
+      setResults(result.data);
+    } catch (error: any) {
+      setResults({
+        error: true,
+        message: error.message,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Button
+        onClick={runTest}
+        disabled={isRunning}
+        className="w-full"
+      >
+        {isRunning ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Test läuft...
+          </>
+        ) : (
+          <>
+            <TestTube2 className="w-4 h-4 mr-2" />
+            FTP-Test starten
+          </>
+        )}
+      </Button>
+
+      {results && (
+        <>
+          {results.error ? (
+            <Alert variant="destructive">
+              <XCircle className="w-4 h-4" />
+              <AlertDescription>
+                <strong>Fehler:</strong> {results.message}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4 text-center p-4 bg-muted rounded-lg">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {results.summary.passed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Bestanden</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {results.summary.failed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Fehlgeschlagen</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">
+                    {results.summary.total}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Gesamt</div>
+                </div>
+              </div>
+
+              {results.summary.allPassed ? (
+                <Alert className="border-green-200 bg-green-50">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <strong>Alle Tests bestanden!</strong> FTP-Verbindung funktioniert einwandfrei.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert variant="destructive">
+                  <XCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    <strong>Einige Tests fehlgeschlagen.</strong> Bitte prüfen Sie die Details unten.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                {results.tests.map((test: any, index: number) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border ${
+                      test.success
+                        ? 'border-green-200 bg-green-50'
+                        : 'border-red-200 bg-red-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {test.success ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          )}
+                          <span className="font-medium">{test.name}</span>
+                        </div>
+                        {test.message && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {test.message}
+                          </p>
+                        )}
+                        {test.error && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {test.error}
+                          </p>
+                        )}
+                        {test.duration && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Dauer: {test.duration}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// NAS Test Dialog Component (kept for backward compatibility)
 function NASTestDialog({
   propertyId,
   results,

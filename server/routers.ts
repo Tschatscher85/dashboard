@@ -357,6 +357,11 @@ export const appRouter = router({
         fileName: z.string(),
         fileData: z.string(), // base64 encoded file data
         mimeType: z.string().optional(),
+        imageType: z.enum([
+          "hausansicht", "kueche", "bad", "wohnzimmer", "schlafzimmer",
+          "garten", "balkon", "keller", "dachboden", "garage",
+          "grundrisse", "sonstiges"
+        ]).optional(),
       }))
       .mutation(async ({ input }) => {
         const { storagePut } = await import("./storage");
@@ -523,9 +528,9 @@ export const appRouter = router({
             imageUrl: url,
             nasPath,
             title: input.fileName,
-            imageType: "other",
+            imageType: input.imageType || "sonstiges",
           });
-          console.log('[Upload] Created database entry for Cloud image');
+          console.log('[Upload] Created database entry for Cloud image with imageType:', input.imageType || "sonstiges");
         } else if (input.category === "Bilder") {
           console.log('[Upload] NAS upload - no database entry needed (files listed from NAS)');
         }
