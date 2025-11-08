@@ -744,3 +744,36 @@
 - [ ] Lightbox/Vollbild-Ansicht mit Vor/Zurück-Navigation
 - [ ] Kontakt-Detail mit Brevo-Sync-Status erweitern
 - [ ] Homepage-Sync Buttons verbinden (Veröffentlichen/Aktualisieren)
+
+## New Features (Current Session)
+
+### Lightbox/Vollbild-Ansicht
+- [ ] Implement lightbox dialog component with fullscreen image display
+- [ ] Add previous/next navigation buttons
+- [ ] Add image counter (1/10)
+- [ ] Add zoom functionality
+- [ ] Add close button (X)
+- [ ] Support keyboard navigation (arrow keys, ESC)
+- [ ] Show image title/caption
+
+### Dokumente-Verwaltung Verbesserungen
+- [ ] Add category tabs for documents (like image categories)
+- [ ] Implement PDF preview component
+- [ ] Add document search/filter
+- [ ] Show document metadata (size, upload date, type)
+- [ ] Add document sorting options
+
+### Dashboard-Statistiken
+- [ ] Add property status distribution chart (pie/donut chart)
+- [ ] Add lead conversion funnel chart
+- [ ] Add upcoming appointments widget (next 7 days)
+- [ ] Add recent activities timeline
+- [ ] Add key metrics cards (total properties, active leads, appointments this week)
+
+### Google Calendar Integration
+- [ ] Research Google Calendar API requirements
+- [ ] Add Google OAuth credentials to settings
+- [ ] Implement Google Calendar sync for appointments
+- [ ] Add "Zu Google Calendar hinzufügen" button
+- [ ] Show Google Calendar events in appointments list
+- [ ] Two-way sync (create/update/delete)

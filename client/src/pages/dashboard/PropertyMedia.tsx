@@ -10,6 +10,7 @@ import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, Arr
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 export default function PropertyMedia() {
   const { id } = useParams();
@@ -511,7 +512,16 @@ export default function PropertyMedia() {
                           const imageId = `db-${image.id || index}`;
                           const isSelected = selectedImages.has(imageId);
                           return (
-                          <div key={imageId} className="relative group">
+                          <div 
+                            key={imageId} 
+                            className="relative group cursor-pointer"
+                            onClick={() => {
+                              const allImages = [...filteredDbImages, ...(nasImages || [])];
+                              setLightboxImages(allImages);
+                              setLightboxIndex(index);
+                              setLightboxOpen(true);
+                            }}
+                          >
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -586,7 +596,16 @@ export default function PropertyMedia() {
                           const imageId = `nas-${file.filename}`;
                           const isSelected = selectedImages.has(imageId);
                           return (
-                          <div key={imageId} className="relative group">
+                          <div 
+                            key={imageId} 
+                            className="relative group cursor-pointer"
+                            onClick={() => {
+                              const allImages = [...filteredDbImages, ...(nasImages || [])];
+                              setLightboxImages(allImages);
+                              setLightboxIndex(index);
+                              setLightboxOpen(true);
+                            }}
+                          >
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -787,6 +806,14 @@ export default function PropertyMedia() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
     </div>
   );
 }

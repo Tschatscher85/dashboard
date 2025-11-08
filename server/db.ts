@@ -1,4 +1,4 @@
-import { eq, desc, and, or, like, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, asc, and, or, like, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 // For PostgreSQL migration: import { drizzle } from "drizzle-orm/postgres-js";
 // For PostgreSQL migration: import postgres from "postgres";
@@ -530,11 +530,54 @@ export async function getDashboardStats() {
   const [appointmentsCount] = await db.select({ count: sql<number>`count(*)` }).from(appointments)
     .where(eq(appointments.status, 'scheduled'));
   
+  // Property status distribution
+  const statusDistribution = await db.select({
+    status: properties.status,
+    count: sql<number>`count(*)`
+  })
+  .from(properties)
+  .groupBy(properties.status);
+  
+  const statusLabels: Record<string, string> = {
+    'acquisition': 'Akquisition',
+    'preparation': 'Vorbereitung',
+    'marketing': 'Vermarktung',
+    'negotiation': 'Verhandlung',
+    'reserved': 'Reserviert',
+    'sold': 'Verkauft',
+    'rented': 'Vermietet',
+    'inactive': 'Inaktiv',
+  };
+  
+  const propertyStatusDistribution = statusDistribution.map(item => ({
+    name: statusLabels[item.status || ''] || item.status,
+    value: Number(item.count)
+  }));
+  
+  // Upcoming appointments (next 7 days)
+  const now = new Date();
+  const sevenDaysLater = new Date();
+  sevenDaysLater.setDate(now.getDate() + 7);
+  
+  const upcomingAppointmentsList = await db.select()
+    .from(appointments)
+    .where(
+      and(
+        gte(appointments.startTime, now),
+        lte(appointments.startTime, sevenDaysLater),
+        eq(appointments.status, 'scheduled')
+      )
+    )
+    .orderBy(asc(appointments.startTime))
+    .limit(5);
+  
   return {
     totalProperties: Number(propertiesCount.count),
     totalContacts: Number(contactsCount.count),
     newLeads: Number(leadsCount.count),
     upcomingAppointments: Number(appointmentsCount.count),
+    propertyStatusDistribution,
+    upcomingAppointmentsList,
   };
 }
 
