@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { UserPlus, Key, Trash2, Edit, Eye, EyeOff } from "lucide-react";
@@ -38,6 +39,10 @@ export default function Settings() {
     brevo: "",
     brevoPropertyInquiryListId: "",
     brevoOwnerInquiryListId: "",
+    brevoInsuranceListId: "",
+    brevoPropertyManagementListId: "",
+    brevoAutoSync: "false",
+    brevoDefaultInquiryType: "property_inquiry",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -105,6 +110,10 @@ export default function Settings() {
         brevo: currentApiKeys.brevo || "",
         brevoPropertyInquiryListId: currentApiKeys.brevoPropertyInquiryListId || "",
         brevoOwnerInquiryListId: currentApiKeys.brevoOwnerInquiryListId || "",
+        brevoInsuranceListId: currentApiKeys.brevoInsuranceListId || "",
+        brevoPropertyManagementListId: currentApiKeys.brevoPropertyManagementListId || "",
+        brevoAutoSync: currentApiKeys.brevoAutoSync || "false",
+        brevoDefaultInquiryType: currentApiKeys.brevoDefaultInquiryType || "property_inquiry",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -389,6 +398,76 @@ export default function Settings() {
                       Standard: #19 (Eigentümeranfragen)
                     </p>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brevoInsuranceListId">Versicherung List ID</Label>
+                    <Input
+                      id="brevoInsuranceListId"
+                      type="number"
+                      value={apiKeys.brevoInsuranceListId || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, brevoInsuranceListId: e.target.value })}
+                      placeholder="20"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Für Versicherungsanfragen
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brevoPropertyManagementListId">Hausverwaltung List ID</Label>
+                    <Input
+                      id="brevoPropertyManagementListId"
+                      type="number"
+                      value={apiKeys.brevoPropertyManagementListId || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, brevoPropertyManagementListId: e.target.value })}
+                      placeholder="21"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Für Hausverwaltungsanfragen
+                    </p>
+                  </div>
+                </div>
+
+                {/* Auto-Sync Configuration */}
+                <div className="space-y-4 p-4 border rounded-lg bg-green-50/50">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="brevoAutoSync" className="text-green-900 font-semibold">
+                        Automatische Brevo-Synchronisierung
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Neue Kontakte werden automatisch zu Brevo synchronisiert
+                      </p>
+                    </div>
+                    <Switch
+                      id="brevoAutoSync"
+                      checked={apiKeys.brevoAutoSync === 'true'}
+                      onCheckedChange={(checked) => setApiKeys({ ...apiKeys, brevoAutoSync: checked ? 'true' : 'false' })}
+                    />
+                  </div>
+                  
+                  {apiKeys.brevoAutoSync === 'true' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="brevoDefaultInquiryType">Standard-Anfragetyp</Label>
+                      <Select
+                        value={apiKeys.brevoDefaultInquiryType || 'property_inquiry'}
+                        onValueChange={(value) => setApiKeys({ ...apiKeys, brevoDefaultInquiryType: value })}
+                      >
+                        <SelectTrigger id="brevoDefaultInquiryType">
+                          <SelectValue placeholder="Anfragetyp wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="property_inquiry">Immobilienanfrage</SelectItem>
+                          <SelectItem value="owner_inquiry">Eigentümeranfrage</SelectItem>
+                          <SelectItem value="insurance">Versicherung</SelectItem>
+                          <SelectItem value="property_management">Hausverwaltung</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Dieser Typ wird für neue Kontakte verwendet, wenn kein spezifischer Typ angegeben ist
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Property-Sync API Key */}

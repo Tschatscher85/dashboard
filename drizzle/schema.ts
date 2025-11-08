@@ -298,7 +298,7 @@ export const contacts = mysqlTable("contacts", {
   brevoLastSyncedAt: timestamp("brevoLastSyncedAt"),
   brevoListId: int("brevoListId"),
   brevoErrorMessage: text("brevoErrorMessage"),
-  inquiryType: mysqlEnum("inquiryType", ["property_inquiry", "owner_inquiry"]),
+  inquiryType: mysqlEnum("inquiryType", ["property_inquiry", "owner_inquiry", "insurance", "property_management"]),
   lastSyncedToBrevo: timestamp("lastSyncedToBrevo"), // deprecated, keep for backwards compatibility
   
   // Metadata

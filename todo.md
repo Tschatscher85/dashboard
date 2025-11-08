@@ -728,3 +728,13 @@
 - [x] Inquiry-Type Auswahl implementieren (Immobilienanfrage vs Eigentümeranfrage)
 - [ ] ContactDetail mit Brevo-Status und Sync-Feldern erweitern
 - [ ] Später: Objekt-Referenz und Anschrift zu Brevo-Sync hinzufügen
+
+## Automatische Brevo-Synchronisierung
+
+- [ ] Datenbank-Schema um "insurance" und "property_management" Inquiry-Types erweitern
+- [ ] Settings: Toggle für automatische Synchronisierung hinzufügen
+- [ ] Settings: Standard-Anfragetyp Auswahl hinzufügen
+- [ ] Settings: Brevo List IDs für Versicherung und Hausverwaltung hinzufügen
+- [ ] Automatischer Sync-Trigger beim Erstellen neuer Kontakte implementieren
+- [ ] Inquiry-Type Badges in Kontakte-Liste anzeigen (Immobilienanfrage, Eigentümeranfrage, Versicherung, Hausverwaltung)
+- [ ] Sync-Dialog um alle 4 Anfragetypen erweitern

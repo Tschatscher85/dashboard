@@ -72,6 +72,10 @@ export const appRouter = router({
           brevo: process.env.BREVO_API_KEY || "",
           brevoPropertyInquiryListId: process.env.BREVO_PROPERTY_INQUIRY_LIST_ID || "18",
           brevoOwnerInquiryListId: process.env.BREVO_OWNER_INQUIRY_LIST_ID || "19",
+          brevoInsuranceListId: process.env.BREVO_INSURANCE_LIST_ID || "20",
+          brevoPropertyManagementListId: process.env.BREVO_PROPERTY_MANAGEMENT_LIST_ID || "21",
+          brevoAutoSync: process.env.BREVO_AUTO_SYNC || "false",
+          brevoDefaultInquiryType: process.env.BREVO_DEFAULT_INQUIRY_TYPE || "property_inquiry",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
           // ImmoScout24 API
@@ -108,6 +112,10 @@ export const appRouter = router({
         brevo: z.string().optional(),
         brevoPropertyInquiryListId: z.string().optional(),
         brevoOwnerInquiryListId: z.string().optional(),
+        brevoInsuranceListId: z.string().optional(),
+        brevoPropertyManagementListId: z.string().optional(),
+        brevoAutoSync: z.string().optional(),
+        brevoDefaultInquiryType: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
         // ImmoScout24 API
@@ -155,6 +163,14 @@ export const appRouter = router({
           nasPassword: input.nasPassword ? "***" : "(empty)",
           nasBasePath: input.nasBasePath || "(default)",
         });
+        
+        // Save Brevo configuration
+        if (input.brevoPropertyInquiryListId) process.env.BREVO_PROPERTY_INQUIRY_LIST_ID = input.brevoPropertyInquiryListId;
+        if (input.brevoOwnerInquiryListId) process.env.BREVO_OWNER_INQUIRY_LIST_ID = input.brevoOwnerInquiryListId;
+        if (input.brevoInsuranceListId) process.env.BREVO_INSURANCE_LIST_ID = input.brevoInsuranceListId;
+        if (input.brevoPropertyManagementListId) process.env.BREVO_PROPERTY_MANAGEMENT_LIST_ID = input.brevoPropertyManagementListId;
+        if (input.brevoAutoSync !== undefined) process.env.BREVO_AUTO_SYNC = input.brevoAutoSync;
+        if (input.brevoDefaultInquiryType) process.env.BREVO_DEFAULT_INQUIRY_TYPE = input.brevoDefaultInquiryType;
         
         // Save ImmoScout24 credentials
         if (input.is24ConsumerKey) process.env.IS24_CONSUMER_KEY = input.is24ConsumerKey;
@@ -1311,10 +1327,67 @@ Die Beschreibung soll:
         source: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        await db.createContact({
+        const contactId = await db.createContact({
           ...input,
           createdBy: ctx.user.id,
         });
+        
+        // Auto-sync to Brevo if enabled
+        const autoSyncEnabled = process.env.BREVO_AUTO_SYNC === "true";
+        if (autoSyncEnabled && input.email) {
+          try {
+            const { syncContactToBrevo } = await import("./brevo");
+            const apiKey = process.env.BREVO_API_KEY || "";
+            const defaultInquiryType = (process.env.BREVO_DEFAULT_INQUIRY_TYPE || "property_inquiry") as "property_inquiry" | "owner_inquiry" | "insurance" | "property_management";
+            
+            // Get list ID based on inquiry type
+            let listId: number;
+            switch (defaultInquiryType) {
+              case "property_inquiry":
+                listId = parseInt(process.env.BREVO_PROPERTY_INQUIRY_LIST_ID || "18");
+                break;
+              case "owner_inquiry":
+                listId = parseInt(process.env.BREVO_OWNER_INQUIRY_LIST_ID || "19");
+                break;
+              case "insurance":
+                listId = parseInt(process.env.BREVO_INSURANCE_LIST_ID || "20");
+                break;
+              case "property_management":
+                listId = parseInt(process.env.BREVO_PROPERTY_MANAGEMENT_LIST_ID || "21");
+                break;
+              default:
+                listId = 18;
+            }
+            
+            const brevoContact = {
+              email: input.email,
+              attributes: {
+                VORNAME: input.firstName || "",
+                NACHNAME: input.lastName || "",
+                WHATSAPP: input.mobile || "",
+                SMS: input.phone || "",
+                EXT_ID: contactId.toString(),
+                LEAD: [defaultInquiryType === "property_inquiry" ? "Immobilienanfrage" : 
+                       defaultInquiryType === "owner_inquiry" ? "Eigentümeranfrage" :
+                       defaultInquiryType === "insurance" ? "Versicherung" : "Hausverwaltung"],
+              },
+              listIds: [listId],
+              updateEnabled: true,
+            };
+            
+            await syncContactToBrevo(brevoContact, {
+              apiKey,
+              listId,
+              inquiryType: defaultInquiryType,
+            });
+            
+            console.log(`[Brevo] Auto-synced contact ${contactId} to list ${listId}`);
+          } catch (error) {
+            console.error(`[Brevo] Auto-sync failed for contact ${contactId}:`, error);
+            // Don't fail the contact creation if Brevo sync fails
+          }
+        }
+        
         return { success: true };
       }),
 
@@ -1729,7 +1802,7 @@ Die Beschreibung soll:
     syncContactWithInquiry: protectedProcedure
       .input(z.object({
         contactId: z.number(),
-        inquiryType: z.enum(["property_inquiry", "owner_inquiry"]),
+        inquiryType: z.enum(["property_inquiry", "owner_inquiry", "insurance", "property_management"]),
         propertyId: z.number().optional(),
       }))
       .mutation(async ({ input }) => {

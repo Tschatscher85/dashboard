@@ -87,7 +87,7 @@ export default function Contacts() {
   // Brevo sync with inquiry type
   const [brevoSyncDialogOpen, setBrevoSyncDialogOpen] = useState(false);
   const [selectedContactForSync, setSelectedContactForSync] = useState<number | null>(null);
-  const [inquiryType, setInquiryType] = useState<"property_inquiry" | "owner_inquiry">("property_inquiry");
+  const [inquiryType, setInquiryType] = useState<"property_inquiry" | "owner_inquiry" | "insurance" | "property_management">("property_inquiry");
 
   const syncBrevoMutation = trpc.brevo.syncContactWithInquiry.useMutation({
     onSuccess: () => {
@@ -147,6 +147,28 @@ export default function Contacts() {
       other: "Sonstiges",
     };
     return <Badge variant={variants[type] || "default"}>{labels[type] || type}</Badge>;
+  };
+
+  const getInquiryTypeBadge = (type: string | null | undefined) => {
+    if (!type) return <span className="text-muted-foreground text-sm">-</span>;
+    
+    const colors: Record<string, string> = {
+      property_inquiry: "bg-blue-100 text-blue-800",
+      owner_inquiry: "bg-green-100 text-green-800",
+      insurance: "bg-orange-100 text-orange-800",
+      property_management: "bg-purple-100 text-purple-800",
+    };
+    const labels: Record<string, string> = {
+      property_inquiry: "Immobilienanfrage",
+      owner_inquiry: "Eigentümeranfrage",
+      insurance: "Versicherung",
+      property_management: "Hausverwaltung",
+    };
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[type] || "bg-gray-100 text-gray-800"}`}>
+        {labels[type] || type}
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -357,6 +379,7 @@ export default function Contacts() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Typ</TableHead>
+                <TableHead>Anfragetyp</TableHead>
                 <TableHead>Firma</TableHead>
                 <TableHead>E-Mail</TableHead>
                 <TableHead>Telefon</TableHead>
@@ -375,6 +398,7 @@ export default function Contacts() {
                     </button>
                   </TableCell>
                   <TableCell>{getContactTypeBadge(contact.contactType)}</TableCell>
+                  <TableCell>{getInquiryTypeBadge(contact.inquiryType)}</TableCell>
                   <TableCell>{contact.company || "-"}</TableCell>
                   <TableCell>{contact.email || "-"}</TableCell>
                   <TableCell>{contact.phone || contact.mobile || "-"}</TableCell>
@@ -437,7 +461,7 @@ export default function Contacts() {
               <Label htmlFor="inquiryType">Anfragetyp</Label>
               <Select
                 value={inquiryType}
-                onValueChange={(value) => setInquiryType(value as "property_inquiry" | "owner_inquiry")}
+                onValueChange={(value) => setInquiryType(value as "property_inquiry" | "owner_inquiry" | "insurance" | "property_management")}
               >
                 <SelectTrigger id="inquiryType">
                   <SelectValue placeholder="Anfragetyp wählen" />
@@ -455,12 +479,28 @@ export default function Contacts() {
                       <span className="text-xs text-muted-foreground">Eigentümer möchte verkaufen</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="insurance">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Versicherung</span>
+                      <span className="text-xs text-muted-foreground">Versicherungsanfrage</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="property_management">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Hausverwaltung</span>
+                      <span className="text-xs text-muted-foreground">Hausverwaltungsanfrage</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-2">
                 {inquiryType === "property_inquiry" 
                   ? "Kontakt wird zu Liste #18 (Immobilienanfragen) hinzugefügt"
-                  : "Kontakt wird zu Liste #19 (Eigentümeranfragen) hinzugefügt"
+                  : inquiryType === "owner_inquiry"
+                  ? "Kontakt wird zu Liste #19 (Eigentümeranfragen) hinzugefügt"
+                  : inquiryType === "insurance"
+                  ? "Kontakt wird zu Liste #20 (Versicherung) hinzugefügt"
+                  : "Kontakt wird zu Liste #21 (Hausverwaltung) hinzugefügt"
                 }
               </p>
             </div>

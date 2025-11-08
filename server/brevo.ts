@@ -38,7 +38,7 @@ export interface BrevoContact {
 export interface BrevoSyncOptions {
   apiKey: string;
   listId: number;
-  inquiryType: 'property_inquiry' | 'owner_inquiry';
+  inquiryType: 'property_inquiry' | 'owner_inquiry' | 'insurance' | 'property_management';
 }
 
 /**

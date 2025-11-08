@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "bb577bc3-c1d9-46e8-b1d9-f609dce3ca1f",
-  "prevId": "31eecbea-7415-4635-a28a-9ebc219d5c11",
+  "id": "ee922bf0-83ae-4b0a-a91a-982fa40e5487",
+  "prevId": "b4c8d7b4-2dd0-4129-a1a7-c062623ce171",
   "tables": {
     "activities": {
       "name": "activities",
@@ -471,6 +471,42 @@
         "brevoContactId": {
           "name": "brevoContactId",
           "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "brevoSyncStatus": {
+          "name": "brevoSyncStatus",
+          "type": "enum('not_synced','synced','error')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'not_synced'"
+        },
+        "brevoLastSyncedAt": {
+          "name": "brevoLastSyncedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "brevoListId": {
+          "name": "brevoListId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "brevoErrorMessage": {
+          "name": "brevoErrorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "inquiryType": {
+          "name": "inquiryType",
+          "type": "enum('property_inquiry','owner_inquiry','insurance','property_management')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
