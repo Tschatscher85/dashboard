@@ -409,3 +409,11 @@
 ## NAS Settings UI Fix
 
 - [x] Update Settings page to show correct base path (/Daten/... instead of /volume1/Daten/...)
+
+## FTP/FTPS Implementation
+
+- [x] Install basic-ftp package
+- [x] Create FTP client module (server/lib/ftp-client.ts)
+- [x] Add FTP configuration fields to Settings UI (protocol, host, port, secure)
+- [x] Update upload logic to support FTP protocol
+- [ ] Test FTP upload with UGREEN NAS

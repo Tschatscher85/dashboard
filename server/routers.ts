@@ -72,10 +72,12 @@ export const appRouter = router({
           brevo: process.env.BREVO_API_KEY || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
+          nasProtocol: process.env.NAS_PROTOCOL || "ftp",
           nasUrl: process.env.NAS_WEBDAV_URL || "",
+          nasPort: process.env.NAS_PORT || "21",
           nasUsername: process.env.NAS_USERNAME || "",
           nasPassword: process.env.NAS_PASSWORD || "",
-          nasBasePath: process.env.NAS_BASE_PATH || "/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+          nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
         };
       }),
 
@@ -85,7 +87,9 @@ export const appRouter = router({
         brevo: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
+        nasProtocol: z.enum(["webdav", "ftp", "ftps"]).optional(),
         nasUrl: z.string().optional(),
+        nasPort: z.string().optional(),
         nasUsername: z.string().optional(),
         nasPassword: z.string().optional(),
         nasBasePath: z.string().optional(),
@@ -306,7 +310,6 @@ export const appRouter = router({
         mimeType: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { uploadFile, getPropertyFolderName, testConnection } = await import("./lib/webdav-client");
         const { storagePut } = await import("./storage");
         
         // Get property to build folder name
@@ -318,8 +321,12 @@ export const appRouter = router({
         // Convert base64 to buffer
         const fileBuffer = Buffer.from(input.fileData, 'base64');
         
-        // Generate folder name from property address
-        const propertyFolderName = getPropertyFolderName(property);
+        // Get NAS configuration
+        const nasProtocol = process.env.NAS_PROTOCOL || "ftp";
+        const nasUrl = process.env.NAS_WEBDAV_URL || "";
+        const nasPort = process.env.NAS_PORT || "21";
+        const nasUsername = process.env.NAS_USERNAME || "";
+        const nasPassword = process.env.NAS_PASSWORD || "";
         
         let nasPath: string;
         let url: string;
@@ -327,22 +334,63 @@ export const appRouter = router({
         
         // Try to upload to NAS first
         try {
-          // Test connection with timeout
-          const connectionOk = await Promise.race([
-            testConnection(),
-            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
-          ]);
-          
-          if (connectionOk) {
-            nasPath = await uploadFile(
-              propertyFolderName,
-              input.category,
-              input.fileName,
-              fileBuffer
-            );
-            url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+          if (nasProtocol === "ftp" || nasProtocol === "ftps") {
+            // Use FTP client
+            const ftpClient = await import("./lib/ftp-client");
+            const propertyFolderName = ftpClient.getPropertyFolderName(property);
+            
+            // Test connection with timeout
+            const connectionOk = await Promise.race([
+              ftpClient.testConnection({
+                host: nasUrl.replace(/^https?:\/\//, ''),
+                port: parseInt(nasPort),
+                user: nasUsername,
+                password: nasPassword,
+                secure: nasProtocol === "ftps",
+              }),
+              new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
+            ]);
+            
+            if (connectionOk) {
+              nasPath = await ftpClient.uploadFile(
+                {
+                  host: nasUrl.replace(/^https?:\/\//, ''),
+                  port: parseInt(nasPort),
+                  user: nasUsername,
+                  password: nasPassword,
+                  secure: nasProtocol === "ftps",
+                },
+                propertyFolderName,
+                input.category,
+                input.fileName,
+                fileBuffer
+              );
+              url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+            } else {
+              throw new Error('NAS not reachable');
+            }
           } else {
-            throw new Error('NAS not reachable');
+            // Use WebDAV client
+            const webdavClient = await import("./lib/webdav-client");
+            const propertyFolderName = webdavClient.getPropertyFolderName(property);
+            
+            // Test connection with timeout
+            const connectionOk = await Promise.race([
+              webdavClient.testConnection(),
+              new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
+            ]);
+            
+            if (connectionOk) {
+              nasPath = await webdavClient.uploadFile(
+                propertyFolderName,
+                input.category,
+                input.fileName,
+                fileBuffer
+              );
+              url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+            } else {
+              throw new Error('NAS not reachable');
+            }
           }
         } catch (error) {
           console.warn('[Upload] NAS upload failed, using S3 fallback:', error);

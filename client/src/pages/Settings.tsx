@@ -37,7 +37,9 @@ export default function Settings() {
     brevo: "",
     propertySync: "",
     openai: "",
+    nasProtocol: "ftp" as "webdav" | "ftp" | "ftps",
     nasUrl: "",
+    nasPort: "21",
     nasUsername: "",
     nasPassword: "",
     nasBasePath: "",
@@ -87,7 +89,9 @@ export default function Settings() {
         brevo: currentApiKeys.brevo || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
+        nasProtocol: (currentApiKeys.nasProtocol as "webdav" | "ftp" | "ftps") || "ftp",
         nasUrl: currentApiKeys.nasUrl || "",
+        nasPort: currentApiKeys.nasPort || "21",
         nasUsername: currentApiKeys.nasUsername || "",
         nasPassword: currentApiKeys.nasPassword || "",
         nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
@@ -371,9 +375,30 @@ export default function Settings() {
                   <h3 className="text-lg font-semibold mb-4">NAS-Speicher (Synology WebDAV)</h3>
                   
                   <div className="space-y-4">
-                    {/* NAS WebDAV URL */}
+                    {/* NAS Protocol */}
                     <div className="space-y-2">
-                      <Label htmlFor="nasUrl">WebDAV URL</Label>
+                      <Label htmlFor="nasProtocol">Protokoll</Label>
+                      <Select
+                        value={apiKeys.nasProtocol}
+                        onValueChange={(value: "webdav" | "ftp" | "ftps") => setApiKeys({ ...apiKeys, nasProtocol: value, nasPort: value === "webdav" ? "2001" : value === "ftps" ? "990" : "21" })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ftp">FTP (unverschlüsselt)</SelectItem>
+                          <SelectItem value="ftps">FTPS (verschlüsselt)</SelectItem>
+                          <SelectItem value="webdav">WebDAV</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground">
+                        Wählen Sie das Protokoll für die NAS-Verbindung
+                      </p>
+                    </div>
+
+                    {/* NAS URL/Host */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasUrl">{apiKeys.nasProtocol === "webdav" ? "WebDAV URL" : "FTP Host"}</Label>
                       <div className="flex gap-2">
                         <Input
                           id="nasUrl"
@@ -391,7 +416,24 @@ export default function Settings() {
                         </Button>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        WebDAV-URL Ihres Synology NAS (z.B. http://IP:PORT)
+                        {apiKeys.nasProtocol === "webdav" 
+                          ? "WebDAV-URL Ihres NAS (z.B. https://ugreen.tschatscher.eu)"
+                          : "Hostname oder IP-Adresse Ihres NAS (z.B. ugreen.tschatscher.eu)"}
+                      </p>
+                    </div>
+
+                    {/* NAS Port */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nasPort">Port</Label>
+                      <Input
+                        id="nasPort"
+                        type="text"
+                        value={apiKeys.nasPort}
+                        onChange={(e) => setApiKeys({ ...apiKeys, nasPort: e.target.value })}
+                        placeholder={apiKeys.nasProtocol === "webdav" ? "2001" : apiKeys.nasProtocol === "ftps" ? "990" : "21"}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Standard: FTP=21, FTPS=990, WebDAV=2001
                       </p>
                     </div>
 
