@@ -73,9 +73,9 @@ export const appRouter = router({
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
           nasProtocol: process.env.NAS_PROTOCOL || "ftp",
-          nasUrl: process.env.NAS_WEBDAV_URL || "",
+          nasUrl: process.env.NAS_WEBDAV_URL || "ftp.tschatscher.eu",
           nasPort: process.env.NAS_PORT || "21",
-          nasUsername: process.env.NAS_USERNAME || "",
+          nasUsername: process.env.NAS_USERNAME || "tschatscher",
           nasPassword: process.env.NAS_PASSWORD || "",
           nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
         };
@@ -109,11 +109,20 @@ export const appRouter = router({
           nasBasePath: input.nasBasePath || "(default)",
         });
         
-        // TODO: Save NAS credentials to environment variables or secure storage
+        // Save NAS credentials to environment variables
+        if (input.nasProtocol) process.env.NAS_PROTOCOL = input.nasProtocol;
         if (input.nasUrl) process.env.NAS_WEBDAV_URL = input.nasUrl;
+        if (input.nasPort) process.env.NAS_PORT = input.nasPort;
         if (input.nasUsername) process.env.NAS_USERNAME = input.nasUsername;
         if (input.nasPassword) process.env.NAS_PASSWORD = input.nasPassword;
         if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
+        
+        console.log('[Settings] NAS configuration updated:', {
+          protocol: input.nasProtocol || process.env.NAS_PROTOCOL,
+          host: input.nasUrl ? '***' : '(not set)',
+          port: input.nasPort || process.env.NAS_PORT,
+          basePath: input.nasBasePath || process.env.NAS_BASE_PATH,
+        });
         
         return { success: true };
       }),
@@ -328,6 +337,17 @@ export const appRouter = router({
         const nasUsername = process.env.NAS_USERNAME || "";
         const nasPassword = process.env.NAS_PASSWORD || "";
         
+        console.log('\n========== UPLOAD DEBUG ==========');
+        console.log('[Upload] NAS Configuration:', {
+          protocol: nasProtocol,
+          url: nasUrl || '(not set)',
+          port: nasPort,
+          username: nasUsername || '(not set)',
+          hasPassword: !!nasPassword,
+          fileName: input.fileName,
+          category: input.category,
+        });
+        
         let nasPath: string;
         let url: string;
         let usedFallback = false;
@@ -339,7 +359,15 @@ export const appRouter = router({
             const ftpClient = await import("./lib/ftp-client");
             const propertyFolderName = ftpClient.getPropertyFolderName(property);
             
+            console.log('[Upload] Using FTP client with config:', {
+              host: nasUrl.replace(/^https?:\/\//, ''),
+              port: parseInt(nasPort),
+              secure: nasProtocol === "ftps",
+              propertyFolder: propertyFolderName,
+            });
+            
             // Test connection with timeout
+            console.log('[Upload] Testing FTP connection...');
             const connectionOk = await Promise.race([
               ftpClient.testConnection({
                 host: nasUrl.replace(/^https?:\/\//, ''),
@@ -351,7 +379,10 @@ export const appRouter = router({
               new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
             ]);
             
+            console.log('[Upload] FTP connection test result:', connectionOk);
+            
             if (connectionOk) {
+              console.log('[Upload] Connection OK, starting upload...');
               nasPath = await ftpClient.uploadFile(
                 {
                   host: nasUrl.replace(/^https?:\/\//, ''),
@@ -392,8 +423,12 @@ export const appRouter = router({
               throw new Error('NAS not reachable');
             }
           }
-        } catch (error) {
-          console.warn('[Upload] NAS upload failed, using S3 fallback:', error);
+        } catch (error: any) {
+          console.error('[Upload] NAS upload failed, using S3 fallback');
+          console.error('[Upload] Error details:', {
+            message: error.message,
+            stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+          });
           usedFallback = true;
           
           // Fallback: Save to S3

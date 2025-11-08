@@ -372,7 +372,7 @@ export default function Settings() {
 
                 {/* NAS Configuration */}
                 <div className="border-t pt-6 mt-6">
-                  <h3 className="text-lg font-semibold mb-4">NAS-Speicher (Synology WebDAV)</h3>
+                  <h3 className="text-lg font-semibold mb-4">NAS-Speicher (UGREEN)</h3>
                   
                   <div className="space-y-4">
                     {/* NAS Protocol */}

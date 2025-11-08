@@ -417,3 +417,37 @@
 - [x] Add FTP configuration fields to Settings UI (protocol, host, port, secure)
 - [x] Update upload logic to support FTP protocol
 - [ ] Test FTP upload with UGREEN NAS
+
+## FTP Connection Debugging
+
+- [ ] Check server logs for FTP connection errors
+- [ ] Verify FTP credentials are being read correctly from env
+- [ ] Test FTP connection directly with testConnection function
+- [ ] Fix any path or configuration issues
+- [ ] Verify upload works end-to-end
+
+## FTP/FTPS Implementation ✅
+
+- [x] Install basic-ftp package
+- [x] Create FTP client module (server/lib/ftp-client.ts)
+- [x] Add FTP configuration fields to Settings UI (protocol, host, port, secure)
+- [x] Update upload logic to support FTP protocol
+- [x] Test FTP upload with UGREEN NAS
+- [x] Fix FTP host configuration (ftp.tschatscher.eu)
+- [x] Verify images upload to NAS successfully
+- [x] Add detailed logging for upload debugging
+
+## Next Steps: Document Upload & Sync
+
+- [ ] Test document upload to NAS (PDF, DOCX, etc.)
+- [ ] Verify documents appear in correct NAS folders
+- [ ] Implement bidirectional NAS synchronization
+  - [ ] Add "Mit NAS synchronisieren" button
+  - [ ] Scan NAS folders for manually added files
+  - [ ] Add missing files to database
+  - [ ] Remove deleted files from database
+  - [ ] Show sync status and last sync time
+- [ ] Optimize WebDAV as alternative to FTP
+  - [ ] Fix WebDAV path construction
+  - [ ] Test WebDAV connection with UGREEN NAS
+  - [ ] Add protocol switching in UI
