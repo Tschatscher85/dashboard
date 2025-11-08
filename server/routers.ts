@@ -63,6 +63,22 @@ export const appRouter = router({
 
   // ============ SETTINGS ============
   settings: router({
+    // Public endpoint for company branding (used on landing pages)
+    getCompanyBranding: publicProcedure
+      .query(async () => {
+        return {
+          companyLogo: process.env.COMPANY_LOGO || "",
+          companyName: process.env.COMPANY_NAME || "",
+          companyPhone: process.env.COMPANY_PHONE || "",
+          companyEmail: process.env.COMPANY_EMAIL || "",
+          companyAddress: process.env.COMPANY_ADDRESS || "",
+          companyWebsite: process.env.COMPANY_WEBSITE || "",
+          impressum: process.env.IMPRESSUM || "",
+          agb: process.env.AGB || "",
+          datenschutz: process.env.DATENSCHUTZ || "",
+        };
+      }),
+
     getApiKeys: protectedProcedure
       .query(async () => {
         // In production, these should be stored in a secure settings table
@@ -99,6 +115,17 @@ export const appRouter = router({
           ftpSecure: process.env.FTP_SECURE === "true" || false,
           // Shared
           nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+          // Company Branding
+          companyLogo: process.env.COMPANY_LOGO || "",
+          companyName: process.env.COMPANY_NAME || "",
+          companyPhone: process.env.COMPANY_PHONE || "",
+          companyEmail: process.env.COMPANY_EMAIL || "",
+          companyAddress: process.env.COMPANY_ADDRESS || "",
+          companyWebsite: process.env.COMPANY_WEBSITE || "",
+          // Legal Pages
+          impressum: process.env.IMPRESSUM || "",
+          agb: process.env.AGB || "",
+          datenschutz: process.env.DATENSCHUTZ || "",
           // Legacy fields (for backward compatibility)
           nasProtocol: process.env.NAS_PROTOCOL || "webdav",
           nasUrl: process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
@@ -141,6 +168,17 @@ export const appRouter = router({
         ftpSecure: z.boolean().optional(),
         // Shared
         nasBasePath: z.string().optional(),
+        // Company Branding
+        companyLogo: z.string().optional(),
+        companyName: z.string().optional(),
+        companyPhone: z.string().optional(),
+        companyEmail: z.string().optional(),
+        companyAddress: z.string().optional(),
+        companyWebsite: z.string().optional(),
+        // Legal Pages
+        impressum: z.string().optional(),
+        agb: z.string().optional(),
+        datenschutz: z.string().optional(),
         // Legacy (for backward compatibility)
         nasProtocol: z.enum(["webdav", "ftp", "ftps"]).optional(),
         nasUrl: z.string().optional(),
@@ -202,6 +240,19 @@ export const appRouter = router({
         
         // Save shared settings
         if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
+        
+        // Save company branding
+        if (input.companyLogo) process.env.COMPANY_LOGO = input.companyLogo;
+        if (input.companyName) process.env.COMPANY_NAME = input.companyName;
+        if (input.companyPhone) process.env.COMPANY_PHONE = input.companyPhone;
+        if (input.companyEmail) process.env.COMPANY_EMAIL = input.companyEmail;
+        if (input.companyAddress) process.env.COMPANY_ADDRESS = input.companyAddress;
+        if (input.companyWebsite) process.env.COMPANY_WEBSITE = input.companyWebsite;
+        
+        // Save legal pages
+        if (input.impressum) process.env.IMPRESSUM = input.impressum;
+        if (input.agb) process.env.AGB = input.agb;
+        if (input.datenschutz) process.env.DATENSCHUTZ = input.datenschutz;
         
         // Legacy support (for backward compatibility)
         if (input.nasProtocol) process.env.NAS_PROTOCOL = input.nasProtocol;

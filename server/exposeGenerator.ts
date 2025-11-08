@@ -542,13 +542,38 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
   });
   yPos -= 40;
 
-  // Contact details (placeholder - should be from settings/user)
-  const contactDetails = [
-    'Immobilienmakler',
-    'Telefon: +49 (0) 123 456789',
-    'E-Mail: info@immobilien.de',
-    'Web: www.immobilien.de',
-  ];
+  // Contact details from environment variables (company branding)
+  const contactDetails = [];
+  
+  if (process.env.COMPANY_NAME) {
+    contactDetails.push(process.env.COMPANY_NAME);
+  }
+  
+  if (process.env.COMPANY_ADDRESS) {
+    contactDetails.push(process.env.COMPANY_ADDRESS);
+  }
+  
+  if (process.env.COMPANY_PHONE) {
+    contactDetails.push(`Telefon: ${process.env.COMPANY_PHONE}`);
+  }
+  
+  if (process.env.COMPANY_EMAIL) {
+    contactDetails.push(`E-Mail: ${process.env.COMPANY_EMAIL}`);
+  }
+  
+  if (process.env.COMPANY_WEBSITE) {
+    contactDetails.push(`Web: ${process.env.COMPANY_WEBSITE}`);
+  }
+  
+  // Fallback if no company branding is configured
+  if (contactDetails.length === 0) {
+    contactDetails.push(
+      'Immobilienmakler',
+      'Telefon: +49 (0) 123 456789',
+      'E-Mail: info@immobilien.de',
+      'Web: www.immobilien.de'
+    );
+  }
 
   contactDetails.forEach((detail) => {
     contactPage.drawText(detail, {

@@ -804,3 +804,13 @@
 - [ ] Kontaktformular mit Anfrage-Funktion
 - [ ] Social Sharing Buttons
 - [ ] SEO-Optimierung (Meta-Tags, Schema.org)
+
+## Makler-Branding und rechtliche Seiten
+
+- [ ] Makler-Logo Upload in Einstellungen
+- [ ] Makler-Kontaktdaten in Einstellungen (Name, Telefon, Email, Adresse)
+- [ ] Impressum-Text in Einstellungen
+- [ ] AGB-Text in Einstellungen
+- [ ] Datenschutz-Text in Einstellungen
+- [ ] Landing Page Footer mit rechtlichen Links erweitern
+- [ ] Exposé PDF mit Makler-Logo und Kontaktdaten erweitern

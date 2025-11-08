@@ -67,6 +67,17 @@ export default function Settings() {
     ftpSecure: false,
     // Shared
     nasBasePath: "",
+    // Company Branding
+    companyLogo: "",
+    companyName: "",
+    companyPhone: "",
+    companyEmail: "",
+    companyAddress: "",
+    companyWebsite: "",
+    // Legal Pages
+    impressum: "",
+    agb: "",
+    datenschutz: "",
   });
 
   // Queries
@@ -140,6 +151,17 @@ export default function Settings() {
         ftpSecure: currentApiKeys.ftpSecure || false,
         // Shared
         nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+        // Company Branding
+        companyLogo: currentApiKeys.companyLogo || "",
+        companyName: currentApiKeys.companyName || "",
+        companyPhone: currentApiKeys.companyPhone || "",
+        companyEmail: currentApiKeys.companyEmail || "",
+        companyAddress: currentApiKeys.companyAddress || "",
+        companyWebsite: currentApiKeys.companyWebsite || "",
+        // Legal Pages
+        impressum: currentApiKeys.impressum || "",
+        agb: currentApiKeys.agb || "",
+        datenschutz: currentApiKeys.datenschutz || "",
       });
     }
   }, [currentApiKeys]);
@@ -181,6 +203,7 @@ export default function Settings() {
           <TabsList>
             <TabsTrigger value="users">Benutzerverwaltung</TabsTrigger>
             <TabsTrigger value="api">API-Konfiguration</TabsTrigger>
+            <TabsTrigger value="company">Unternehmen</TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -854,6 +877,129 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Company Branding Tab */}
+          <TabsContent value="company">
+            <div className="space-y-6">
+              {/* Company Branding Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Makler-Branding</CardTitle>
+                  <CardDescription>
+                    Diese Informationen werden im Exposé PDF und auf der Landing Page angezeigt
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="companyLogo">Makler-Logo URL</Label>
+                    <Input
+                      id="companyLogo"
+                      value={apiKeys.companyLogo}
+                      onChange={(e) => setApiKeys({ ...apiKeys, companyLogo: e.target.value })}
+                      placeholder="https://example.com/logo.png"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="companyName">Firmenname</Label>
+                    <Input
+                      id="companyName"
+                      value={apiKeys.companyName}
+                      onChange={(e) => setApiKeys({ ...apiKeys, companyName: e.target.value })}
+                      placeholder="Immobilien Mustermann GmbH"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="companyPhone">Telefon</Label>
+                      <Input
+                        id="companyPhone"
+                        value={apiKeys.companyPhone}
+                        onChange={(e) => setApiKeys({ ...apiKeys, companyPhone: e.target.value })}
+                        placeholder="+49 123 456789"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="companyEmail">E-Mail</Label>
+                      <Input
+                        id="companyEmail"
+                        type="email"
+                        value={apiKeys.companyEmail}
+                        onChange={(e) => setApiKeys({ ...apiKeys, companyEmail: e.target.value })}
+                        placeholder="info@example.com"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="companyAddress">Adresse</Label>
+                    <Input
+                      id="companyAddress"
+                      value={apiKeys.companyAddress}
+                      onChange={(e) => setApiKeys({ ...apiKeys, companyAddress: e.target.value })}
+                      placeholder="Musterstraße 123, 12345 Musterstadt"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="companyWebsite">Website</Label>
+                    <Input
+                      id="companyWebsite"
+                      value={apiKeys.companyWebsite}
+                      onChange={(e) => setApiKeys({ ...apiKeys, companyWebsite: e.target.value })}
+                      placeholder="https://www.example.com"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Legal Pages Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Rechtliche Seiten</CardTitle>
+                  <CardDescription>
+                    Diese Texte werden im Footer der Landing Page verlinkt
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="impressum">Impressum</Label>
+                    <textarea
+                      id="impressum"
+                      value={apiKeys.impressum}
+                      onChange={(e) => setApiKeys({ ...apiKeys, impressum: e.target.value })}
+                      placeholder="Angaben gemäß § 5 TMG..."
+                      className="w-full min-h-[150px] p-2 border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="agb">AGB (Allgemeine Geschäftsbedingungen)</Label>
+                    <textarea
+                      id="agb"
+                      value={apiKeys.agb}
+                      onChange={(e) => setApiKeys({ ...apiKeys, agb: e.target.value })}
+                      placeholder="§ 1 Geltungsbereich..."
+                      className="w-full min-h-[150px] p-2 border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="datenschutz">Datenschutzerklärung</Label>
+                    <textarea
+                      id="datenschutz"
+                      value={apiKeys.datenschutz}
+                      onChange={(e) => setApiKeys({ ...apiKeys, datenschutz: e.target.value })}
+                      placeholder="1. Datenschutz auf einen Blick..."
+                      className="w-full min-h-[150px] p-2 border rounded-md"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div>
+                <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                  <Key className="mr-2 h-4 w-4" />
+                  {saveApiKeysMutation.isPending ? "Speichere..." : "Speichern"}
+                </Button>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

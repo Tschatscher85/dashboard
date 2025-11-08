@@ -17,6 +17,9 @@ export default function PropertyLanding() {
     id: propertyId,
   });
 
+  // Fetch company branding settings
+  const { data: settings } = trpc.settings.getCompanyBranding.useQuery();
+
   const [leadData, setLeadData] = useState({
     firstName: "",
     lastName: "",
@@ -590,10 +593,83 @@ export default function PropertyLanding() {
         </section>
       </div>
 
+      {/* Footer */}
+      <footer className="bg-gray-100 border-t mt-16">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Company Info */}
+            <div>
+              <h3 className="font-semibold text-lg mb-4">Kontakt</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                {settings?.companyName && <p className="font-medium text-gray-900">{settings.companyName}</p>}
+                {settings?.companyAddress && <p>{settings.companyAddress}</p>}
+                {settings?.companyPhone && (
+                  <p>
+                    Tel: <a href={`tel:${settings.companyPhone}`} className="hover:text-primary">{settings.companyPhone}</a>
+                  </p>
+                )}
+                {settings?.companyEmail && (
+                  <p>
+                    E-Mail: <a href={`mailto:${settings.companyEmail}`} className="hover:text-primary">{settings.companyEmail}</a>
+                  </p>
+                )}
+                {settings?.companyWebsite && (
+                  <p>
+                    Web: <a href={settings.companyWebsite} target="_blank" rel="noopener noreferrer" className="hover:text-primary">{settings.companyWebsite}</a>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h3 className="font-semibold text-lg mb-4">Rechtliches</h3>
+              <div className="space-y-2 text-sm">
+                {settings?.impressum && (
+                  <a href="#impressum" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.impressum);
+                  }}>
+                    Impressum
+                  </a>
+                )}
+                {settings?.agb && (
+                  <a href="#agb" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.agb);
+                  }}>
+                    AGB
+                  </a>
+                )}
+                {settings?.datenschutz && (
+                  <a href="#datenschutz" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.datenschutz);
+                  }}>
+                    Datenschutzerklärung
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Company Logo */}
+            <div className="flex items-center justify-center md:justify-end">
+              {settings?.companyLogo && (
+                <img src={settings.companyLogo} alt="Company Logo" className="max-h-20 max-w-full object-contain" />
+              )}
+            </div>
+          </div>
+
+          <div className="mt-8 pt-8 border-t text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} {settings?.companyName || 'Immobilienverwaltung'}. Alle Rechte vorbehalten.</p>
+          </div>
+        </div>
+      </footer>
+
       {/* Print Styles */}
       <style>{`
         @media print {
-          nav, button {
+          nav, button, footer {
             display: none !important;
           }
           body {
