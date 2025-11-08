@@ -738,3 +738,9 @@
 - [ ] Automatischer Sync-Trigger beim Erstellen neuer Kontakte implementieren
 - [ ] Inquiry-Type Badges in Kontakte-Liste anzeigen (Immobilienanfrage, Eigentümeranfrage, Versicherung, Hausverwaltung)
 - [ ] Sync-Dialog um alle 4 Anfragetypen erweitern
+
+## Final Features (vor Brevo API)
+- [ ] Kategorisierte Medien-Galerie mit Tabs (12 Kategorien)
+- [ ] Lightbox/Vollbild-Ansicht mit Vor/Zurück-Navigation
+- [ ] Kontakt-Detail mit Brevo-Sync-Status erweitern
+- [ ] Homepage-Sync Buttons verbinden (Veröffentlichen/Aktualisieren)

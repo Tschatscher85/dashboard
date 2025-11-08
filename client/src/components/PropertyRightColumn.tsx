@@ -16,6 +16,7 @@ import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 import { Globe, RefreshCw, Ban, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 interface PropertyRightColumnProps {
   property: Property;
@@ -34,6 +35,35 @@ export function PropertyRightColumn({
   const [externalCommissionType, setExternalCommissionType] = useState<"percent" | "euro">("percent");
 
   const [isCalculating, setIsCalculating] = useState(false);
+  
+  // Homepage sync handlers
+  const utils = trpc.useUtils();
+  
+  const handleHomepageExport = async () => {
+    try {
+      const result = await utils.client.properties.exportForHomepage.query({ propertyIds: [property.id] });
+      toast.success("Objekt erfolgreich für Homepage exportiert!");
+      console.log("Export result:", result);
+    } catch (error: any) {
+      toast.error(`Fehler beim Export: ${error.message}`);
+    }
+  };
+  
+  const handleHomepageSync = async () => {
+    // Get homepage URL from settings
+    const homepageUrl = prompt("Bitte geben Sie die URL Ihrer Homepage ein:");
+    if (!homepageUrl) return;
+    
+    try {
+      await utils.client.properties.syncToHomepage.mutate({ 
+        homepageUrl,
+        propertyIds: [property.id] 
+      });
+      toast.success("Objekt erfolgreich zur Homepage synchronisiert!");
+    } catch (error: any) {
+      toast.error(`Fehler beim Synchronisieren: ${error.message}`);
+    }
+  };
 
   const calculateDistances = async () => {
     if (!formData.street || !formData.city) {
@@ -284,11 +314,23 @@ export function PropertyRightColumn({
                 </div>
               </div>
               <div className="flex gap-2 mt-2">
-                <Button size="sm" variant="outline" className="text-blue-600" disabled={!isEditing}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-blue-600" 
+                  disabled={!isEditing}
+                  onClick={handleHomepageExport}
+                >
                   <Globe className="h-4 w-4 mr-1" />
                   Veröffentlichen
                 </Button>
-                <Button size="sm" variant="outline" className="text-green-600" disabled={!isEditing}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-green-600" 
+                  disabled={!isEditing}
+                  onClick={handleHomepageSync}
+                >
                   <RefreshCw className="h-4 w-4 mr-1" />
                   Aktualisieren
                 </Button>

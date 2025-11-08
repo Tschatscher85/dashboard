@@ -55,6 +55,14 @@ export default function PropertyMedia() {
   // View size control
   const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("medium");
   
+  // Category filter for gallery
+  const [activeCategory, setActiveCategory] = useState<string>("alle");
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxImages, setLightboxImages] = useState<any[]>([]);
+  
   // Links state
   const [virtualTourLink, setVirtualTourLink] = useState("");
   const [businessCardLink, setBusinessCardLink] = useState("");
@@ -353,10 +361,58 @@ export default function PropertyMedia() {
                 {(() => {
                   // Combine database images and NAS images
                   const dbImages = property.images || [];
-                  const totalImages = dbImages.length + (nasImages?.length || 0);
+                  
+                  // Define image categories
+                  const imageCategories = [
+                    { value: "alle", label: "Alle Bilder" },
+                    { value: "hausansicht", label: "Hausansicht" },
+                    { value: "kueche", label: "Küche" },
+                    { value: "bad", label: "Bad" },
+                    { value: "wohnzimmer", label: "Wohnzimmer" },
+                    { value: "schlafzimmer", label: "Schlafzimmer" },
+                    { value: "garten", label: "Garten" },
+                    { value: "balkon_terrasse", label: "Balkon/Terrasse" },
+                    { value: "keller", label: "Keller" },
+                    { value: "dachboden", label: "Dachboden" },
+                    { value: "garage", label: "Garage" },
+                    { value: "grundrisse", label: "Grundrisse" },
+                    { value: "sonstiges", label: "Sonstiges" },
+                  ];
+                  
+                  // Filter images by category
+                  const filteredDbImages = activeCategory === "alle" 
+                    ? dbImages 
+                    : dbImages.filter((img: any) => img.imageType === activeCategory);
+                  
+                  const totalImages = filteredDbImages.length + (nasImages?.length || 0);
                   
                   return (
                     <>
+                      {/* Category Tabs */}
+                      <div className="mb-4 overflow-x-auto">
+                        <div className="flex gap-2 pb-2">
+                          {imageCategories.map((cat) => {
+                            const catCount = cat.value === "alle" 
+                              ? dbImages.length 
+                              : dbImages.filter((img: any) => img.imageType === cat.value).length;
+                            return (
+                              <Button
+                                key={cat.value}
+                                variant={activeCategory === cat.value ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setActiveCategory(cat.value)}
+                                className="whitespace-nowrap"
+                              >
+                                {cat.label}
+                                {catCount > 0 && (
+                                  <span className="ml-1.5 text-xs opacity-70">({catCount})</span>
+                                )}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-4">
                           <h3 className="text-lg font-semibold">
@@ -375,7 +431,7 @@ export default function PropertyMedia() {
                                   setSelectAll(checked);
                                   if (checked) {
                                     const allIds = new Set<string>();
-                                    dbImages.forEach((img: any, idx: number) => allIds.add(`db-${img.id || idx}`));
+                                    filteredDbImages.forEach((img: any, idx: number) => allIds.add(`db-${img.id || idx}`));
                                     nasImages?.forEach((file: any, idx: number) => allIds.add(`nas-${file.filename}`));
                                     setSelectedImages(allIds);
                                   } else {
@@ -451,7 +507,7 @@ export default function PropertyMedia() {
                         "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                       }`}>
                         {/* Database images (S3) */}
-                        {dbImages.map((image: any, index: number) => {
+                        {filteredDbImages.map((image: any, index: number) => {
                           const imageId = `db-${image.id || index}`;
                           const isSelected = selectedImages.has(imageId);
                           return (
@@ -1201,6 +1257,7 @@ function NASTestDialog({
           )}
         </>
       )}
+
     </div>
   );
 }
