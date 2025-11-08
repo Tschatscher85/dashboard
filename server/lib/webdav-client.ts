@@ -47,8 +47,10 @@ export function resetWebDAVClient(): void {
 
 /**
  * Base path for property files on NAS
+ * Note: This is the WebDAV-relative path, not the filesystem path.
+ * The /volume1/ prefix is handled by the NAS internally.
  */
-const BASE_PATH = '/volume1/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf';
+const BASE_PATH = '/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf';
 
 /**
  * Generate property folder name from address

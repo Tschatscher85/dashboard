@@ -383,10 +383,25 @@
 ## NAS Upload Diagnostic and Fix
 
 - [x] Create test endpoint to diagnose NAS connection (testNASConnection)
-- [ ] Add NAS test dialog to PropertyMedia page
-- [ ] Test NAS connection with real credentials
-- [ ] Check if folders can be created on NAS
-- [ ] Test file upload to NAS
-- [ ] Identify why uploads go to S3 instead of NAS
-- [ ] Fix NAS upload issues
+- [x] Add NAS test dialog to PropertyMedia page (button in header)
+- [ ] User: Test NAS connection with real credentials (click "NAS-Verbindung testen" button)
+- [ ] Check if folders can be created on NAS (will be shown in test results)
+- [ ] Test file upload to NAS (will be shown in test results)
+- [ ] Identify why uploads go to S3 instead of NAS (test will reveal this)
+- [ ] Fix NAS upload issues based on test results
 - [ ] Verify files appear on NAS after upload
+
+## Fix NAS Connection Issues (from diagnostic test)
+
+- [ ] Fix "TypeError: Invalid URL" in Create Folders step
+- [ ] Fix "NAS is not reachable" in Basic Connection step
+- [ ] Check WebDAV URL format in environment variables
+- [ ] Verify NAS is accessible from server (network/firewall issue?)
+- [ ] Test connection again after fixes
+
+## NAS WebDAV Path Fix
+
+- [x] Fix BASE_PATH in webdav-client.ts to use WebDAV-relative path (remove /volume1/)
+- [x] Test NAS connection with corrected paths
+- [x] Verify folder creation works
+- [x] Test file upload to NAS
