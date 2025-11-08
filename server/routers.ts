@@ -414,6 +414,116 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    testNASConnection: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { testConnection, getPropertyFolderName, ensurePropertyFolders, uploadFile } = await import("./lib/webdav-client");
+        
+        const results: any = {
+          timestamp: new Date().toISOString(),
+          tests: [],
+        };
+        
+        // Test 1: Basic connection
+        try {
+          const startTime = Date.now();
+          const connected = await testConnection();
+          const duration = Date.now() - startTime;
+          results.tests.push({
+            name: 'Basic Connection',
+            success: connected,
+            duration: `${duration}ms`,
+            message: connected ? 'NAS is reachable' : 'NAS is not reachable',
+          });
+        } catch (error: any) {
+          results.tests.push({
+            name: 'Basic Connection',
+            success: false,
+            error: error.message,
+          });
+        }
+        
+        // Test 2: Get property folder name
+        try {
+          const property = await db.getPropertyById(input.propertyId);
+          if (!property) {
+            throw new Error('Property not found');
+          }
+          const folderName = getPropertyFolderName(property);
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: true,
+            folderName,
+          });
+          results.propertyFolderName = folderName;
+        } catch (error: any) {
+          results.tests.push({
+            name: 'Property Folder Name',
+            success: false,
+            error: error.message,
+          });
+        }
+        
+        // Test 3: Create folders
+        if (results.propertyFolderName) {
+          try {
+            const startTime = Date.now();
+            await ensurePropertyFolders(results.propertyFolderName);
+            const duration = Date.now() - startTime;
+            results.tests.push({
+              name: 'Create Folders',
+              success: true,
+              duration: `${duration}ms`,
+              message: 'Folders created/verified successfully',
+            });
+          } catch (error: any) {
+            results.tests.push({
+              name: 'Create Folders',
+              success: false,
+              error: error.message,
+            });
+          }
+        }
+        
+        // Test 4: Upload test file
+        if (results.propertyFolderName) {
+          try {
+            const startTime = Date.now();
+            const testContent = Buffer.from('NAS Upload Test - ' + new Date().toISOString());
+            const testFileName = `test-${Date.now()}.txt`;
+            const path = await uploadFile(results.propertyFolderName, 'Bilder', testFileName, testContent);
+            const duration = Date.now() - startTime;
+            results.tests.push({
+              name: 'Upload Test File',
+              success: true,
+              duration: `${duration}ms`,
+              path,
+              message: 'Test file uploaded successfully',
+            });
+          } catch (error: any) {
+            results.tests.push({
+              name: 'Upload Test File',
+              success: false,
+              error: error.message,
+            });
+          }
+        }
+        
+        // Summary
+        const successCount = results.tests.filter((t: any) => t.success).length;
+        const totalCount = results.tests.length;
+        results.summary = {
+          passed: successCount,
+          failed: totalCount - successCount,
+          total: totalCount,
+          allPassed: successCount === totalCount,
+        };
+        
+        return results;
+      }),
+
     generateDescription: protectedProcedure
       .input(z.object({
         propertyData: z.any(),

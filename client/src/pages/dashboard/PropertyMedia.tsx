@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PropertyMedia() {
   const { id } = useParams();
@@ -15,6 +17,9 @@ export default function PropertyMedia() {
   
   const [renamingImage, setRenamingImage] = useState<{ id?: number; nasPath?: string; currentName: string } | null>(null);
   const [newName, setNewName] = useState("");
+  const [showNASTest, setShowNASTest] = useState(false);
+  const [nasTestResults, setNasTestResults] = useState<any>(null);
+  const [isTestRunning, setIsTestRunning] = useState(false);
   
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
   
@@ -188,20 +193,42 @@ export default function PropertyMedia() {
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => window.history.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{property.title}</h1>
-            <p className="text-muted-foreground">
-              {property.street} {property.houseNumber}, {property.zipCode} {property.city}
-            </p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.history.back()}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">{property.title}</h1>
+              <p className="text-muted-foreground">
+                {property.street} {property.houseNumber}, {property.zipCode} {property.city}
+              </p>
+            </div>
           </div>
+          <Dialog open={showNASTest} onOpenChange={setShowNASTest}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <TestTube2 className="w-4 h-4 mr-2" />
+                NAS-Verbindung testen
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>NAS-Verbindungstest</DialogTitle>
+              </DialogHeader>
+              <NASTestDialog
+                propertyId={propertyId}
+                results={nasTestResults}
+                setResults={setNasTestResults}
+                isRunning={isTestRunning}
+                setIsRunning={setIsTestRunning}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -508,6 +535,168 @@ export default function PropertyMedia() {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// NAS Test Dialog Component
+function NASTestDialog({
+  propertyId,
+  results,
+  setResults,
+  isRunning,
+  setIsRunning,
+}: {
+  propertyId: number;
+  results: any;
+  setResults: (results: any) => void;
+  isRunning: boolean;
+  setIsRunning: (running: boolean) => void;
+}) {
+  const testQuery = trpc.properties.testNASConnection.useQuery(
+    { propertyId },
+    { enabled: false }
+  );
+
+  const runTest = async () => {
+    setIsRunning(true);
+    setResults(null);
+    try {
+      const result = await testQuery.refetch();
+      setResults(result.data);
+    } catch (error: any) {
+      setResults({
+        error: true,
+        message: error.message,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Button
+        onClick={runTest}
+        disabled={isRunning}
+        className="w-full"
+      >
+        {isRunning ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Test läuft...
+          </>
+        ) : (
+          <>
+            <TestTube2 className="w-4 h-4 mr-2" />
+            Test starten
+          </>
+        )}
+      </Button>
+
+      {results && (
+        <>
+          {results.error ? (
+            <Alert variant="destructive">
+              <XCircle className="w-4 h-4" />
+              <AlertDescription>
+                <strong>Fehler:</strong> {results.message}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4 text-center p-4 bg-muted rounded-lg">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {results.summary.passed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Bestanden</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {results.summary.failed}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Fehlgeschlagen</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">
+                    {results.summary.total}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Gesamt</div>
+                </div>
+              </div>
+
+              {results.summary.allPassed ? (
+                <Alert className="border-green-200 bg-green-50">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <strong>Alle Tests bestanden!</strong> Die NAS-Verbindung funktioniert einwandfrei.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert variant="destructive">
+                  <XCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    <strong>Einige Tests sind fehlgeschlagen.</strong> Bitte prüfen Sie die Details unten.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {results.propertyFolderName && (
+                <div className="p-4 bg-muted rounded-lg space-y-2">
+                  <div className="font-medium">Property-Informationen</div>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Ordnername:</span>{" "}
+                    <code className="bg-background px-2 py-1 rounded text-xs">
+                      {results.propertyFolderName}
+                    </code>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="font-medium">Test-Details</div>
+                {results.tests.map((test: any, index: number) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg border ${
+                      test.success
+                        ? "border-green-200 bg-green-50"
+                        : "border-red-200 bg-red-50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      {test.success ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-600 mt-0.5" />
+                      )}
+                      <div className="flex-1 text-sm">
+                        <div className="font-medium">{test.name}</div>
+                        {test.message && (
+                          <div className="text-muted-foreground mt-1">
+                            {test.message}
+                          </div>
+                        )}
+                        {test.error && (
+                          <div className="text-red-600 mt-1">
+                            <strong>Fehler:</strong> {test.error}
+                          </div>
+                        )}
+                        {test.duration && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Dauer: {test.duration}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
 import PropertyManagement from "./pages/dashboard/PropertyManagement";
 import PropertyLanding from "./pages/PropertyLanding";
 import PropertyMedia from "./pages/dashboard/PropertyMedia";
+import NASTest from "./pages/dashboard/NASTest";
 import Settings from "./pages/Settings";
 import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench } from "lucide-react";
 
@@ -155,6 +156,13 @@ function Router() {
         {() => (
           <DashboardLayout navItems={dashboardNavItems}>
             <PropertyManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/nas-test">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <NASTest />
           </DashboardLayout>
         )}
       </Route>

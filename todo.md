@@ -379,3 +379,14 @@
 - [x] Verify NAS upload path (correct: /Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/[Adresse]/Bilder/)
 - [x] Increase NAS timeout from 3s to 15s
 - [ ] Test actual NAS upload and verify file appears on NAS
+
+## NAS Upload Diagnostic and Fix
+
+- [x] Create test endpoint to diagnose NAS connection (testNASConnection)
+- [ ] Add NAS test dialog to PropertyMedia page
+- [ ] Test NAS connection with real credentials
+- [ ] Check if folders can be created on NAS
+- [ ] Test file upload to NAS
+- [ ] Identify why uploads go to S3 instead of NAS
+- [ ] Fix NAS upload issues
+- [ ] Verify files appear on NAS after upload
