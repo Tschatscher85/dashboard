@@ -72,12 +72,25 @@ export const appRouter = router({
           brevo: process.env.BREVO_API_KEY || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
-          nasProtocol: process.env.NAS_PROTOCOL || "ftp",
-          nasUrl: process.env.NAS_WEBDAV_URL || "ftp.tschatscher.eu",
-          nasPort: process.env.NAS_PORT || "21",
+          // WebDAV (primary)
+          webdavUrl: process.env.WEBDAV_URL || process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
+          webdavPort: process.env.WEBDAV_PORT || "2002",
+          webdavUsername: process.env.WEBDAV_USERNAME || process.env.NAS_USERNAME || "tschatscher",
+          webdavPassword: process.env.WEBDAV_PASSWORD || process.env.NAS_PASSWORD || "",
+          // FTP (fallback)
+          ftpHost: process.env.FTP_HOST || "ftp.tschatscher.eu",
+          ftpPort: process.env.FTP_PORT || "21",
+          ftpUsername: process.env.FTP_USERNAME || process.env.NAS_USERNAME || "tschatscher",
+          ftpPassword: process.env.FTP_PASSWORD || process.env.NAS_PASSWORD || "",
+          ftpSecure: process.env.FTP_SECURE === "true" || false,
+          // Shared
+          nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+          // Legacy fields (for backward compatibility)
+          nasProtocol: process.env.NAS_PROTOCOL || "webdav",
+          nasUrl: process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
+          nasPort: process.env.NAS_PORT || "2002",
           nasUsername: process.env.NAS_USERNAME || "tschatscher",
           nasPassword: process.env.NAS_PASSWORD || "",
-          nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
         };
       }),
 
@@ -87,12 +100,25 @@ export const appRouter = router({
         brevo: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
+        // WebDAV
+        webdavUrl: z.string().optional(),
+        webdavPort: z.string().optional(),
+        webdavUsername: z.string().optional(),
+        webdavPassword: z.string().optional(),
+        // FTP
+        ftpHost: z.string().optional(),
+        ftpPort: z.string().optional(),
+        ftpUsername: z.string().optional(),
+        ftpPassword: z.string().optional(),
+        ftpSecure: z.boolean().optional(),
+        // Shared
+        nasBasePath: z.string().optional(),
+        // Legacy (for backward compatibility)
         nasProtocol: z.enum(["webdav", "ftp", "ftps"]).optional(),
         nasUrl: z.string().optional(),
         nasPort: z.string().optional(),
         nasUsername: z.string().optional(),
         nasPassword: z.string().optional(),
-        nasBasePath: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // In production, save these to a secure settings table or update .env file
@@ -109,18 +135,32 @@ export const appRouter = router({
           nasBasePath: input.nasBasePath || "(default)",
         });
         
-        // Save NAS credentials to environment variables
+        // Save WebDAV credentials
+        if (input.webdavUrl) process.env.WEBDAV_URL = input.webdavUrl;
+        if (input.webdavPort) process.env.WEBDAV_PORT = input.webdavPort;
+        if (input.webdavUsername) process.env.WEBDAV_USERNAME = input.webdavUsername;
+        if (input.webdavPassword) process.env.WEBDAV_PASSWORD = input.webdavPassword;
+        
+        // Save FTP credentials
+        if (input.ftpHost) process.env.FTP_HOST = input.ftpHost;
+        if (input.ftpPort) process.env.FTP_PORT = input.ftpPort;
+        if (input.ftpUsername) process.env.FTP_USERNAME = input.ftpUsername;
+        if (input.ftpPassword) process.env.FTP_PASSWORD = input.ftpPassword;
+        if (input.ftpSecure !== undefined) process.env.FTP_SECURE = String(input.ftpSecure);
+        
+        // Save shared settings
+        if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
+        
+        // Legacy support (for backward compatibility)
         if (input.nasProtocol) process.env.NAS_PROTOCOL = input.nasProtocol;
         if (input.nasUrl) process.env.NAS_WEBDAV_URL = input.nasUrl;
         if (input.nasPort) process.env.NAS_PORT = input.nasPort;
         if (input.nasUsername) process.env.NAS_USERNAME = input.nasUsername;
         if (input.nasPassword) process.env.NAS_PASSWORD = input.nasPassword;
-        if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
         
         console.log('[Settings] NAS configuration updated:', {
-          protocol: input.nasProtocol || process.env.NAS_PROTOCOL,
-          host: input.nasUrl ? '***' : '(not set)',
-          port: input.nasPort || process.env.NAS_PORT,
+          webdav: input.webdavUrl ? '***' : '(not set)',
+          ftp: input.ftpHost ? '***' : '(not set)',
           basePath: input.nasBasePath || process.env.NAS_BASE_PATH,
         });
         
@@ -330,98 +370,130 @@ export const appRouter = router({
         // Convert base64 to buffer
         const fileBuffer = Buffer.from(input.fileData, 'base64');
         
-        // Get NAS configuration
-        const nasProtocol = process.env.NAS_PROTOCOL || "ftp";
-        const nasUrl = process.env.NAS_WEBDAV_URL || "";
-        const nasPort = process.env.NAS_PORT || "21";
-        const nasUsername = process.env.NAS_USERNAME || "";
-        const nasPassword = process.env.NAS_PASSWORD || "";
+        // Get NAS configuration (new separate WebDAV and FTP configs)
+        const webdavUrl = process.env.WEBDAV_URL || "";
+        const webdavPort = process.env.WEBDAV_PORT || "2002";
+        const webdavUsername = process.env.WEBDAV_USERNAME || "";
+        const webdavPassword = process.env.WEBDAV_PASSWORD || "";
+        
+        const ftpHost = process.env.FTP_HOST || "";
+        const ftpPort = process.env.FTP_PORT || "21";
+        const ftpUsername = process.env.FTP_USERNAME || "";
+        const ftpPassword = process.env.FTP_PASSWORD || "";
         
         console.log('\n========== UPLOAD DEBUG ==========');
-        console.log('[Upload] NAS Configuration:', {
-          protocol: nasProtocol,
-          url: nasUrl || '(not set)',
-          port: nasPort,
-          username: nasUsername || '(not set)',
-          hasPassword: !!nasPassword,
+        console.log('[Upload] WebDAV Configuration:', {
+          url: webdavUrl || '(not set)',
+          port: webdavPort,
+          username: webdavUsername || '(not set)',
+          hasPassword: !!webdavPassword,
+        });
+        console.log('[Upload] FTP Configuration:', {
+          host: ftpHost || '(not set)',
+          port: ftpPort,
+          username: ftpUsername || '(not set)',
+          hasPassword: !!ftpPassword,
+        });
+        console.log('[Upload] File:', {
           fileName: input.fileName,
           category: input.category,
         });
         
-        let nasPath: string;
-        let url: string;
+        let nasPath: string = '';
+        let url: string = '';
         let usedFallback = false;
         
-        // Try to upload to NAS first
+        // Try WebDAV first, then FTP, then S3 fallback
         try {
-          if (nasProtocol === "ftp" || nasProtocol === "ftps") {
-            // Use FTP client
-            const ftpClient = await import("./lib/ftp-client");
-            const propertyFolderName = ftpClient.getPropertyFolderName(property);
-            
-            console.log('[Upload] Using FTP client with config:', {
-              host: nasUrl.replace(/^https?:\/\//, ''),
-              port: parseInt(nasPort),
-              secure: nasProtocol === "ftps",
-              propertyFolder: propertyFolderName,
-            });
-            
-            // Test connection with timeout
-            console.log('[Upload] Testing FTP connection...');
-            const connectionOk = await Promise.race([
-              ftpClient.testConnection({
-                host: nasUrl.replace(/^https?:\/\//, ''),
-                port: parseInt(nasPort),
-                user: nasUsername,
-                password: nasPassword,
-                secure: nasProtocol === "ftps",
-              }),
-              new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
-            ]);
-            
-            console.log('[Upload] FTP connection test result:', connectionOk);
-            
-            if (connectionOk) {
-              console.log('[Upload] Connection OK, starting upload...');
-              nasPath = await ftpClient.uploadFile(
-                {
-                  host: nasUrl.replace(/^https?:\/\//, ''),
-                  port: parseInt(nasPort),
-                  user: nasUsername,
-                  password: nasPassword,
-                  secure: nasProtocol === "ftps",
-                },
-                propertyFolderName,
-                input.category,
-                input.fileName,
-                fileBuffer
-              );
-              url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
-            } else {
-              throw new Error('NAS not reachable');
+          let uploadSuccess = false;
+          
+          // Try WebDAV first (if configured)
+          if (webdavUrl && webdavUsername && webdavPassword) {
+            console.log('[Upload] Trying WebDAV first...');
+            try {
+              const webdavClient = await import("./lib/webdav-client");
+              const propertyFolderName = webdavClient.getPropertyFolderName(property);
+              
+              // Test connection with timeout
+              const connectionOk = await Promise.race([
+                webdavClient.testConnection(),
+                new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 10000))
+              ]);
+              
+              if (connectionOk) {
+                console.log('[Upload] WebDAV connection OK, uploading...');
+                nasPath = await webdavClient.uploadFile(
+                  propertyFolderName,
+                  input.category,
+                  input.fileName,
+                  fileBuffer
+                );
+                url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+                uploadSuccess = true;
+                console.log('[Upload] ✅ WebDAV upload successful');
+              } else {
+                console.log('[Upload] WebDAV connection failed, trying FTP...');
+              }
+            } catch (webdavError: any) {
+              console.log('[Upload] WebDAV error:', webdavError.message);
+              console.log('[Upload] Falling back to FTP...');
             }
-          } else {
-            // Use WebDAV client
-            const webdavClient = await import("./lib/webdav-client");
-            const propertyFolderName = webdavClient.getPropertyFolderName(property);
-            
-            // Test connection with timeout
-            const connectionOk = await Promise.race([
-              webdavClient.testConnection(),
-              new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000))
-            ]);
-            
-            if (connectionOk) {
-              nasPath = await webdavClient.uploadFile(
-                propertyFolderName,
-                input.category,
-                input.fileName,
-                fileBuffer
-              );
-              url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
-            } else {
-              throw new Error('NAS not reachable');
+          }
+          
+          // Try FTP if WebDAV failed or not configured
+          if (!uploadSuccess && ftpHost && ftpUsername && ftpPassword) {
+            console.log('[Upload] Trying FTP...');
+            try {
+              const ftpClient = await import("./lib/ftp-client");
+              const propertyFolderName = ftpClient.getPropertyFolderName(property);
+              
+              console.log('[Upload] FTP config:', {
+                host: ftpHost,
+                port: parseInt(ftpPort),
+                propertyFolder: propertyFolderName,
+              });
+              
+              // Test connection with timeout
+              const connectionOk = await Promise.race([
+                ftpClient.testConnection({
+                  host: ftpHost,
+                  port: parseInt(ftpPort),
+                  user: ftpUsername,
+                  password: ftpPassword,
+                  secure: false,
+                }),
+                new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 10000))
+              ]);
+              
+              if (connectionOk) {
+                console.log('[Upload] FTP connection OK, uploading...');
+                nasPath = await ftpClient.uploadFile(
+                  {
+                    host: ftpHost,
+                    port: parseInt(ftpPort),
+                    user: ftpUsername,
+                    password: ftpPassword,
+                    secure: false,
+                  },
+                  propertyFolderName,
+                  input.category,
+                  input.fileName,
+                  fileBuffer
+                );
+                url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+                uploadSuccess = true;
+                console.log('[Upload] ✅ FTP upload successful');
+              } else {
+                console.log('[Upload] FTP connection failed');
+              }
+            } catch (ftpError: any) {
+              console.log('[Upload] FTP error:', ftpError.message);
             }
+          }
+          
+          // If both NAS methods failed, throw error to trigger S3 fallback
+          if (!uploadSuccess) {
+            throw new Error('Both WebDAV and FTP failed');
           }
         } catch (error: any) {
           console.error('[Upload] NAS upload failed, using S3 fallback');
@@ -443,8 +515,9 @@ export const appRouter = router({
           url = s3Result.url;
         }
         
-        // If category is "Bilder", also save to database
-        if (input.category === "Bilder") {
+        // If category is "Bilder" AND we used S3 fallback, save to database
+        // (NAS files are listed directly from NAS, no database entry needed)
+        if (input.category === "Bilder" && usedFallback) {
           await db.createPropertyImage({
             propertyId: input.propertyId,
             imageUrl: url,
@@ -452,6 +525,9 @@ export const appRouter = router({
             title: input.fileName,
             imageType: "other",
           });
+          console.log('[Upload] Created database entry for Cloud image');
+        } else if (input.category === "Bilder") {
+          console.log('[Upload] NAS upload - no database entry needed (files listed from NAS)');
         }
         
         return { 

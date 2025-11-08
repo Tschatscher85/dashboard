@@ -112,8 +112,9 @@ export default function PropertyMedia() {
   const deleteImageMutation = trpc.properties.deleteImage.useMutation({
     onSuccess: () => {
       toast.success("Bild gelöscht");
-      // Refetch property to update images list
-      window.location.reload(); // Simple refresh for now
+      // Refetch both property data and NAS files
+      refetchImages();
+      window.location.reload(); // Full refresh to update property.images
     },
     onError: (error) => {
       toast.error(`Fehler beim Löschen: ${error.message}`);
@@ -202,7 +203,7 @@ export default function PropertyMedia() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => window.history.back()}
+              onClick={() => window.location.href = `/dashboard/properties/${propertyId}`}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>

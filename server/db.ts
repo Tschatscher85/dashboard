@@ -302,6 +302,28 @@ export async function deletePropertyImage(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  // First, get the image to find its S3 key
+  const image = await db.select().from(propertyImages).where(eq(propertyImages.id, id)).limit(1);
+  
+  if (image.length > 0) {
+    const imageData = image[0];
+    
+    // If image is stored on S3 (has imageUrl), delete from S3
+    if (imageData.imageUrl && imageData.imageUrl.includes('storage')) {
+      try {
+        const { storageDelete } = await import('./storage');
+        // Extract S3 key from URL or use nasPath as fallback
+        const s3Key = imageData.nasPath || imageData.imageUrl.split('/').slice(-3).join('/');
+        await storageDelete(s3Key);
+        console.log(`[Delete] Deleted image from S3: ${s3Key}`);
+      } catch (error) {
+        console.error('[Delete] Failed to delete from S3:', error);
+        // Continue with database deletion even if S3 deletion fails
+      }
+    }
+  }
+  
+  // Delete from database
   const result = await db.delete(propertyImages).where(eq(propertyImages.id, id));
   return result;
 }

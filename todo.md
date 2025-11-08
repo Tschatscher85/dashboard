@@ -472,3 +472,60 @@
 - [x] Add "Select All" checkbox
 - [x] Add "Delete Selected" button (appears when items selected)
 - [x] Add confirmation dialog before bulk deletion
+
+## Urgent Fixes - Image Display & Deletion
+
+- [ ] Fix multi-select deletion not working (checkboxes work but delete fails)
+- [ ] Delete old test images from database (Cloud images)
+- [ ] Implement hybrid solution: upload to NAS + save Cloud thumbnail for display
+- [ ] Add protocol indicator (show if WebDAV or FTP is active)
+- [ ] Test image display with hybrid approach
+
+## Settings Redesign - Separate WebDAV and FTP
+
+- [ ] Split NAS configuration into two sections (WebDAV primary, FTP fallback)
+- [ ] Remove protocol dropdown (auto-fallback instead)
+- [ ] Add WebDAV section with URL, port, username, password
+- [ ] Add FTP section with host, port, username, password
+- [ ] Implement automatic fallback: WebDAV → FTP → S3
+- [ ] Show connection status for each protocol
+
+## Upload Code Fix - Use New WebDAV/FTP Config
+
+- [x] Update upload code to read WEBDAV_URL, WEBDAV_PORT, FTP_HOST, FTP_PORT instead of legacy NAS_* variables
+- [x] Implement automatic fallback: try WebDAV first, then FTP, then S3 Cloud
+- [x] Add proper error handling and logging for each protocol attempt
+- [ ] Test image upload with new configuration
+
+## Fix Multi-Select Deletion for Cloud Images
+
+- [ ] Add checkboxes to Cloud images (database images) in PropertyMedia
+- [ ] Fix deleteImageMutation to actually delete images from database
+- [ ] Enable multi-select for both Cloud and NAS images
+- [ ] Test deletion with checkbox selection
+
+
+### Fix Multi-Select Deletion for Cloud Images
+
+- [x] Add checkboxes to Cloud images (database images) in PropertyMedia
+- [x] Fix deleteImageMutation to actually delete images from S3 storage
+- [x] Enable multi-select for both Cloud and NAS images
+- [ ] Test deletion with checkbox selection
+
+## Fix PropertyMedia Navigation
+
+- [x] Change back button to navigate to PropertyDetail instead of Dashboard
+- [x] Update onClick handler to use window.location.href
+
+## Investigate Duplicate Upload Issue
+
+- [x] Check why upload creates both Cloud AND NAS entries
+- [x] Review upload logic in routers.ts
+- [x] Fixed: Database entry now only created for S3 fallback uploads
+
+## URGENT: Delete Cloud Images and Fix Refresh
+
+- [x] Added storageDelete function to delete from S3
+- [x] Updated deletePropertyImage to delete from S3 before database
+- [x] Fix page refresh after deletion (NAS files not updating)
+- [x] Add proper refetch for both database images and NAS files after delete

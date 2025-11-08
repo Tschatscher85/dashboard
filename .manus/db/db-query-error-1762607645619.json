@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM propertyImages WHERE propertyId = (SELECT id FROM properties WHERE street LIKE '%Klingenweg%' LIMIT 1) AND storageType = 'cloud'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute DELETE FROM propertyImages WHERE propertyId = (SELECT id FROM properties WHERE street LIKE '%Klingenweg%' LIMIT 1) AND storageType = 'cloud'",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'storagetype' in 'field list'"
+  ]
+}

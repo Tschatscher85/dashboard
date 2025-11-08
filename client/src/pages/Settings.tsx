@@ -19,9 +19,6 @@ export default function Settings() {
     brevo: false,
     propertySync: false,
     openai: false,
-    nasUrl: false,
-    nasUsername: false,
-    nasPassword: false,
   });
 
   // User form state
@@ -37,11 +34,18 @@ export default function Settings() {
     brevo: "",
     propertySync: "",
     openai: "",
-    nasProtocol: "ftp" as "webdav" | "ftp" | "ftps",
-    nasUrl: "",
-    nasPort: "21",
-    nasUsername: "",
-    nasPassword: "",
+    // WebDAV configuration (primary)
+    webdavUrl: "",
+    webdavPort: "2002",
+    webdavUsername: "",
+    webdavPassword: "",
+    // FTP configuration (fallback)
+    ftpHost: "",
+    ftpPort: "21",
+    ftpUsername: "",
+    ftpPassword: "",
+    ftpSecure: false,
+    // Shared
     nasBasePath: "",
   });
 
@@ -89,11 +93,18 @@ export default function Settings() {
         brevo: currentApiKeys.brevo || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
-        nasProtocol: (currentApiKeys.nasProtocol as "webdav" | "ftp" | "ftps") || "ftp",
-        nasUrl: currentApiKeys.nasUrl || "",
-        nasPort: currentApiKeys.nasPort || "21",
-        nasUsername: currentApiKeys.nasUsername || "",
-        nasPassword: currentApiKeys.nasPassword || "",
+        // WebDAV (primary)
+        webdavUrl: currentApiKeys.webdavUrl || currentApiKeys.nasUrl || "",
+        webdavPort: currentApiKeys.webdavPort || "2002",
+        webdavUsername: currentApiKeys.webdavUsername || currentApiKeys.nasUsername || "",
+        webdavPassword: currentApiKeys.webdavPassword || currentApiKeys.nasPassword || "",
+        // FTP (fallback)
+        ftpHost: currentApiKeys.ftpHost || "",
+        ftpPort: currentApiKeys.ftpPort || "21",
+        ftpUsername: currentApiKeys.ftpUsername || currentApiKeys.nasUsername || "",
+        ftpPassword: currentApiKeys.ftpPassword || currentApiKeys.nasPassword || "",
+        ftpSecure: currentApiKeys.ftpSecure || false,
+        // Shared
         nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
       });
     }
@@ -373,126 +384,142 @@ export default function Settings() {
                 {/* NAS Configuration */}
                 <div className="border-t pt-6 mt-6">
                   <h3 className="text-lg font-semibold mb-4">NAS-Speicher (UGREEN)</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Konfigurieren Sie WebDAV (primär) und FTP (Fallback). Das System versucht automatisch WebDAV → FTP → S3 Cloud.
+                  </p>
                   
-                  <div className="space-y-4">
-                    {/* NAS Protocol */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasProtocol">Protokoll</Label>
-                      <Select
-                        value={apiKeys.nasProtocol}
-                        onValueChange={(value: "webdav" | "ftp" | "ftps") => setApiKeys({ ...apiKeys, nasProtocol: value, nasPort: value === "webdav" ? "2001" : value === "ftps" ? "990" : "21" })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ftp">FTP (unverschlüsselt)</SelectItem>
-                          <SelectItem value="ftps">FTPS (verschlüsselt)</SelectItem>
-                          <SelectItem value="webdav">WebDAV</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-sm text-muted-foreground">
-                        Wählen Sie das Protokoll für die NAS-Verbindung
-                      </p>
+                  {/* WebDAV Configuration (Primary) */}
+                  <div className="space-y-4 mb-6 p-4 border rounded-lg bg-blue-50/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-blue-900">WebDAV (Primär)</h4>
+                      <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">HTTPS verschlüsselt</span>
                     </div>
-
-                    {/* NAS URL/Host */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasUrl">{apiKeys.nasProtocol === "webdav" ? "WebDAV URL" : "FTP Host"}</Label>
-                      <div className="flex gap-2">
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="webdavUrl">WebDAV URL</Label>
                         <Input
-                          id="nasUrl"
-                          type={showApiKeys.nasUrl ? "text" : "password"}
-                          value={apiKeys.nasUrl}
-                          onChange={(e) => setApiKeys({ ...apiKeys, nasUrl: e.target.value })}
-                          placeholder="http://192.168.0.189:2001"
+                          id="webdavUrl"
+                          type="text"
+                          value={apiKeys.webdavUrl}
+                          onChange={(e) => setApiKeys({ ...apiKeys, webdavUrl: e.target.value })}
+                          placeholder="https://ugreen.tschatscher.eu"
                         />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => toggleShowApiKey("nasUrl")}
-                        >
-                          {showApiKeys.nasUrl ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {apiKeys.nasProtocol === "webdav" 
-                          ? "WebDAV-URL Ihres NAS (z.B. https://ugreen.tschatscher.eu)"
-                          : "Hostname oder IP-Adresse Ihres NAS (z.B. ugreen.tschatscher.eu)"}
-                      </p>
+                      <div className="space-y-2">
+                        <Label htmlFor="webdavPort">Port</Label>
+                        <Input
+                          id="webdavPort"
+                          type="text"
+                          value={apiKeys.webdavPort}
+                          onChange={(e) => setApiKeys({ ...apiKeys, webdavPort: e.target.value })}
+                          placeholder="2002"
+                        />
+                      </div>
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="webdavUsername">Benutzername</Label>
+                        <Input
+                          id="webdavUsername"
+                          type="text"
+                          value={apiKeys.webdavUsername}
+                          onChange={(e) => setApiKeys({ ...apiKeys, webdavUsername: e.target.value })}
+                          placeholder="tschatscher"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="webdavPassword">Passwort</Label>
+                        <Input
+                          id="webdavPassword"
+                          type="password"
+                          value={apiKeys.webdavPassword}
+                          onChange={(e) => setApiKeys({ ...apiKeys, webdavPassword: e.target.value })}
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                    {/* NAS Port */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasPort">Port</Label>
-                      <Input
-                        id="nasPort"
-                        type="text"
-                        value={apiKeys.nasPort}
-                        onChange={(e) => setApiKeys({ ...apiKeys, nasPort: e.target.value })}
-                        placeholder={apiKeys.nasProtocol === "webdav" ? "2001" : apiKeys.nasProtocol === "ftps" ? "990" : "21"}
+                  {/* FTP Configuration (Fallback) */}
+                  <div className="space-y-4 mb-6 p-4 border rounded-lg bg-gray-50/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-gray-900">FTP (Fallback)</h4>
+                      <span className="text-xs bg-gray-600 text-white px-2 py-0.5 rounded">Nur wenn WebDAV fehlschlägt</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="ftpHost">FTP Host</Label>
+                        <Input
+                          id="ftpHost"
+                          type="text"
+                          value={apiKeys.ftpHost}
+                          onChange={(e) => setApiKeys({ ...apiKeys, ftpHost: e.target.value })}
+                          placeholder="ftp.tschatscher.eu"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ftpPort">Port</Label>
+                        <Input
+                          id="ftpPort"
+                          type="text"
+                          value={apiKeys.ftpPort}
+                          onChange={(e) => setApiKeys({ ...apiKeys, ftpPort: e.target.value })}
+                          placeholder="21"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="ftpUsername">Benutzername</Label>
+                        <Input
+                          id="ftpUsername"
+                          type="text"
+                          value={apiKeys.ftpUsername}
+                          onChange={(e) => setApiKeys({ ...apiKeys, ftpUsername: e.target.value })}
+                          placeholder="tschatscher"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ftpPassword">Passwort</Label>
+                        <Input
+                          id="ftpPassword"
+                          type="password"
+                          value={apiKeys.ftpPassword}
+                          onChange={(e) => setApiKeys({ ...apiKeys, ftpPassword: e.target.value })}
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="ftpSecure"
+                        checked={apiKeys.ftpSecure}
+                        onChange={(e) => setApiKeys({ ...apiKeys, ftpSecure: e.target.checked, ftpPort: e.target.checked ? "990" : "21" })}
+                        className="rounded"
                       />
-                      <p className="text-sm text-muted-foreground">
-                        Standard: FTP=21, FTPS=990, WebDAV=2001
-                      </p>
+                      <Label htmlFor="ftpSecure" className="cursor-pointer">FTPS verwenden (verschlüsselt, Port 990)</Label>
                     </div>
+                  </div>
 
-                    {/* NAS Username */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasUsername">Benutzername</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="nasUsername"
-                          type={showApiKeys.nasUsername ? "text" : "password"}
-                          value={apiKeys.nasUsername}
-                          onChange={(e) => setApiKeys({ ...apiKeys, nasUsername: e.target.value })}
-                          placeholder="NAS-Benutzername"
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => toggleShowApiKey("nasUsername")}
-                        >
-                          {showApiKeys.nasUsername ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* NAS Password */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasPassword">Passwort</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="nasPassword"
-                          type={showApiKeys.nasPassword ? "text" : "password"}
-                          value={apiKeys.nasPassword}
-                          onChange={(e) => setApiKeys({ ...apiKeys, nasPassword: e.target.value })}
-                          placeholder="NAS-Passwort"
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => toggleShowApiKey("nasPassword")}
-                        >
-                          {showApiKeys.nasPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* NAS Base Path */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nasBasePath">Basis-Pfad</Label>
-                      <Input
-                        id="nasBasePath"
-                        type="text"
-                        value={apiKeys.nasBasePath}
-                        onChange={(e) => setApiKeys({ ...apiKeys, nasBasePath: e.target.value })}
-                        placeholder="/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Basis-Ordner für Immobilien-Dateien auf dem NAS
-                      </p>
-                    </div>
+                  {/* Shared Base Path */}
+                  <div className="space-y-2">
+                    <Label htmlFor="nasBasePath">Basis-Pfad (für beide Protokolle)</Label>
+                    <Input
+                      id="nasBasePath"
+                      type="text"
+                      value={apiKeys.nasBasePath}
+                      onChange={(e) => setApiKeys({ ...apiKeys, nasBasePath: e.target.value })}
+                      placeholder="/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Basis-Ordner für Immobilien-Dateien auf dem NAS
+                    </p>
                   </div>
                 </div>
 
