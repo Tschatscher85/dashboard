@@ -574,29 +574,13 @@ export default function PropertyMedia() {
                             </div>
                             <div className="absolute top-2 right-2 flex gap-2 z-30">
                               <Button
-                                variant="secondary"
-                                size="icon"
-                                className="h-8 w-8 shadow-lg z-30 pointer-events-auto bg-white/90 hover:bg-white"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  setRenamingImage({
-                                    id: image.id,
-                                    currentName: image.title || `Bild ${index + 1}`,
-                                    category: image.category || image.imageType || "sonstiges",
-                                  });
-                                  setNewName(image.displayName || image.title || "");
-                                }}
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                              <Button
                                 variant="destructive"
                                 size="icon"
                                 className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   e.preventDefault();
+                                  alert(`Delete button clicked! Image ID: ${image.id}, Title: ${image.title}`);
                                   
                                   if (!image.id) {
                                     alert('Fehler: Bild hat keine ID!');
@@ -1314,85 +1298,6 @@ function NASTestDialog({
           )}
         </>
       )}
-
-      {/* Rename & Category Change Dialog */}
-      <Dialog open={!!renamingImage} onOpenChange={(open) => !open && setRenamingImage(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Bild bearbeiten</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Aktueller Name</Label>
-              <Input value={renamingImage?.currentName || ""} disabled />
-            </div>
-            <div>
-              <Label>Neuer Anzeigename</Label>
-              <Input 
-                value={newName} 
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Neuer Name für das Bild"
-              />
-            </div>
-            <div>
-              <Label>Kategorie</Label>
-              <select 
-                className="w-full border rounded px-3 py-2"
-                value={renamingImage?.category || "sonstiges"}
-                onChange={(e) => {
-                  if (renamingImage) {
-                    setRenamingImage({ ...renamingImage, category: e.target.value });
-                  }
-                }}
-              >
-                <option value="hausansicht">Hausansicht</option>
-                <option value="kueche">Küche</option>
-                <option value="bad">Bad</option>
-                <option value="wohnzimmer">Wohnzimmer</option>
-                <option value="schlafzimmer">Schlafzimmer</option>
-                <option value="garten">Garten</option>
-                <option value="balkon">Balkon/Terrasse</option>
-                <option value="keller">Keller</option>
-                <option value="dachboden">Dachboden</option>
-                <option value="garage">Garage/Stellplatz</option>
-                <option value="grundrisse">Grundrisse</option>
-                <option value="sonstiges">Sonstiges</option>
-              </select>
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setRenamingImage(null)}>
-                Abbrechen
-              </Button>
-              <Button onClick={async () => {
-                if (!renamingImage) return;
-                
-                try {
-                  if (renamingImage.id) {
-                    // Update database image
-                    await trpc.properties.updateImage.mutate({
-                      id: renamingImage.id,
-                      displayName: newName || renamingImage.currentName,
-                      category: renamingImage.category,
-                    });
-                    toast.success("Bild aktualisiert");
-                    refetchImages();
-                    window.location.reload();
-                  } else {
-                    toast.error("Umbenennen von NAS-Dateien noch nicht unterstützt");
-                  }
-                } catch (error: any) {
-                  toast.error(`Fehler: ${error.message}`);
-                }
-                
-                setRenamingImage(null);
-                setNewName("");
-              }}>
-                Speichern
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
     </div>
   );
