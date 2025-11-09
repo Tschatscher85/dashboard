@@ -40,6 +40,25 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
 
   const { data: property } = trpc.properties.getById.useQuery({ id: propertyId });
   const { data: documents } = trpc.documents.listByProperty.useQuery({ propertyId });
+  
+  // Load NAS files for all categories
+  const { data: nasImages } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: 'Bilder' },
+    { enabled: !!propertyId }
+  );
+  const { data: nasObjektunterlagen } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: 'Objektunterlagen' },
+    { enabled: !!propertyId }
+  );
+  const { data: nasSensibleDaten } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: 'Sensible Daten' },
+    { enabled: !!propertyId }
+  );
+  const { data: nasVertragsunterlagen } = trpc.properties.listNASFiles.useQuery(
+    { propertyId, category: 'Vertragsunterlagen' },
+    { enabled: !!propertyId }
+  );
+  
   const utils = trpc.useUtils();
 
   const updateImageMutation = trpc.properties.updateImage.useMutation({
@@ -66,6 +85,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
 
   // Combine images and documents into media items
   const mediaItems: MediaItem[] = [
+    // Database images
     ...(property?.images || []).map((img: any) => ({
       id: img.id,
       type: "image" as const,
@@ -76,6 +96,18 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       showOnLandingPage: img.showOnLandingPage,
       nasPath: img.nasPath,
     })),
+    // NAS images
+    ...(nasImages || []).map((img: any, idx: number) => ({
+      id: -1 - idx, // Negative IDs for NAS files
+      type: "image" as const,
+      url: img.url || img.path,
+      title: img.name,
+      category: "Bilder",
+      displayName: img.name,
+      showOnLandingPage: 1,
+      nasPath: img.path,
+    })),
+    // Database documents
     ...(documents || []).map((doc: any) => ({
       id: doc.id,
       type: "document" as const,
@@ -87,6 +119,34 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       isFloorPlan: doc.isFloorPlan,
       useInExpose: doc.useInExpose,
       nasPath: doc.nasPath,
+    })),
+    // NAS documents
+    ...(nasObjektunterlagen || []).map((doc: any, idx: number) => ({
+      id: -1000 - idx,
+      type: "document" as const,
+      url: doc.url || doc.path,
+      title: doc.name,
+      category: "Objektunterlagen",
+      displayName: doc.name,
+      nasPath: doc.path,
+    })),
+    ...(nasSensibleDaten || []).map((doc: any, idx: number) => ({
+      id: -2000 - idx,
+      type: "document" as const,
+      url: doc.url || doc.path,
+      title: doc.name,
+      category: "Sensible Daten",
+      displayName: doc.name,
+      nasPath: doc.path,
+    })),
+    ...(nasVertragsunterlagen || []).map((doc: any, idx: number) => ({
+      id: -3000 - idx,
+      type: "document" as const,
+      url: doc.url || doc.path,
+      title: doc.name,
+      category: "Vertragsunterlagen",
+      displayName: doc.name,
+      nasPath: doc.path,
     })),
   ];
 

@@ -284,7 +284,26 @@ export async function createPropertyImage(image: InsertPropertyImage) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(propertyImages).values(image);
+  // Use raw SQL to avoid Drizzle's 'default' keyword issue
+  const result = await db.execute(
+    `INSERT INTO propertyImages 
+     (propertyId, imageUrl, nasPath, title, description, imageType, sortOrder, category, displayName, showOnLandingPage, isFeatured) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ,
+    [
+      image.propertyId,
+      image.imageUrl,
+      image.nasPath || null,
+      image.title || null,
+      image.description || null,
+      image.imageType || 'sonstiges',
+      image.sortOrder ?? 0,
+      image.category || null,
+      image.displayName || null,
+      image.showOnLandingPage ?? 1,
+      image.isFeatured ?? 0,
+    ]
+  );
   return result;
 }
 

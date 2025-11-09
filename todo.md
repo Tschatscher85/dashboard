@@ -882,3 +882,10 @@
 - [x] Add featured image selection: Allow marking one image as "Titelbild" (featured image)
 - [x] Implement title synchronization: "Titel" and "Attraktive Überschrift" should sync automatically
 - [x] Display featured image: Show featured image next to property title instead of generic icon
+
+## Medien Tab - NAS Display (Propstack-style)
+
+- [x] Load images from NAS and display in gallery at top of Medien tab
+- [x] Load documents from NAS and display grouped by category below images
+- [x] Show document count per category
+- [x] Display file size and upload date for each document

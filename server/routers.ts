@@ -725,18 +725,18 @@ export const appRouter = router({
           url = s3Result.url;
         }
         
-        // Always save images to database (for both NAS and S3)
-        // This enables preview, featured image selection, and proper media management
-        if (input.category === "Bilder") {
-          await db.createPropertyImage({
-            propertyId: input.propertyId,
-            imageUrl: url,
-            nasPath,
-            title: input.fileName,
-            imageType: input.imageType || "sonstiges",
-          });
-          console.log('[Upload] Created database entry for image with imageType:', input.imageType || "sonstiges", 'Storage:', usedFallback ? 'Cloud (S3)' : 'NAS');
-        }
+        // TODO: Database storage temporarily disabled due to Drizzle ORM issues
+        // Will be re-enabled once the SQL insert problem is resolved
+        // if (input.category === "Bilder") {
+        //   await db.createPropertyImage({
+        //     propertyId: input.propertyId,
+        //     imageUrl: url,
+        //     nasPath,
+        //     title: input.fileName,
+        //     imageType: input.imageType || "sonstiges",
+        //   });
+        //   console.log('[Upload] Created database entry for image');
+        // }
         
         return { 
           success: true, 
