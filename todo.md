@@ -882,8 +882,3 @@
 - [x] Add featured image selection: Allow marking one image as "Titelbild" (featured image)
 - [x] Implement title synchronization: "Titel" and "Attraktive Überschrift" should sync automatically
 - [x] Display featured image: Show featured image next to property title instead of generic icon
-
-## New Critical Issues (User Reported)
-
-- [x] Medien-Tab zeigt keine hochgeladenen Bilder an (trotz erfolgreicher Datenbank-Speicherung)
-- [x] Medien-Tab zeigt keine hochgeladenen Dokumente an

@@ -736,18 +736,6 @@ export const appRouter = router({
             imageType: input.imageType || "sonstiges",
           });
           console.log('[Upload] Created database entry for image with imageType:', input.imageType || "sonstiges", 'Storage:', usedFallback ? 'Cloud (S3)' : 'NAS');
-        } else {
-          // Save documents to database (Objektunterlagen, Sensible Daten, Vertragsunterlagen)
-          await db.createDocument({
-            propertyId: input.propertyId,
-            fileUrl: url,
-            nasPath,
-            title: input.fileName,
-            documentType: input.category === "Objektunterlagen" ? "brochure" : 
-                         input.category === "Sensible Daten" ? "contract" : "other",
-            category: input.category,
-          });
-          console.log('[Upload] Created database entry for document, category:', input.category, 'Storage:', usedFallback ? 'Cloud (S3)' : 'NAS');
         }
         
         return { 
