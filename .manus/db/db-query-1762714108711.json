@@ -1,0 +1,15 @@
+{
+  "query": "SELECT * FROM appConfig WHERE configKey = 'NAS_PUBLIC_USERNAME'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT * FROM appConfig WHERE configKey = 'NAS_PUBLIC_USERNAME'",
+  "rows": [
+    {
+      "configKey": "NAS_PUBLIC_USERNAME",
+      "configValue": "ImmoJaeger",
+      "updatedAt": "2025-11-09 18:42:21"
+    }
+  ],
+  "messages": [],
+  "stdout": "configKey\tconfigValue\tupdatedAt\nNAS_PUBLIC_USERNAME\tImmoJaeger\t2025-11-09 18:42:21\n",
+  "stderr": "",
+  "execution_time_ms": 392
+}

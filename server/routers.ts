@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+import { getDb } from "./db";
 import { generateExpose } from "./exposeGenerator";
 import { getBrevoClient } from "./brevoClient";
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "./googleCalendar";
@@ -81,8 +82,25 @@ export const appRouter = router({
 
     getApiKeys: protectedProcedure
       .query(async () => {
-        // In production, these should be stored in a secure settings table
-        // For now, we return empty strings as placeholders
+        // Load configuration from database (appConfig table)
+        const db = await getDb();
+        const configMap = new Map<string, string>();
+        
+        if (db) {
+          try {
+            const { appConfig } = await import('../drizzle/schema');
+            const configs = await db.select().from(appConfig);
+            configs.forEach(c => configMap.set(c.configKey, c.configValue || ''));
+          } catch (error) {
+            console.error('[getApiKeys] Failed to load from database:', error);
+          }
+        }
+        
+        // Helper to get value from DB or fallback to env
+        const getConfig = (key: string, envKey?: string, defaultValue: string = '') => {
+          return configMap.get(key) || (envKey ? process.env[envKey] : '') || defaultValue;
+        };
+        
         return {
           superchat: process.env.SUPERCHAT_API_KEY || "",
           brevo: process.env.BREVO_API_KEY || "",
@@ -103,21 +121,21 @@ export const appRouter = router({
           is24AccessTokenSecret: process.env.IS24_ACCESS_TOKEN_SECRET || "",
           is24UseSandbox: process.env.IS24_USE_SANDBOX === "true" || false,
           // WebDAV (primary)
-          webdavUrl: process.env.WEBDAV_URL || process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
-          webdavPort: process.env.WEBDAV_PORT || "2002",
-          webdavUsername: process.env.WEBDAV_USERNAME || process.env.NAS_USERNAME || "tschatscher",
-          webdavPassword: process.env.WEBDAV_PASSWORD || process.env.NAS_PASSWORD || "",
+          webdavUrl: getConfig('WEBDAV_URL', 'NAS_WEBDAV_URL', 'https://ugreen.tschatscher.eu/'),
+          webdavPort: getConfig('WEBDAV_PORT', 'WEBDAV_PORT', '2002'),
+          webdavUsername: getConfig('WEBDAV_USERNAME', 'NAS_USERNAME', 'tschatscher'),
+          webdavPassword: getConfig('WEBDAV_PASSWORD', 'NAS_PASSWORD', ''),
           // FTP (fallback)
-          ftpHost: process.env.FTP_HOST || "ftp.tschatscher.eu",
-          ftpPort: process.env.FTP_PORT || "21",
-          ftpUsername: process.env.FTP_USERNAME || process.env.NAS_USERNAME || "tschatscher",
-          ftpPassword: process.env.FTP_PASSWORD || process.env.NAS_PASSWORD || "",
-          ftpSecure: process.env.FTP_SECURE === "true" || false,
+          ftpHost: getConfig('FTP_HOST', 'FTP_HOST', 'ftp.tschatscher.eu'),
+          ftpPort: getConfig('FTP_PORT', 'FTP_PORT', '21'),
+          ftpUsername: getConfig('FTP_USERNAME', 'NAS_USERNAME', 'tschatscher'),
+          ftpPassword: getConfig('FTP_PASSWORD', 'NAS_PASSWORD', ''),
+          ftpSecure: getConfig('FTP_SECURE', 'FTP_SECURE', 'false') === 'true',
           // Public Read-Only Access
-          nasPublicUsername: process.env.NAS_PUBLIC_USERNAME || "",
-          nasPublicPassword: process.env.NAS_PUBLIC_PASSWORD || "",
+          nasPublicUsername: getConfig('NAS_PUBLIC_USERNAME', 'NAS_PUBLIC_USERNAME', ''),
+          nasPublicPassword: getConfig('NAS_PUBLIC_PASSWORD', 'NAS_PUBLIC_PASSWORD', ''),
           // Shared
-          nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
+          nasBasePath: getConfig('NAS_BASE_PATH', 'NAS_BASE_PATH', '/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf'),
           // Immobilienmakler Branding
           realestateLogo: process.env.REALESTATE_LOGO || "",
           realestateName: process.env.REALESTATE_NAME || "",
@@ -378,6 +396,44 @@ export const appRouter = router({
           ftp: input.ftpHost ? '***' : '(not set)',
           basePath: input.nasBasePath || process.env.NAS_BASE_PATH,
         });
+        
+        // Save to database (appConfig table)
+        const db = await getDb();
+        if (db) {
+          try {
+            const { appConfig } = await import('../drizzle/schema');
+            const { eq } = await import('drizzle-orm');
+            
+            // Helper to upsert config
+            const upsertConfig = async (key: string, value: string | undefined) => {
+              if (value === undefined) return;
+              const existing = await db!.select().from(appConfig).where(eq(appConfig.configKey, key)).limit(1);
+              if (existing.length > 0) {
+                await db!.update(appConfig).set({ configValue: value }).where(eq(appConfig.configKey, key));
+              } else {
+                await db!.insert(appConfig).values({ configKey: key, configValue: value });
+              }
+            };
+            
+            // Save all WebDAV/FTP/NAS settings to database
+            await upsertConfig('WEBDAV_URL', input.webdavUrl);
+            await upsertConfig('WEBDAV_PORT', input.webdavPort);
+            await upsertConfig('WEBDAV_USERNAME', input.webdavUsername);
+            await upsertConfig('WEBDAV_PASSWORD', input.webdavPassword);
+            await upsertConfig('FTP_HOST', input.ftpHost);
+            await upsertConfig('FTP_PORT', input.ftpPort);
+            await upsertConfig('FTP_USERNAME', input.ftpUsername);
+            await upsertConfig('FTP_PASSWORD', input.ftpPassword);
+            await upsertConfig('FTP_SECURE', input.ftpSecure?.toString());
+            await upsertConfig('NAS_PUBLIC_USERNAME', input.nasPublicUsername);
+            await upsertConfig('NAS_PUBLIC_PASSWORD', input.nasPublicPassword);
+            await upsertConfig('NAS_BASE_PATH', input.nasBasePath);
+            
+            console.log('[Settings] Configuration saved to database');
+          } catch (error) {
+            console.error('[Settings] Failed to save to database:', error);
+          }
+        }
         
         return { success: true };
       }),

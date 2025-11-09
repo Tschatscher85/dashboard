@@ -120,6 +120,13 @@
       "when": 1762690014858,
       "tag": "0016_tiny_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1762713730969,
+      "tag": "0017_wild_gladiator",
+      "breakpoints": true
     }
   ]
 }

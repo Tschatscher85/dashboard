@@ -42,17 +42,63 @@ async function startServer() {
     return handleSuperchatWebhook(req, res);
   });
 
-  // NAS file proxy endpoint
+  // NAS file proxy endpoint (uses READ-ONLY credentials for security)
   app.get('/api/nas/*', async (req, res) => {
     try {
       // Extract path after /api/nas/
       const nasPath = req.path.replace('/api/nas/', '');
       console.log('[NAS Proxy] Fetching file:', nasPath);
 
-      // Try WebDAV first
+      // Load credentials from database (appConfig table)
+      const { getDb } = await import('../db');
+      const database = await getDb();
+      const configMap = new Map<string, string>();
+      
+      if (database) {
+        try {
+          const { appConfig } = await import('../../drizzle/schema');
+          const configs = await database.select().from(appConfig);
+          configs.forEach(c => configMap.set(c.configKey, c.configValue || ''));
+        } catch (error) {
+          console.error('[NAS Proxy] Failed to load config from database:', error);
+        }
+      }
+      
+      // Helper to get value from DB or fallback to env
+      const getConfig = (key: string, envKey?: string) => {
+        return configMap.get(key) || (envKey ? process.env[envKey] : '') || '';
+      };
+
+      // Get read-only credentials from database or environment
+      const readOnlyUsername = getConfig('NAS_PUBLIC_USERNAME', 'NAS_PUBLIC_USERNAME');
+      const readOnlyPassword = getConfig('NAS_PUBLIC_PASSWORD', 'NAS_PUBLIC_PASSWORD');
+      const webdavUrl = getConfig('WEBDAV_URL', 'WEBDAV_URL') || getConfig('NAS_WEBDAV_URL', 'NAS_WEBDAV_URL');
+      const webdavPort = getConfig('WEBDAV_PORT', 'WEBDAV_PORT') || '2002';
+
+      if (!webdavUrl || !readOnlyUsername || !readOnlyPassword) {
+        console.error('[NAS Proxy] Missing read-only credentials');
+        return res.status(500).json({ error: 'NAS read-only access not configured' });
+      }
+
+      // Try WebDAV with read-only credentials
       try {
-        const { getWebDAVClient } = await import('../lib/webdav-client');
-        const client = getWebDAVClient();
+        const { createClient } = await import('webdav');
+        
+        // Normalize WebDAV URL (remove trailing slash, add port)
+        let normalizedUrl = webdavUrl.replace(/\/+$/, '');
+        if (!normalizedUrl.includes(':' + webdavPort)) {
+          normalizedUrl = `${normalizedUrl}:${webdavPort}`;
+        }
+        
+        console.log('[NAS Proxy] Connecting to:', normalizedUrl);
+        console.log('[NAS Proxy] Using read-only user:', readOnlyUsername);
+        
+        // Create WebDAV client with read-only credentials
+        const client = createClient(normalizedUrl, {
+          username: readOnlyUsername,
+          password: readOnlyPassword,
+        });
+        
         // Decode URL-encoded path (e.g., %20 -> space)
         const decodedPath = decodeURIComponent(nasPath);
         const fullPath = `/${decodedPath}`;
@@ -75,7 +121,7 @@ async function startServer() {
         res.setHeader('Content-Type', contentType);
         res.setHeader('Cache-Control', 'public, max-age=3600');
         res.send(fileBuffer);
-        console.log('[NAS Proxy] ✅ File served successfully');
+        console.log('[NAS Proxy] ✅ File served successfully via read-only user');
       } catch (webdavError: any) {
         console.error('[NAS Proxy] WebDAV error:', webdavError.message);
         res.status(404).json({ error: 'File not found on NAS', details: webdavError.message });

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO appConfig (configKey, configValue) VALUES \n('WEBDAV_URL', 'https://ugreen.tschatscher.eu/'),\n('WEBDAV_PORT', '2002'),\n('WEBDAV_USERNAME', 'tschatscher'),\n('NAS_PUBLIC_USERNAME', 'ImmoJaeger'),\n('NAS_PUBLIC_PASSWORD', 'Survive1985#'),\n('FTP_HOST', 'ftp.tschatscher.eu'),\n('FTP_PORT', '21'),\n('FTP_USERNAME', 'tschatscher'),\n('NAS_BASE_PATH', '/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf')\nON DUPLICATE KEY UPDATE configValue = VALUES(configValue)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute INSERT INTO appConfig (configKey, configValue) VALUES \n('WEBDAV_URL', 'https://ugreen.tschatscher.eu/'),\n('WEBDAV_PORT', '2002'),\n('WEBDAV_USERNAME', 'tschatscher'),\n('NAS_PUBLIC_USERNAME', 'ImmoJaeger'),\n('NAS_PUBLIC_PASSWORD', 'Survive1985#'),\n('FTP_HOST', 'ftp.tschatscher.eu'),\n('FTP_PORT', '21'),\n('FTP_USERNAME', 'tschatscher'),\n('NAS_BASE_PATH', '/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf')\nON DUPLICATE KEY UPDATE configValue = VALUES(configValue)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 398
+}

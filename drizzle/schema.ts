@@ -738,3 +738,16 @@ export const inquiries = mysqlTable("inquiries", {
 
 export type Inquiry = typeof inquiries.$inferSelect;
 export type InsertInquiry = typeof inquiries.$inferInsert;
+
+/**
+ * App Configuration - Persistent application settings
+ * Stores configuration values that persist across deployments
+ */
+export const appConfig = mysqlTable("appConfig", {
+  configKey: varchar("configKey", { length: 255 }).primaryKey(),
+  configValue: text("configValue"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AppConfig = typeof appConfig.$inferSelect;
+export type InsertAppConfig = typeof appConfig.$inferInsert;

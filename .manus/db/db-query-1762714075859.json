@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE appConfig SET configValue = 'https://ugreen.tschatscher.eu' WHERE configKey = 'WEBDAV_URL'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute UPDATE appConfig SET configValue = 'https://ugreen.tschatscher.eu' WHERE configKey = 'WEBDAV_URL'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 413
+}
