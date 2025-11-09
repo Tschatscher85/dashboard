@@ -862,3 +862,53 @@ export async function updateImageSortOrder(imageId: number, sortOrder: number) {
     .set({ sortOrder })
     .where(eq(propertyImages.id, imageId));
 }
+
+// ============ IMAGE METADATA OPERATIONS ============
+
+export async function updateImageMetadata(data: {
+  id: number;
+  title?: string;
+  category?: string;
+  displayName?: string;
+  showOnLandingPage?: number;
+}) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const updateData: Record<string, any> = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.displayName !== undefined) updateData.displayName = data.displayName;
+  if (data.showOnLandingPage !== undefined) updateData.showOnLandingPage = data.showOnLandingPage;
+
+  await db.update(propertyImages)
+    .set(updateData)
+    .where(eq(propertyImages.id, data.id));
+}
+
+export async function updateDocumentMetadata(data: {
+  id: number;
+  title?: string;
+  category?: string;
+  showOnLandingPage?: number;
+  isFloorPlan?: number;
+  useInExpose?: number;
+}) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const updateData: Record<string, any> = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.showOnLandingPage !== undefined) updateData.showOnLandingPage = data.showOnLandingPage;
+  if (data.isFloorPlan !== undefined) updateData.isFloorPlan = data.isFloorPlan;
+  if (data.useInExpose !== undefined) updateData.useInExpose = data.useInExpose;
+
+  await db.update(documents)
+    .set(updateData)
+    .where(eq(documents.id, data.id));
+}

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { PropertyDetailForm, type Property, type PropertyDetailFormHandle } from "@/components/PropertyDetailForm";
+import { EnhancedMediaTab } from "@/components/EnhancedMediaTab";
 import { useState, useRef, useEffect } from "react";
 
 export default function PropertyDetail() {
@@ -399,40 +400,9 @@ export default function PropertyDetail() {
           </Card>
         </TabsContent>
 
-        {/* Media Tab */}
+        {/* Media Tab - Enhanced with images and documents */}
         <TabsContent value="media">
-          <Card>
-            <CardHeader>
-              <CardTitle>Medien ({allImages.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {allImages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {allImages.map((image: any, index: number) => (
-                    <div key={index} className="relative aspect-square overflow-hidden rounded-lg border group">
-                      <img
-                        src={image.imageUrl || image}
-                        alt={image.title || `Bild ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3EBild%3C/text%3E%3C/svg%3E';
-                        }}
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
-                        Bild {index + 1}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Noch keine Medien hochgeladen</p>
-                  <p className="text-sm mt-2">Klicken Sie auf "Medien verwalten", um Bilder hochzuladen</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <EnhancedMediaTab propertyId={propertyId} />
         </TabsContent>
 
         {/* History Tab */}

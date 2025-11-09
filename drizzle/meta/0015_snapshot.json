@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "ee922bf0-83ae-4b0a-a91a-982fa40e5487",
-  "prevId": "b4c8d7b4-2dd0-4129-a1a7-c062623ce171",
+  "id": "ff64582c-278b-4ad0-992c-1979f1d0e12c",
+  "prevId": "ee922bf0-83ae-4b0a-a91a-982fa40e5487",
   "tables": {
     "activities": {
       "name": "activities",
@@ -636,6 +636,52 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "showOnLandingPage": {
+          "name": "showOnLandingPage",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "isFloorPlan": {
+          "name": "isFloorPlan",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "useInExpose": {
+          "name": "useInExpose",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
         },
         "uploadedBy": {
           "name": "uploadedBy",
@@ -2416,6 +2462,28 @@
           "notNull": false,
           "autoincrement": false,
           "default": 0
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "displayName": {
+          "name": "displayName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "showOnLandingPage": {
+          "name": "showOnLandingPage",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 1
         },
         "createdAt": {
           "name": "createdAt",

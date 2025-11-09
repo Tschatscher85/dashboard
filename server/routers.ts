@@ -2026,6 +2026,20 @@ Die Beschreibung soll:
         
         return { success: true, message: "Bildersortierung gespeichert" };
       }),
+
+    // Update image metadata
+    updateImage: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        category: z.string().optional(),
+        displayName: z.string().optional(),
+        showOnLandingPage: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateImageMetadata(input);
+        return { success: true };
+      }),
   }),
 
   // ============ LEADS ============
@@ -2454,6 +2468,29 @@ Die Beschreibung soll:
       .mutation(async ({ input }) => {
         const { uploadImagesToIS24 } = await import("./is24");
         return await uploadImagesToIS24(input.is24ExternalId, input.imageUrls);
+      }),
+   }),
+
+  // ============ DOCUMENTS ============
+  documents: router({
+    listByProperty: protectedProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getDocumentsByProperty(input.propertyId);
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        category: z.string().optional(),
+        showOnLandingPage: z.number().optional(),
+        isFloorPlan: z.number().optional(),
+        useInExpose: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateDocumentMetadata(input);
+        return { success: true };
       }),
   }),
 

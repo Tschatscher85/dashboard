@@ -854,3 +854,17 @@
 - [x] Navigation dynamisch anpassen basierend auf aktivierten Modulen
 - [x] Dashboard-Widgets entsprechend anpassen
 - [x] Testen der Modul-Aktivierung
+
+## Erweiterte Medien-Verwaltung (Propstack-Style)
+- [ ] "Unterlagen Upload Haus" Kategorie entfernen
+- [ ] Medien-Tab erweitern: Bilder UND Dokumente zusammen anzeigen
+- [ ] Kategorisierung nach Raum (Kinderzimmer, Küche, etc.) + Dokumenttypen
+- [ ] Dokument-Bearbeitung Dialog:
+  - [ ] Titel bearbeiten
+  - [ ] Tags zuweisen
+  - [ ] Toggle: "Auf Landing Page anzeigen"
+  - [ ] Toggle: "Als Grundriss markieren"
+  - [ ] Toggle: "Als Exposé verwenden"
+- [ ] Bilder kategorisieren (Bad, Küche, Wohnzimmer, etc.)
+- [ ] Bilder umbenennen können
+- [ ] Datenbank-Schema erweitern (category, showOnLandingPage, isFloorPlan, useInExpose)

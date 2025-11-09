@@ -333,6 +333,11 @@ export const propertyImages = mysqlTable("propertyImages", {
   ]).default("sonstiges"),
   sortOrder: int("sortOrder").default(0),
   
+  // Enhanced media management
+  category: varchar("category", { length: 100 }), // Custom category like "Kinderzimmer 2", "Energieausweis"
+  displayName: varchar("displayName", { length: 255 }), // Custom display name
+  showOnLandingPage: int("showOnLandingPage").default(1), // 1 = show, 0 = hide
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -362,6 +367,14 @@ export const documents = mysqlTable("documents", {
   // Relations
   propertyId: int("propertyId"), // can be null for general documents
   contactId: int("contactId"), // can be null
+  
+  // Enhanced media management
+  category: varchar("category", { length: 100 }), // Custom category like "Objektunterlagen", "Sensible Daten"
+  tags: text("tags"), // JSON array of tags
+  showOnLandingPage: int("showOnLandingPage").default(0), // 1 = show, 0 = hide
+  isFloorPlan: int("isFloorPlan").default(0), // 1 = is floorplan, 0 = not
+  useInExpose: int("useInExpose").default(0), // 1 = use in expose, 0 = don't use
+  sortOrder: int("sortOrder").default(0),
   
   // Metadata
   uploadedBy: int("uploadedBy").notNull(),
