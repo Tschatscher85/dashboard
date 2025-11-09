@@ -108,6 +108,10 @@ export default function Settings() {
     impressum: "",
     agb: "",
     datenschutz: "",
+    // Module Activation
+    moduleImmobilienmakler: true,
+    moduleVersicherungen: true,
+    moduleHausverwaltung: true,
   });
 
   // Queries
@@ -137,9 +141,13 @@ export default function Settings() {
     },
   });
 
+  const utils = trpc.useUtils();
+  
   const saveApiKeysMutation = trpc.settings.saveApiKeys.useMutation({
     onSuccess: () => {
       toast.success("API-Konfiguration gespeichert");
+      // Invalidate to refresh navigation
+      utils.settings.getApiKeys.invalidate();
     },
     onError: (error) => {
       toast.error(`Fehler: ${error.message}`);
@@ -263,6 +271,7 @@ export default function Settings() {
             <TabsTrigger value="users">Benutzerverwaltung</TabsTrigger>
             <TabsTrigger value="api">API-Konfiguration</TabsTrigger>
             <TabsTrigger value="company">Unternehmen</TabsTrigger>
+            <TabsTrigger value="modules">Module</TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
@@ -1068,6 +1077,85 @@ export default function Settings() {
                 </div>
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          {/* Module Activation Tab */}
+          <TabsContent value="modules">
+            <Card>
+              <CardHeader>
+                <CardTitle>Modul-Aktivierung</CardTitle>
+                <CardDescription>
+                  Aktivieren oder deaktivieren Sie Geschäftsbereiche. Deaktivierte Module werden in der Navigation ausgeblendet.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  {/* Immobilienmakler Module */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-1">
+                      <Label htmlFor="moduleImmobilienmakler" className="text-base font-semibold">
+                        Immobilienmakler
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Zeigt die Navigation "Objekte" und alle Immobilienmakler-Funktionen
+                      </p>
+                    </div>
+                    <Switch
+                      id="moduleImmobilienmakler"
+                      checked={apiKeys.moduleImmobilienmakler}
+                      onCheckedChange={(checked) =>
+                        setApiKeys({ ...apiKeys, moduleImmobilienmakler: checked })
+                      }
+                    />
+                  </div>
+
+                  {/* Versicherungen Module */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-1">
+                      <Label htmlFor="moduleVersicherungen" className="text-base font-semibold">
+                        Versicherungen
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Zeigt die Navigation "Versicherungen" und alle Versicherungs-Funktionen
+                      </p>
+                    </div>
+                    <Switch
+                      id="moduleVersicherungen"
+                      checked={apiKeys.moduleVersicherungen}
+                      onCheckedChange={(checked) =>
+                        setApiKeys({ ...apiKeys, moduleVersicherungen: checked })
+                      }
+                    />
+                  </div>
+
+                  {/* Hausverwaltung Module */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-1">
+                      <Label htmlFor="moduleHausverwaltung" className="text-base font-semibold">
+                        Hausverwaltung
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Zeigt die Navigation "Hausverwaltung" und alle Hausverwaltungs-Funktionen
+                      </p>
+                    </div>
+                    <Switch
+                      id="moduleHausverwaltung"
+                      checked={apiKeys.moduleHausverwaltung}
+                      onCheckedChange={(checked) =>
+                        setApiKeys({ ...apiKeys, moduleHausverwaltung: checked })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Modul-Einstellungen speichern"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

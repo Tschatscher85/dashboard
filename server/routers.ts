@@ -161,6 +161,10 @@ export const appRouter = router({
           nasPort: process.env.NAS_PORT || "2002",
           nasUsername: process.env.NAS_USERNAME || "tschatscher",
           nasPassword: process.env.NAS_PASSWORD || "",
+          // Module Activation
+          moduleImmobilienmakler: process.env.MODULE_IMMOBILIENMAKLER !== "false",
+          moduleVersicherungen: process.env.MODULE_VERSICHERUNGEN !== "false",
+          moduleHausverwaltung: process.env.MODULE_HAUSVERWALTUNG !== "false",
         };
       }),
 
@@ -243,6 +247,10 @@ export const appRouter = router({
         nasPort: z.string().optional(),
         nasUsername: z.string().optional(),
         nasPassword: z.string().optional(),
+        // Module Activation
+        moduleImmobilienmakler: z.boolean().optional(),
+        moduleVersicherungen: z.boolean().optional(),
+        moduleHausverwaltung: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {
         // In production, save these to a secure settings table or update .env file
@@ -349,6 +357,11 @@ export const appRouter = router({
         if (input.nasPort) process.env.NAS_PORT = input.nasPort;
         if (input.nasUsername) process.env.NAS_USERNAME = input.nasUsername;
         if (input.nasPassword) process.env.NAS_PASSWORD = input.nasPassword;
+        
+        // Save module activation settings
+        if (input.moduleImmobilienmakler !== undefined) process.env.MODULE_IMMOBILIENMAKLER = String(input.moduleImmobilienmakler);
+        if (input.moduleVersicherungen !== undefined) process.env.MODULE_VERSICHERUNGEN = String(input.moduleVersicherungen);
+        if (input.moduleHausverwaltung !== undefined) process.env.MODULE_HAUSVERWALTUNG = String(input.moduleHausverwaltung);
         
         console.log('[Settings] NAS configuration updated:', {
           webdav: input.webdavUrl ? '***' : '(not set)',

@@ -847,3 +847,10 @@
 
 ## Bugfixes (Neu)
 - [x] WebDAV URL mit Trailing Slash (/) funktioniert nicht - URLs normalisieren (beide Formate unterstützen)
+
+## Modul-Aktivierung System
+- [x] Checkboxen in Settings für Modul-Aktivierung (Immobilienmakler, Versicherungen, Hausverwaltung)
+- [x] Backend-Endpoints zum Speichern und Abrufen der Modul-Einstellungen
+- [x] Navigation dynamisch anpassen basierend auf aktivierten Modulen
+- [x] Dashboard-Widgets entsprechend anpassen
+- [x] Testen der Modul-Aktivierung

@@ -20,8 +20,9 @@ import PropertyMedia from "./pages/dashboard/PropertyMedia";
 import NASTest from "./pages/dashboard/NASTest";
 import Settings from "./pages/Settings";
 import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
-const dashboardNavItems = [
+const getAllNavItems = () => [
   {
     title: "Übersicht",
     href: "/dashboard",
@@ -69,7 +70,38 @@ const dashboardNavItems = [
   },
 ];
 
+// Filter navigation items based on active modules
+function useFilteredNavItems() {
+  const { data: moduleSettings } = trpc.settings.getApiKeys.useQuery();
+  
+  const allNavItems = getAllNavItems();
+  
+  if (!moduleSettings) return allNavItems;
+  
+  return allNavItems.filter(item => {
+    // Always show these items
+    if (["Übersicht", "Kontakte", "Leads", "Termine", "Dokumente", "Einstellungen"].includes(item.title)) {
+      return true;
+    }
+    
+    // Filter based on module activation
+    if (item.title === "Objekte" && moduleSettings.moduleImmobilienmakler === false) {
+      return false;
+    }
+    if (item.title === "Versicherungen" && moduleSettings.moduleVersicherungen === false) {
+      return false;
+    }
+    if (item.title === "Hausverwaltung" && moduleSettings.moduleHausverwaltung === false) {
+      return false;
+    }
+    
+    return true;
+  });
+}
+
 function Router() {
+  const dashboardNavItems = useFilteredNavItems();
+  
   return (
     <Switch>
       <Route path={"/"} component={Home} />
