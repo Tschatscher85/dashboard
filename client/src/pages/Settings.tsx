@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import BrandingSection from "@/components/BrandingSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { UserPlus, Key, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Key, Trash2, Edit, Eye, EyeOff, Upload, Image as ImageIcon } from "lucide-react";
 
 export default function Settings() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
@@ -67,14 +68,43 @@ export default function Settings() {
     ftpSecure: false,
     // Shared
     nasBasePath: "",
-    // Company Branding
+    // Immobilienmakler Branding
+    realestateLogo: "",
+    realestateName: "",
+    realestatePhone: "",
+    realestateEmail: "",
+    realestateAddress: "",
+    realestateWebsite: "",
+    realestateImpressum: "",
+    realestateAgb: "",
+    realestateDatenschutz: "",
+    // Versicherungen Branding
+    insuranceLogo: "",
+    insuranceName: "",
+    insurancePhone: "",
+    insuranceEmail: "",
+    insuranceAddress: "",
+    insuranceWebsite: "",
+    insuranceImpressum: "",
+    insuranceAgb: "",
+    insuranceDatenschutz: "",
+    // Hausverwaltung Branding
+    propertyMgmtLogo: "",
+    propertyMgmtName: "",
+    propertyMgmtPhone: "",
+    propertyMgmtEmail: "",
+    propertyMgmtAddress: "",
+    propertyMgmtWebsite: "",
+    propertyMgmtImpressum: "",
+    propertyMgmtAgb: "",
+    propertyMgmtDatenschutz: "",
+    // Legacy Company Branding
     companyLogo: "",
     companyName: "",
     companyPhone: "",
     companyEmail: "",
     companyAddress: "",
     companyWebsite: "",
-    // Legal Pages
     impressum: "",
     agb: "",
     datenschutz: "",
@@ -151,14 +181,43 @@ export default function Settings() {
         ftpSecure: currentApiKeys.ftpSecure || false,
         // Shared
         nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
-        // Company Branding
+        // Immobilienmakler Branding
+        realestateLogo: currentApiKeys.realestateLogo || "",
+        realestateName: currentApiKeys.realestateName || "",
+        realestatePhone: currentApiKeys.realestatePhone || "",
+        realestateEmail: currentApiKeys.realestateEmail || "",
+        realestateAddress: currentApiKeys.realestateAddress || "",
+        realestateWebsite: currentApiKeys.realestateWebsite || "",
+        realestateImpressum: currentApiKeys.realestateImpressum || "",
+        realestateAgb: currentApiKeys.realestateAgb || "",
+        realestateDatenschutz: currentApiKeys.realestateDatenschutz || "",
+        // Versicherungen Branding
+        insuranceLogo: currentApiKeys.insuranceLogo || "",
+        insuranceName: currentApiKeys.insuranceName || "",
+        insurancePhone: currentApiKeys.insurancePhone || "",
+        insuranceEmail: currentApiKeys.insuranceEmail || "",
+        insuranceAddress: currentApiKeys.insuranceAddress || "",
+        insuranceWebsite: currentApiKeys.insuranceWebsite || "",
+        insuranceImpressum: currentApiKeys.insuranceImpressum || "",
+        insuranceAgb: currentApiKeys.insuranceAgb || "",
+        insuranceDatenschutz: currentApiKeys.insuranceDatenschutz || "",
+        // Hausverwaltung Branding
+        propertyMgmtLogo: currentApiKeys.propertyMgmtLogo || "",
+        propertyMgmtName: currentApiKeys.propertyMgmtName || "",
+        propertyMgmtPhone: currentApiKeys.propertyMgmtPhone || "",
+        propertyMgmtEmail: currentApiKeys.propertyMgmtEmail || "",
+        propertyMgmtAddress: currentApiKeys.propertyMgmtAddress || "",
+        propertyMgmtWebsite: currentApiKeys.propertyMgmtWebsite || "",
+        propertyMgmtImpressum: currentApiKeys.propertyMgmtImpressum || "",
+        propertyMgmtAgb: currentApiKeys.propertyMgmtAgb || "",
+        propertyMgmtDatenschutz: currentApiKeys.propertyMgmtDatenschutz || "",
+        // Legacy Company Branding
         companyLogo: currentApiKeys.companyLogo || "",
         companyName: currentApiKeys.companyName || "",
         companyPhone: currentApiKeys.companyPhone || "",
         companyEmail: currentApiKeys.companyEmail || "",
         companyAddress: currentApiKeys.companyAddress || "",
         companyWebsite: currentApiKeys.companyWebsite || "",
-        // Legal Pages
         impressum: currentApiKeys.impressum || "",
         agb: currentApiKeys.agb || "",
         datenschutz: currentApiKeys.datenschutz || "",
@@ -748,9 +807,16 @@ export default function Settings() {
                           id="webdavUrl"
                           type="text"
                           value={apiKeys.webdavUrl}
-                          onChange={(e) => setApiKeys({ ...apiKeys, webdavUrl: e.target.value })}
+                          onChange={(e) => {
+                            // Automatically remove trailing slash
+                            const url = e.target.value.endsWith('/') ? e.target.value.slice(0, -1) : e.target.value;
+                            setApiKeys({ ...apiKeys, webdavUrl: url });
+                          }}
                           placeholder="https://ugreen.tschatscher.eu"
                         />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ⚠️ Bitte ohne abschließenden Slash (/) eingeben
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="webdavPort">Port</Label>
@@ -879,127 +945,129 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          {/* Company Branding Tab */}
+          {/* Company Branding Tab - Now with three sub-sections */}
           <TabsContent value="company">
-            <div className="space-y-6">
-              {/* Company Branding Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Makler-Branding</CardTitle>
-                  <CardDescription>
-                    Diese Informationen werden im Exposé PDF und auf der Landing Page angezeigt
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="companyLogo">Makler-Logo URL</Label>
-                    <Input
-                      id="companyLogo"
-                      value={apiKeys.companyLogo}
-                      onChange={(e) => setApiKeys({ ...apiKeys, companyLogo: e.target.value })}
-                      placeholder="https://example.com/logo.png"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyName">Firmenname</Label>
-                    <Input
-                      id="companyName"
-                      value={apiKeys.companyName}
-                      onChange={(e) => setApiKeys({ ...apiKeys, companyName: e.target.value })}
-                      placeholder="Immobilien Mustermann GmbH"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="companyPhone">Telefon</Label>
-                      <Input
-                        id="companyPhone"
-                        value={apiKeys.companyPhone}
-                        onChange={(e) => setApiKeys({ ...apiKeys, companyPhone: e.target.value })}
-                        placeholder="+49 123 456789"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="companyEmail">E-Mail</Label>
-                      <Input
-                        id="companyEmail"
-                        type="email"
-                        value={apiKeys.companyEmail}
-                        onChange={(e) => setApiKeys({ ...apiKeys, companyEmail: e.target.value })}
-                        placeholder="info@example.com"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="companyAddress">Adresse</Label>
-                    <Input
-                      id="companyAddress"
-                      value={apiKeys.companyAddress}
-                      onChange={(e) => setApiKeys({ ...apiKeys, companyAddress: e.target.value })}
-                      placeholder="Musterstraße 123, 12345 Musterstadt"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="companyWebsite">Website</Label>
-                    <Input
-                      id="companyWebsite"
-                      value={apiKeys.companyWebsite}
-                      onChange={(e) => setApiKeys({ ...apiKeys, companyWebsite: e.target.value })}
-                      placeholder="https://www.example.com"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+            <Tabs defaultValue="realestate" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="realestate">Immobilienmakler</TabsTrigger>
+                <TabsTrigger value="insurance">Versicherungen</TabsTrigger>
+                <TabsTrigger value="propertymgmt">Hausverwaltung</TabsTrigger>
+              </TabsList>
 
-              {/* Legal Pages Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Rechtliche Seiten</CardTitle>
-                  <CardDescription>
-                    Diese Texte werden im Footer der Landing Page verlinkt
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="impressum">Impressum</Label>
-                    <textarea
-                      id="impressum"
-                      value={apiKeys.impressum}
-                      onChange={(e) => setApiKeys({ ...apiKeys, impressum: e.target.value })}
-                      placeholder="Angaben gemäß § 5 TMG..."
-                      className="w-full min-h-[150px] p-2 border rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="agb">AGB (Allgemeine Geschäftsbedingungen)</Label>
-                    <textarea
-                      id="agb"
-                      value={apiKeys.agb}
-                      onChange={(e) => setApiKeys({ ...apiKeys, agb: e.target.value })}
-                      placeholder="§ 1 Geltungsbereich..."
-                      className="w-full min-h-[150px] p-2 border rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="datenschutz">Datenschutzerklärung</Label>
-                    <textarea
-                      id="datenschutz"
-                      value={apiKeys.datenschutz}
-                      onChange={(e) => setApiKeys({ ...apiKeys, datenschutz: e.target.value })}
-                      placeholder="1. Datenschutz auf einen Blick..."
-                      className="w-full min-h-[150px] p-2 border rounded-md"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Immobilienmakler Tab */}
+              <TabsContent value="realestate">
+                <BrandingSection
+                  title="Immobilienmakler Branding"
+                  description="Diese Informationen werden im Exposé PDF und auf der Landing Page angezeigt"
+                  data={{
+                    logo: apiKeys.realestateLogo,
+                    name: apiKeys.realestateName,
+                    phone: apiKeys.realestatePhone,
+                    email: apiKeys.realestateEmail,
+                    address: apiKeys.realestateAddress,
+                    website: apiKeys.realestateWebsite,
+                    impressum: apiKeys.realestateImpressum,
+                    agb: apiKeys.realestateAgb,
+                    datenschutz: apiKeys.realestateDatenschutz,
+                  }}
+                  onChange={(data) => setApiKeys({
+                    ...apiKeys,
+                    realestateLogo: data.logo,
+                    realestateName: data.name,
+                    realestatePhone: data.phone,
+                    realestateEmail: data.email,
+                    realestateAddress: data.address,
+                    realestateWebsite: data.website,
+                    realestateImpressum: data.impressum,
+                    realestateAgb: data.agb,
+                    realestateDatenschutz: data.datenschutz,
+                  })}
+                  logoUploadId="realestateLogoUpload"
+                />
+                <div className="mt-6">
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Speichern"}
+                  </Button>
+                </div>
+              </TabsContent>
 
-              <div>
-                <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
-                  <Key className="mr-2 h-4 w-4" />
-                  {saveApiKeysMutation.isPending ? "Speichere..." : "Speichern"}
-                </Button>
-              </div>
-            </div>
+              {/* Versicherungen Tab */}
+              <TabsContent value="insurance">
+                <BrandingSection
+                  title="Versicherungen Branding"
+                  description="Diese Informationen werden für Versicherungs-bezogene Seiten verwendet"
+                  data={{
+                    logo: apiKeys.insuranceLogo,
+                    name: apiKeys.insuranceName,
+                    phone: apiKeys.insurancePhone,
+                    email: apiKeys.insuranceEmail,
+                    address: apiKeys.insuranceAddress,
+                    website: apiKeys.insuranceWebsite,
+                    impressum: apiKeys.insuranceImpressum,
+                    agb: apiKeys.insuranceAgb,
+                    datenschutz: apiKeys.insuranceDatenschutz,
+                  }}
+                  onChange={(data) => setApiKeys({
+                    ...apiKeys,
+                    insuranceLogo: data.logo,
+                    insuranceName: data.name,
+                    insurancePhone: data.phone,
+                    insuranceEmail: data.email,
+                    insuranceAddress: data.address,
+                    insuranceWebsite: data.website,
+                    insuranceImpressum: data.impressum,
+                    insuranceAgb: data.agb,
+                    insuranceDatenschutz: data.datenschutz,
+                  })}
+                  logoUploadId="insuranceLogoUpload"
+                />
+                <div className="mt-6">
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Speichern"}
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* Hausverwaltung Tab */}
+              <TabsContent value="propertymgmt">
+                <BrandingSection
+                  title="Hausverwaltung Branding"
+                  description="Diese Informationen werden für Hausverwaltungs-bezogene Seiten verwendet"
+                  data={{
+                    logo: apiKeys.propertyMgmtLogo,
+                    name: apiKeys.propertyMgmtName,
+                    phone: apiKeys.propertyMgmtPhone,
+                    email: apiKeys.propertyMgmtEmail,
+                    address: apiKeys.propertyMgmtAddress,
+                    website: apiKeys.propertyMgmtWebsite,
+                    impressum: apiKeys.propertyMgmtImpressum,
+                    agb: apiKeys.propertyMgmtAgb,
+                    datenschutz: apiKeys.propertyMgmtDatenschutz,
+                  }}
+                  onChange={(data) => setApiKeys({
+                    ...apiKeys,
+                    propertyMgmtLogo: data.logo,
+                    propertyMgmtName: data.name,
+                    propertyMgmtPhone: data.phone,
+                    propertyMgmtEmail: data.email,
+                    propertyMgmtAddress: data.address,
+                    propertyMgmtWebsite: data.website,
+                    propertyMgmtImpressum: data.impressum,
+                    propertyMgmtAgb: data.agb,
+                    propertyMgmtDatenschutz: data.datenschutz,
+                  })}
+                  logoUploadId="propertyMgmtLogoUpload"
+                />
+                <div className="mt-6">
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Speichern"}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

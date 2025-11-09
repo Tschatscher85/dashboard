@@ -23,13 +23,23 @@ interface WebDAVConfig {
 /**
  * Get WebDAV client instance (singleton pattern)
  */
+// Helper function to normalize WebDAV URL
+function normalizeUrl(url: string): string {
+  // Remove trailing slash if present (causes connection issues)
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
 export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
+  const rawUrl = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
+  const url = normalizeUrl(rawUrl);
+  
+  // Reset client if URL changed (to pick up new config)
+  if (webdavClient && config?.url && normalizeUrl(config.url) !== normalizeUrl(process.env.NAS_WEBDAV_URL || '')) {
+    console.log('[WebDAV] URL changed, resetting client');
+    webdavClient = null;
+  }
+  
   if (!webdavClient) {
-    let url = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
-    // Remove trailing slash if present (causes connection issues)
-    if (url.endsWith('/')) {
-      url = url.slice(0, -1);
-    }
     const username = config?.username || process.env.NAS_USERNAME || 'tschatscher';
     const password = config?.password || process.env.NAS_PASSWORD || '';
 

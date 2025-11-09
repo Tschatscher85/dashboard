@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import DraggableImageGallery from "@/components/DraggableImageGallery";
 
 export default function PropertyMedia() {
   const { id } = useParams();
@@ -63,6 +64,19 @@ export default function PropertyMedia() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxImages, setLightboxImages] = useState<any[]>([]);
+  
+  // Drag and drop state
+  const [isDragDropEnabled, setIsDragDropEnabled] = useState(false);
+  
+  // Reorder images mutation
+  const reorderImagesMutation = trpc.properties.reorderImages.useMutation({
+    onSuccess: () => {
+      toast.success("Bildersortierung gespeichert");
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Speichern: ${error.message}`);
+    },
+  });
   
   // Links state
   const [virtualTourLink, setVirtualTourLink] = useState("");

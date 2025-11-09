@@ -814,3 +814,36 @@
 - [ ] Datenschutz-Text in Einstellungen
 - [ ] Landing Page Footer mit rechtlichen Links erweitern
 - [ ] Exposé PDF mit Makler-Logo und Kontaktdaten erweitern
+
+## Neue Features - Erweiterungen (08.11.2024 - Phase 2)
+
+### Logo-Upload Funktionalität
+- [ ] Logo-Upload-Button in Settings statt URL-Eingabe
+- [ ] Direkter Upload zu S3 mit Vorschau
+- [ ] Automatische Bildoptimierung für Logos
+
+### Separate Branding für drei Geschäftsbereiche
+- [ ] Datenbank-Schema erweitern für drei Branding-Sets (Immobilienmakler, Versicherungen, Hausverwaltung)
+- [ ] Settings UI mit drei Tabs: Immobilienmakler, Versicherungen, Hausverwaltung
+- [ ] Jeder Bereich eigenes Logo, Kontaktdaten, AGB, Impressum, Datenschutz
+- [ ] Backend-Endpunkte für separate Branding-Daten
+- [ ] PropertyLanding zeigt korrektes Branding basierend auf Kontext
+
+### Drag & Drop Bildersortierung
+- [ ] dnd-kit Integration für Drag & Drop
+- [ ] Drag & Drop in PropertyMedia Galerie implementieren
+- [ ] sortOrder Feld zur propertyImages Tabelle hinzufügen
+- [ ] Sortierung in Datenbank speichern
+- [ ] Sortierung in Exposé PDF und Landing Page übernehmen
+
+### Dokumenten-Vorlagen System
+- [ ] Vorlagen-Verwaltung UI in Settings erstellen
+- [ ] PDF-Generierung für Mietvertrag
+- [ ] PDF-Generierung für Kaufvertrag
+- [ ] PDF-Generierung für Übergabeprotokoll
+- [ ] Automatische Datenbefüllung aus Immobilien- und Kontaktdaten
+- [ ] Download-Button in PropertyDetail
+- [ ] Download-Button in ContactDetail
+
+## Bugfixes (Neu)
+- [x] WebDAV URL mit Trailing Slash (/) funktioniert nicht - URLs normalisieren (beide Formate unterstützen)

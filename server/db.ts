@@ -851,3 +851,14 @@ export async function getInquiriesByContact(contactId: number) {
   
   return result;
 }
+
+// ============ IMAGE SORTING ============
+export async function updateImageSortOrder(imageId: number, sortOrder: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(propertyImages)
+    .set({ sortOrder })
+    .where(eq(propertyImages.id, imageId));
+}

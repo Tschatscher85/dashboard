@@ -115,17 +115,46 @@ export const appRouter = router({
           ftpSecure: process.env.FTP_SECURE === "true" || false,
           // Shared
           nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
-          // Company Branding
-          companyLogo: process.env.COMPANY_LOGO || "",
-          companyName: process.env.COMPANY_NAME || "",
-          companyPhone: process.env.COMPANY_PHONE || "",
-          companyEmail: process.env.COMPANY_EMAIL || "",
-          companyAddress: process.env.COMPANY_ADDRESS || "",
-          companyWebsite: process.env.COMPANY_WEBSITE || "",
-          // Legal Pages
-          impressum: process.env.IMPRESSUM || "",
-          agb: process.env.AGB || "",
-          datenschutz: process.env.DATENSCHUTZ || "",
+          // Immobilienmakler Branding
+          realestateLogo: process.env.REALESTATE_LOGO || "",
+          realestateName: process.env.REALESTATE_NAME || "",
+          realestatePhone: process.env.REALESTATE_PHONE || "",
+          realestateEmail: process.env.REALESTATE_EMAIL || "",
+          realestateAddress: process.env.REALESTATE_ADDRESS || "",
+          realestateWebsite: process.env.REALESTATE_WEBSITE || "",
+          realestateImpressum: process.env.REALESTATE_IMPRESSUM || "",
+          realestateAgb: process.env.REALESTATE_AGB || "",
+          realestateDatenschutz: process.env.REALESTATE_DATENSCHUTZ || "",
+          // Versicherungen Branding
+          insuranceLogo: process.env.INSURANCE_LOGO || "",
+          insuranceName: process.env.INSURANCE_NAME || "",
+          insurancePhone: process.env.INSURANCE_PHONE || "",
+          insuranceEmail: process.env.INSURANCE_EMAIL || "",
+          insuranceAddress: process.env.INSURANCE_ADDRESS || "",
+          insuranceWebsite: process.env.INSURANCE_WEBSITE || "",
+          insuranceImpressum: process.env.INSURANCE_IMPRESSUM || "",
+          insuranceAgb: process.env.INSURANCE_AGB || "",
+          insuranceDatenschutz: process.env.INSURANCE_DATENSCHUTZ || "",
+          // Hausverwaltung Branding
+          propertyMgmtLogo: process.env.PROPERTYMGMT_LOGO || "",
+          propertyMgmtName: process.env.PROPERTYMGMT_NAME || "",
+          propertyMgmtPhone: process.env.PROPERTYMGMT_PHONE || "",
+          propertyMgmtEmail: process.env.PROPERTYMGMT_EMAIL || "",
+          propertyMgmtAddress: process.env.PROPERTYMGMT_ADDRESS || "",
+          propertyMgmtWebsite: process.env.PROPERTYMGMT_WEBSITE || "",
+          propertyMgmtImpressum: process.env.PROPERTYMGMT_IMPRESSUM || "",
+          propertyMgmtAgb: process.env.PROPERTYMGMT_AGB || "",
+          propertyMgmtDatenschutz: process.env.PROPERTYMGMT_DATENSCHUTZ || "",
+          // Legacy Company Branding (for backward compatibility)
+          companyLogo: process.env.COMPANY_LOGO || process.env.REALESTATE_LOGO || "",
+          companyName: process.env.COMPANY_NAME || process.env.REALESTATE_NAME || "",
+          companyPhone: process.env.COMPANY_PHONE || process.env.REALESTATE_PHONE || "",
+          companyEmail: process.env.COMPANY_EMAIL || process.env.REALESTATE_EMAIL || "",
+          companyAddress: process.env.COMPANY_ADDRESS || process.env.REALESTATE_ADDRESS || "",
+          companyWebsite: process.env.COMPANY_WEBSITE || process.env.REALESTATE_WEBSITE || "",
+          impressum: process.env.IMPRESSUM || process.env.REALESTATE_IMPRESSUM || "",
+          agb: process.env.AGB || process.env.REALESTATE_AGB || "",
+          datenschutz: process.env.DATENSCHUTZ || process.env.REALESTATE_DATENSCHUTZ || "",
           // Legacy fields (for backward compatibility)
           nasProtocol: process.env.NAS_PROTOCOL || "webdav",
           nasUrl: process.env.NAS_WEBDAV_URL || "https://ugreen.tschatscher.eu:2002",
@@ -168,14 +197,43 @@ export const appRouter = router({
         ftpSecure: z.boolean().optional(),
         // Shared
         nasBasePath: z.string().optional(),
-        // Company Branding
+        // Immobilienmakler Branding
+        realestateLogo: z.string().optional(),
+        realestateName: z.string().optional(),
+        realestatePhone: z.string().optional(),
+        realestateEmail: z.string().optional(),
+        realestateAddress: z.string().optional(),
+        realestateWebsite: z.string().optional(),
+        realestateImpressum: z.string().optional(),
+        realestateAgb: z.string().optional(),
+        realestateDatenschutz: z.string().optional(),
+        // Versicherungen Branding
+        insuranceLogo: z.string().optional(),
+        insuranceName: z.string().optional(),
+        insurancePhone: z.string().optional(),
+        insuranceEmail: z.string().optional(),
+        insuranceAddress: z.string().optional(),
+        insuranceWebsite: z.string().optional(),
+        insuranceImpressum: z.string().optional(),
+        insuranceAgb: z.string().optional(),
+        insuranceDatenschutz: z.string().optional(),
+        // Hausverwaltung Branding
+        propertyMgmtLogo: z.string().optional(),
+        propertyMgmtName: z.string().optional(),
+        propertyMgmtPhone: z.string().optional(),
+        propertyMgmtEmail: z.string().optional(),
+        propertyMgmtAddress: z.string().optional(),
+        propertyMgmtWebsite: z.string().optional(),
+        propertyMgmtImpressum: z.string().optional(),
+        propertyMgmtAgb: z.string().optional(),
+        propertyMgmtDatenschutz: z.string().optional(),
+        // Legacy Company Branding (for backward compatibility)
         companyLogo: z.string().optional(),
         companyName: z.string().optional(),
         companyPhone: z.string().optional(),
         companyEmail: z.string().optional(),
         companyAddress: z.string().optional(),
         companyWebsite: z.string().optional(),
-        // Legal Pages
         impressum: z.string().optional(),
         agb: z.string().optional(),
         datenschutz: z.string().optional(),
@@ -241,15 +299,46 @@ export const appRouter = router({
         // Save shared settings
         if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
         
-        // Save company branding
+        // Save Immobilienmakler branding
+        if (input.realestateLogo) process.env.REALESTATE_LOGO = input.realestateLogo;
+        if (input.realestateName) process.env.REALESTATE_NAME = input.realestateName;
+        if (input.realestatePhone) process.env.REALESTATE_PHONE = input.realestatePhone;
+        if (input.realestateEmail) process.env.REALESTATE_EMAIL = input.realestateEmail;
+        if (input.realestateAddress) process.env.REALESTATE_ADDRESS = input.realestateAddress;
+        if (input.realestateWebsite) process.env.REALESTATE_WEBSITE = input.realestateWebsite;
+        if (input.realestateImpressum) process.env.REALESTATE_IMPRESSUM = input.realestateImpressum;
+        if (input.realestateAgb) process.env.REALESTATE_AGB = input.realestateAgb;
+        if (input.realestateDatenschutz) process.env.REALESTATE_DATENSCHUTZ = input.realestateDatenschutz;
+        
+        // Save Versicherungen branding
+        if (input.insuranceLogo) process.env.INSURANCE_LOGO = input.insuranceLogo;
+        if (input.insuranceName) process.env.INSURANCE_NAME = input.insuranceName;
+        if (input.insurancePhone) process.env.INSURANCE_PHONE = input.insurancePhone;
+        if (input.insuranceEmail) process.env.INSURANCE_EMAIL = input.insuranceEmail;
+        if (input.insuranceAddress) process.env.INSURANCE_ADDRESS = input.insuranceAddress;
+        if (input.insuranceWebsite) process.env.INSURANCE_WEBSITE = input.insuranceWebsite;
+        if (input.insuranceImpressum) process.env.INSURANCE_IMPRESSUM = input.insuranceImpressum;
+        if (input.insuranceAgb) process.env.INSURANCE_AGB = input.insuranceAgb;
+        if (input.insuranceDatenschutz) process.env.INSURANCE_DATENSCHUTZ = input.insuranceDatenschutz;
+        
+        // Save Hausverwaltung branding
+        if (input.propertyMgmtLogo) process.env.PROPERTYMGMT_LOGO = input.propertyMgmtLogo;
+        if (input.propertyMgmtName) process.env.PROPERTYMGMT_NAME = input.propertyMgmtName;
+        if (input.propertyMgmtPhone) process.env.PROPERTYMGMT_PHONE = input.propertyMgmtPhone;
+        if (input.propertyMgmtEmail) process.env.PROPERTYMGMT_EMAIL = input.propertyMgmtEmail;
+        if (input.propertyMgmtAddress) process.env.PROPERTYMGMT_ADDRESS = input.propertyMgmtAddress;
+        if (input.propertyMgmtWebsite) process.env.PROPERTYMGMT_WEBSITE = input.propertyMgmtWebsite;
+        if (input.propertyMgmtImpressum) process.env.PROPERTYMGMT_IMPRESSUM = input.propertyMgmtImpressum;
+        if (input.propertyMgmtAgb) process.env.PROPERTYMGMT_AGB = input.propertyMgmtAgb;
+        if (input.propertyMgmtDatenschutz) process.env.PROPERTYMGMT_DATENSCHUTZ = input.propertyMgmtDatenschutz;
+        
+        // Save legacy company branding (for backward compatibility)
         if (input.companyLogo) process.env.COMPANY_LOGO = input.companyLogo;
         if (input.companyName) process.env.COMPANY_NAME = input.companyName;
         if (input.companyPhone) process.env.COMPANY_PHONE = input.companyPhone;
         if (input.companyEmail) process.env.COMPANY_EMAIL = input.companyEmail;
         if (input.companyAddress) process.env.COMPANY_ADDRESS = input.companyAddress;
         if (input.companyWebsite) process.env.COMPANY_WEBSITE = input.companyWebsite;
-        
-        // Save legal pages
         if (input.impressum) process.env.IMPRESSUM = input.impressum;
         if (input.agb) process.env.AGB = input.agb;
         if (input.datenschutz) process.env.DATENSCHUTZ = input.datenschutz;
@@ -1902,6 +1991,27 @@ Die Beschreibung soll:
         });
         
         return result;
+      }),
+
+    // Reorder images
+    reorderImages: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        imageIds: z.array(z.string()), // Array of image IDs in new order (format: "db-123" or "nas-filename.jpg")
+      }))
+      .mutation(async ({ input }) => {
+        // Update sortOrder for database images
+        const dbImageIds = input.imageIds
+          .filter(id => id.startsWith('db-'))
+          .map(id => parseInt(id.replace('db-', '')));
+        
+        // Update each image's sortOrder based on its position in the array
+        for (let i = 0; i < dbImageIds.length; i++) {
+          const imageId = dbImageIds[i];
+          await db.updateImageSortOrder(imageId, i);
+        }
+        
+        return { success: true, message: "Bildersortierung gespeichert" };
       }),
   }),
 
