@@ -725,9 +725,9 @@ export const appRouter = router({
           url = s3Result.url;
         }
         
-        // If category is "Bilder" AND we used S3 fallback, save to database
-        // (NAS files are listed directly from NAS, no database entry needed)
-        if (input.category === "Bilder" && usedFallback) {
+        // Always save images to database (for both NAS and S3)
+        // This enables preview, featured image selection, and proper media management
+        if (input.category === "Bilder") {
           await db.createPropertyImage({
             propertyId: input.propertyId,
             imageUrl: url,
@@ -735,9 +735,7 @@ export const appRouter = router({
             title: input.fileName,
             imageType: input.imageType || "sonstiges",
           });
-          console.log('[Upload] Created database entry for Cloud image with imageType:', input.imageType || "sonstiges");
-        } else if (input.category === "Bilder") {
-          console.log('[Upload] NAS upload - no database entry needed (files listed from NAS)');
+          console.log('[Upload] Created database entry for image with imageType:', input.imageType || "sonstiges", 'Storage:', usedFallback ? 'Cloud (S3)' : 'NAS');
         }
         
         return { 
@@ -2056,6 +2054,7 @@ Die Beschreibung soll:
         category: z.string().optional(),
         displayName: z.string().optional(),
         showOnLandingPage: z.number().optional(),
+        isFeatured: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
         await db.updateImageMetadata(input);

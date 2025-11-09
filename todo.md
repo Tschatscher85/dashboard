@@ -873,3 +873,12 @@
 - [ ] WebDAV URL: Trailing Slash (/) wird nicht automatisch entfernt
 - [ ] Modul-Deaktivierung: Toggles funktionieren nicht (Module lassen sich nicht ausschalten)
 - [ ] Medien-Tab: Hochgeladene Dokumente werden nicht angezeigt
+
+## Critical Bugs to Fix (User Reported)
+
+- [x] Fix image upload: Images uploaded to NAS are not being saved to database
+- [x] Fix image preview: Uploaded images show placeholder icon instead of actual image preview
+- [x] Fix Medien tab: Uploaded images do not appear in PropertyDetail Medien tab
+- [x] Add featured image selection: Allow marking one image as "Titelbild" (featured image)
+- [x] Implement title synchronization: "Titel" and "Attraktive Überschrift" should sync automatically
+- [x] Display featured image: Show featured image next to property title instead of generic icon

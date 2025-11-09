@@ -280,11 +280,15 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
           <div className="col-span-2 space-y-2">
-            <Label>Überschrift</Label>
+            <Label>Überschrift (wird automatisch mit Titel synchronisiert)</Label>
             <div className="flex gap-2">
               <Input
-                value={formData.headline || ""}
-                onChange={(e) => handleChange("headline", e.target.value)}
+                value={formData.headline || formData.title || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange("headline", value);
+                  handleChange("title", value); // Sync title with headline
+                }}
                 disabled={!isEditing}
                 placeholder="Attraktive Überschrift für die Immobilie"
                 className="flex-1"

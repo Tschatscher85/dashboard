@@ -871,6 +871,7 @@ export async function updateImageMetadata(data: {
   category?: string;
   displayName?: string;
   showOnLandingPage?: number;
+  isFeatured?: number;
 }) {
   const db = await getDb();
   if (!db) {
@@ -882,6 +883,18 @@ export async function updateImageMetadata(data: {
   if (data.category !== undefined) updateData.category = data.category;
   if (data.displayName !== undefined) updateData.displayName = data.displayName;
   if (data.showOnLandingPage !== undefined) updateData.showOnLandingPage = data.showOnLandingPage;
+  if (data.isFeatured !== undefined) {
+    // If setting this image as featured, unset all other images for this property first
+    if (data.isFeatured === 1) {
+      const image = await db.select().from(propertyImages).where(eq(propertyImages.id, data.id)).limit(1);
+      if (image.length > 0) {
+        await db.update(propertyImages)
+          .set({ isFeatured: 0 })
+          .where(eq(propertyImages.propertyId, image[0].propertyId));
+      }
+    }
+    updateData.isFeatured = data.isFeatured;
+  }
 
   await db.update(propertyImages)
     .set(updateData)

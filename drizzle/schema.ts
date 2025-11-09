@@ -337,6 +337,7 @@ export const propertyImages = mysqlTable("propertyImages", {
   category: varchar("category", { length: 100 }), // Custom category like "Kinderzimmer 2", "Energieausweis"
   displayName: varchar("displayName", { length: 255 }), // Custom display name
   showOnLandingPage: int("showOnLandingPage").default(1), // 1 = show, 0 = hide
+  isFeatured: int("isFeatured").default(0), // 1 = featured/title image, 0 = normal
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

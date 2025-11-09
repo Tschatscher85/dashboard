@@ -150,6 +150,16 @@ export default function PropertyMedia() {
     },
   });
 
+  const updateImageMutation = trpc.properties.updateImage.useMutation({
+    onSuccess: () => {
+      toast.success("Bild aktualisiert");
+      window.location.reload(); // Full refresh to update property.images
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+    },
+  });
+
   const uploadFiles = async (files: File[], category: "images" | "documents", docCategory?: string) => {
     if (files.length === 0) return;
     
@@ -574,16 +584,37 @@ export default function PropertyMedia() {
                             </div>
                             <div className="absolute top-2 right-2 flex gap-2 z-30">
                               <Button
+                                variant={image.isFeatured ? "default" : "secondary"}
+                                size="icon"
+                                className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  
+                                  if (!image.id) {
+                                    toast.error('Fehler: Bild hat keine ID!');
+                                    return;
+                                  }
+                                  
+                                  updateImageMutation.mutate({ 
+                                    id: image.id, 
+                                    isFeatured: image.isFeatured ? 0 : 1 
+                                  });
+                                }}
+                                title={image.isFeatured ? "Titelbild entfernen" : "Als Titelbild markieren"}
+                              >
+                                <ImageIcon className="w-4 h-4" />
+                              </Button>
+                              <Button
                                 variant="destructive"
                                 size="icon"
                                 className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   e.preventDefault();
-                                  alert(`Delete button clicked! Image ID: ${image.id}, Title: ${image.title}`);
                                   
                                   if (!image.id) {
-                                    alert('Fehler: Bild hat keine ID!');
+                                    toast.error('Fehler: Bild hat keine ID!');
                                     return;
                                   }
                                   

@@ -1,0 +1,1 @@
+ALTER TABLE `propertyImages` ADD `isFeatured` int DEFAULT 0;

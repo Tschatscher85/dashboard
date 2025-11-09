@@ -188,7 +188,24 @@ export default function PropertyDetail() {
         <div className="flex gap-6">
           {/* Property Image */}
           <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-            <Building2 className="h-12 w-12 text-muted-foreground" />
+            {(() => {
+              const featuredImage = property.images?.find((img: any) => img.isFeatured === 1);
+              if (featuredImage?.imageUrl) {
+                return (
+                  <img
+                    src={featuredImage.imageUrl}
+                    alt={property.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to icon if image fails to load
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                );
+              }
+              return <Building2 className="h-12 w-12 text-muted-foreground" />;
+            })()}
           </div>
           
           {/* Property Info */}
