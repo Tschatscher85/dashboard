@@ -868,3 +868,8 @@
 - [ ] Bilder kategorisieren (Bad, Küche, Wohnzimmer, etc.)
 - [ ] Bilder umbenennen können
 - [ ] Datenbank-Schema erweitern (category, showOnLandingPage, isFloorPlan, useInExpose)
+
+## Bugfixes (Kritisch)
+- [ ] WebDAV URL: Trailing Slash (/) wird nicht automatisch entfernt
+- [ ] Modul-Deaktivierung: Toggles funktionieren nicht (Module lassen sich nicht ausschalten)
+- [ ] Medien-Tab: Hochgeladene Dokumente werden nicht angezeigt

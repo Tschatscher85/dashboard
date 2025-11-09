@@ -229,6 +229,10 @@ export default function Settings() {
         impressum: currentApiKeys.impressum || "",
         agb: currentApiKeys.agb || "",
         datenschutz: currentApiKeys.datenschutz || "",
+        // Module Activation
+        moduleImmobilienmakler: currentApiKeys.moduleImmobilienmakler ?? true,
+        moduleVersicherungen: currentApiKeys.moduleVersicherungen ?? true,
+        moduleHausverwaltung: currentApiKeys.moduleHausverwaltung ?? true,
       });
     }
   }, [currentApiKeys]);
@@ -1090,6 +1094,12 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
+                  {/* Debug: Show current module states */}
+                  <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
+                    Debug: Immobilienmakler={String(apiKeys.moduleImmobilienmakler)}, 
+                    Versicherungen={String(apiKeys.moduleVersicherungen)}, 
+                    Hausverwaltung={String(apiKeys.moduleHausverwaltung)}
+                  </div>
                   {/* Immobilienmakler Module */}
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-1">
@@ -1122,9 +1132,10 @@ export default function Settings() {
                     <Switch
                       id="moduleVersicherungen"
                       checked={apiKeys.moduleVersicherungen}
-                      onCheckedChange={(checked) =>
-                        setApiKeys({ ...apiKeys, moduleVersicherungen: checked })
-                      }
+                      onCheckedChange={(checked) => {
+                        console.log('[Module Toggle] Versicherungen:', checked);
+                        setApiKeys({ ...apiKeys, moduleVersicherungen: checked });
+                      }}
                     />
                   </div>
 

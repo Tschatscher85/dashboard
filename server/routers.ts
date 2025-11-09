@@ -161,10 +161,10 @@ export const appRouter = router({
           nasPort: process.env.NAS_PORT || "2002",
           nasUsername: process.env.NAS_USERNAME || "tschatscher",
           nasPassword: process.env.NAS_PASSWORD || "",
-          // Module Activation
-          moduleImmobilienmakler: process.env.MODULE_IMMOBILIENMAKLER !== "false",
-          moduleVersicherungen: process.env.MODULE_VERSICHERUNGEN !== "false",
-          moduleHausverwaltung: process.env.MODULE_HAUSVERWALTUNG !== "false",
+          // Module Activation (default: true if not set)
+          moduleImmobilienmakler: process.env.MODULE_IMMOBILIENMAKLER === "false" ? false : true,
+          moduleVersicherungen: process.env.MODULE_VERSICHERUNGEN === "false" ? false : true,
+          moduleHausverwaltung: process.env.MODULE_HAUSVERWALTUNG === "false" ? false : true,
         };
       }),
 
@@ -1743,6 +1743,27 @@ Die Beschreibung soll:
         await db.deleteDocument(input.id);
         return { success: true };
       }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        category: z.string().optional(),
+        showOnLandingPage: z.number().optional(),
+        isFloorPlan: z.number().optional(),
+        useInExpose: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateDocumentMetadata(input);
+        return { success: true };
+      }),
+
+    // Alias for compatibility
+    listByProperty: protectedProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getDocumentsByProperty(input.propertyId);
+      }),
   }),
 
   // ============ ACTIVITIES ============
@@ -2470,29 +2491,6 @@ Die Beschreibung soll:
         return await uploadImagesToIS24(input.is24ExternalId, input.imageUrls);
       }),
    }),
-
-  // ============ DOCUMENTS ============
-  documents: router({
-    listByProperty: protectedProcedure
-      .input(z.object({ propertyId: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getDocumentsByProperty(input.propertyId);
-      }),
-
-    update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        category: z.string().optional(),
-        showOnLandingPage: z.number().optional(),
-        isFloorPlan: z.number().optional(),
-        useInExpose: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateDocumentMetadata(input);
-        return { success: true };
-      }),
-  }),
 
   // ============ DASHBOARD ============
   dashboard: router({
