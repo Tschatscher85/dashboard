@@ -113,6 +113,9 @@ export const appRouter = router({
           ftpUsername: process.env.FTP_USERNAME || process.env.NAS_USERNAME || "tschatscher",
           ftpPassword: process.env.FTP_PASSWORD || process.env.NAS_PASSWORD || "",
           ftpSecure: process.env.FTP_SECURE === "true" || false,
+          // Public Read-Only Access
+          nasPublicUsername: process.env.NAS_PUBLIC_USERNAME || "",
+          nasPublicPassword: process.env.NAS_PUBLIC_PASSWORD || "",
           // Shared
           nasBasePath: process.env.NAS_BASE_PATH || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
           // Immobilienmakler Branding
@@ -199,6 +202,9 @@ export const appRouter = router({
         ftpUsername: z.string().optional(),
         ftpPassword: z.string().optional(),
         ftpSecure: z.boolean().optional(),
+        // Public Read-Only Access
+        nasPublicUsername: z.string().optional(),
+        nasPublicPassword: z.string().optional(),
         // Shared
         nasBasePath: z.string().optional(),
         // Immobilienmakler Branding
@@ -303,6 +309,10 @@ export const appRouter = router({
         if (input.ftpUsername) process.env.FTP_USERNAME = input.ftpUsername;
         if (input.ftpPassword) process.env.FTP_PASSWORD = input.ftpPassword;
         if (input.ftpSecure !== undefined) process.env.FTP_SECURE = String(input.ftpSecure);
+        
+        // Save Public Read-Only credentials
+        if (input.nasPublicUsername) process.env.NAS_PUBLIC_USERNAME = input.nasPublicUsername;
+        if (input.nasPublicPassword) process.env.NAS_PUBLIC_PASSWORD = input.nasPublicPassword;
         
         // Save shared settings
         if (input.nasBasePath) process.env.NAS_BASE_PATH = input.nasBasePath;
@@ -591,6 +601,10 @@ export const appRouter = router({
         const ftpUsername = process.env.FTP_USERNAME || "";
         const ftpPassword = process.env.FTP_PASSWORD || "";
         
+        // Public Read-Only credentials for image URLs
+        const nasPublicUsername = process.env.NAS_PUBLIC_USERNAME || "";
+        const nasPublicPassword = process.env.NAS_PUBLIC_PASSWORD || "";
+        
         console.log('\n========== UPLOAD DEBUG ==========');
         console.log('[Upload] WebDAV Configuration:', {
           url: webdavUrl || '(not set)',
@@ -638,9 +652,20 @@ export const appRouter = router({
                   input.fileName,
                   fileBuffer
                 );
-                url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+                
+                // Build proxy URL for image preview
+                // Use backend proxy endpoint to avoid browser credential blocking
+                // Remove /volume1 prefix
+                const relativePath = nasPath.replace(/^\/volume1/, '');
+                // Encode path for URL
+                const encodedPath = relativePath.split('/').map(encodeURIComponent).join('/');
+                // Use proxy endpoint: /api/nas/{path}
+                url = `/api/nas${relativePath}`;
+                console.log('[Upload] Using NAS proxy URL:', url);
+                
                 uploadSuccess = true;
                 console.log('[Upload] ✅ WebDAV upload successful');
+                console.log('[Upload] Public URL:', url);
               } else {
                 console.log('[Upload] WebDAV connection failed, trying FTP...');
               }
@@ -690,7 +715,12 @@ export const appRouter = router({
                   input.fileName,
                   fileBuffer
                 );
-                url = `/nas/${propertyFolderName}/${input.category}/${input.fileName}`;
+                
+                // Build proxy URL for image preview
+                const relativePath = nasPath.replace(/^\/volume1/, '');
+                url = `/api/nas${relativePath}`;
+                console.log('[Upload] Using NAS proxy URL:', url);
+                
                 uploadSuccess = true;
                 console.log('[Upload] ✅ FTP upload successful');
               } else {
@@ -701,51 +731,47 @@ export const appRouter = router({
             }
           }
           
-          // If both NAS methods failed, throw error to trigger S3 fallback
+          // If both NAS methods failed, throw error
           if (!uploadSuccess) {
-            throw new Error('Both WebDAV and FTP failed');
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'NAS-Upload fehlgeschlagen. Bitte überprüfen Sie die NAS-Verbindung in den Einstellungen.',
+            });
           }
         } catch (error: any) {
-          console.error('[Upload] NAS upload failed, using S3 fallback');
+          console.error('[Upload] NAS upload failed');
           console.error('[Upload] Error details:', {
             message: error.message,
             stack: error.stack?.split('\n').slice(0, 3).join('\n'),
           });
-          usedFallback = true;
-          
-          // Fallback: Save to S3
-          const s3Key = `properties/${input.propertyId}/${input.category}/${Date.now()}-${input.fileName}`;
-          const s3Result = await storagePut(
-            s3Key,
-            fileBuffer,
-            input.mimeType || 'application/octet-stream'
-          );
-          
-          nasPath = s3Key;
-          url = s3Result.url;
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `NAS-Upload fehlgeschlagen: ${error.message}`,
+          });
         }
         
-        // TODO: Database storage temporarily disabled due to Drizzle ORM issues
-        // Will be re-enabled once the SQL insert problem is resolved
-        // if (input.category === "Bilder") {
-        //   await db.createPropertyImage({
-        //     propertyId: input.propertyId,
-        //     imageUrl: url,
-        //     nasPath,
-        //     title: input.fileName,
-        //     imageType: input.imageType || "sonstiges",
-        //   });
-        //   console.log('[Upload] Created database entry for image');
-        // }
+        // Save to database
+        if (input.category === "Bilder") {
+          try {
+            await db.createPropertyImage({
+              propertyId: input.propertyId,
+              imageUrl: url,
+              nasPath,
+              title: input.fileName,
+              imageType: input.imageType || "sonstiges",
+            });
+            console.log('[Upload] Created database entry for image');
+          } catch (dbError: any) {
+            console.error('[Upload] Failed to save image to database:', dbError.message);
+            // Continue anyway - file is uploaded to NAS/S3
+          }
+        }
         
         return { 
           success: true, 
           nasPath,
           url,
-          usedFallback,
-          message: usedFallback 
-            ? 'Datei wurde in Cloud gespeichert (NAS nicht erreichbar)' 
-            : 'Datei erfolgreich zum NAS hochgeladen'
+          message: 'Datei erfolgreich zum NAS hochgeladen'
         };
       }),
 

@@ -1,0 +1,18 @@
+{
+  "query": "SHOW COLUMNS FROM propertyImages WHERE Field = 'imageType'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SHOW COLUMNS FROM propertyImages WHERE Field = 'imageType'",
+  "rows": [
+    {
+      "Field": "imageType",
+      "Type": "enum('main','exterior','interior','floorplan','map','other')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "other",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nimageType\tenum('main','exterior','interior','floorplan','map','other')\tYES\t\tother\t\n",
+  "stderr": "",
+  "execution_time_ms": 391
+}

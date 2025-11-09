@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, propertyId, title, imageUrl, nasPath, imageType FROM propertyImages ORDER BY id DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT id, propertyId, title, imageUrl, nasPath, imageType FROM propertyImages ORDER BY id DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "180001",
+      "propertyId": "2",
+      "title": "ProvenExpert Top Empfehlung 2024.png",
+      "imageUrl": "/nas/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/ProvenExpert Top Empfehlung 2024.png",
+      "nasPath": "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/ProvenExpert Top Empfehlung 2024.png",
+      "imageType": "sonstiges"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpropertyId\ttitle\timageUrl\tnasPath\timageType\n180001\t2\tProvenExpert Top Empfehlung 2024.png\t/nas/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/ProvenExpert Top Empfehlung 2024.png\t/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg 15, 73312 Geislingen an der Steige/Bilder/ProvenExpert Top Empfehlung 2024.png\tsonstiges\n",
+  "stderr": "",
+  "execution_time_ms": 408
+}

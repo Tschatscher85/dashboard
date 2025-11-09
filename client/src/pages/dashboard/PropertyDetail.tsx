@@ -103,9 +103,11 @@ export default function PropertyDetail() {
     delete dataWithoutTitle.title;
     
     // Always use editedTitle if it exists (user is in edit mode)
+    const newTitle = editedTitle || property?.title;
     const finalData = {
       ...dataWithoutTitle,
-      title: editedTitle || property?.title,
+      title: newTitle,
+      headline: newTitle, // Sync headline with title
     };
     
     updateMutation.mutate({

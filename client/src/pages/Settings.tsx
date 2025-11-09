@@ -66,6 +66,9 @@ export default function Settings() {
     ftpUsername: "",
     ftpPassword: "",
     ftpSecure: false,
+    // Public Read-Only Access
+    nasPublicUsername: "",
+    nasPublicPassword: "",
     // Shared
     nasBasePath: "",
     // Immobilienmakler Branding
@@ -187,6 +190,9 @@ export default function Settings() {
         ftpUsername: currentApiKeys.ftpUsername || currentApiKeys.nasUsername || "",
         ftpPassword: currentApiKeys.ftpPassword || currentApiKeys.nasPassword || "",
         ftpSecure: currentApiKeys.ftpSecure || false,
+        // Public Read-Only Access
+        nasPublicUsername: currentApiKeys.nasPublicUsername || "",
+        nasPublicPassword: currentApiKeys.nasPublicPassword || "",
         // Shared
         nasBasePath: currentApiKeys.nasBasePath || "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf",
         // Immobilienmakler Branding
@@ -861,6 +867,40 @@ export default function Settings() {
                           type="password"
                           value={apiKeys.webdavPassword}
                           onChange={(e) => setApiKeys({ ...apiKeys, webdavPassword: e.target.value })}
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Public Read-Only Access (for image previews) */}
+                  <div className="space-y-4 mb-6 p-4 border rounded-lg bg-green-50/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-green-900">Öffentlicher Lesezugriff</h4>
+                      <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Für Bildvorschau</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Separate Zugangsdaten mit <strong>nur Leserechten</strong> für öffentliche Bild-URLs. Erhöht die Sicherheit.
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nasPublicUsername">Read-Only Benutzername</Label>
+                        <Input
+                          id="nasPublicUsername"
+                          type="text"
+                          value={apiKeys.nasPublicUsername}
+                          onChange={(e) => setApiKeys({ ...apiKeys, nasPublicUsername: e.target.value })}
+                          placeholder="readonly"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="nasPublicPassword">Read-Only Passwort</Label>
+                        <Input
+                          id="nasPublicPassword"
+                          type="password"
+                          value={apiKeys.nasPublicPassword}
+                          onChange={(e) => setApiKeys({ ...apiKeys, nasPublicPassword: e.target.value })}
                           placeholder="••••••••"
                         />
                       </div>

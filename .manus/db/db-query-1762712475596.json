@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, title, imageUrl FROM propertyImages ORDER BY id DESC LIMIT 2",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT id, title, imageUrl FROM propertyImages ORDER BY id DESC LIMIT 2",
+  "rows": [
+    {
+      "id": "180004",
+      "title": "Immo-Jaeger - Transparent.png",
+      "imageUrl": "https://ImmoJaeger:Survive1985%23@ugreen.tschatscher.eu/Daten/Allianz/Agentur%20Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg%2015%2C%2073312%20Geislingen%20an%20der%20Steige/Bilder/Immo-Jaeger%20-%20Transparent.png"
+    },
+    {
+      "id": "180003",
+      "title": "Logo Blau Transparent.png",
+      "imageUrl": "https://forge.manus.ai/v1/storage/download/iQEkwyRDHDALEMnG3o9MSe/properties/2/Bilder/1762712350692-Logo Blau Transparent.png"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\timageUrl\n180004\tImmo-Jaeger - Transparent.png\thttps://ImmoJaeger:Survive1985%23@ugreen.tschatscher.eu/Daten/Allianz/Agentur%20Jaeger/Beratung/Immobilienmakler/Verkauf/Klingenweg%2015%2C%2073312%20Geislingen%20an%20der%20Steige/Bilder/Immo-Jaeger%20-%20Transparent.png\n180003\tLogo Blau Transparent.png\thttps://forge.manus.ai/v1/storage/download/iQEkwyRDHDALEMnG3o9MSe/properties/2/Bilder/1762712350692-Logo Blau Transparent.png\n",
+  "stderr": "",
+  "execution_time_ms": 392
+}

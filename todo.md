@@ -889,3 +889,16 @@
 - [x] Load documents from NAS and display grouped by category below images
 - [x] Show document count per category
 - [x] Display file size and upload date for each document
+
+## Critical Bug - Title-Headline Sync Not Working
+
+- [x] Title ("Haus in Geislingen") and Headline ("Wohnung") are not synchronized
+- [x] Fix bidirectional sync: changing title should update headline and vice versa
+- [ ] Test both directions work correctly
+
+## Database Storage Implementation (Raw MySQL)
+
+- [ ] Implement raw MySQL INSERT for image uploads (bypass Drizzle ORM)
+- [ ] Test image upload saves to database with preview
+- [ ] Implement raw MySQL INSERT for document uploads
+- [ ] Test rename and metadata editing features work

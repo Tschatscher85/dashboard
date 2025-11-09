@@ -281,30 +281,35 @@ export async function deleteContact(id: number) {
 // ============ PROPERTY IMAGE OPERATIONS ============
 
 export async function createPropertyImage(image: InsertPropertyImage) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!process.env.DATABASE_URL) throw new Error("Database not available");
   
-  // Use raw SQL to avoid Drizzle's 'default' keyword issue
-  const result = await db.execute(
-    `INSERT INTO propertyImages 
-     (propertyId, imageUrl, nasPath, title, description, imageType, sortOrder, category, displayName, showOnLandingPage, isFeatured) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ,
-    [
-      image.propertyId,
-      image.imageUrl,
-      image.nasPath || null,
-      image.title || null,
-      image.description || null,
-      image.imageType || 'sonstiges',
-      image.sortOrder ?? 0,
-      image.category || null,
-      image.displayName || null,
-      image.showOnLandingPage ?? 1,
-      image.isFeatured ?? 0,
-    ]
-  );
-  return result;
+  // Use direct mysql2 connection instead of Drizzle
+  const mysql2 = await import('mysql2/promise');
+  const connection = await mysql2.createConnection(process.env.DATABASE_URL);
+  
+  try {
+    const [result] = await connection.execute(
+      `INSERT INTO propertyImages 
+       (propertyId, imageUrl, nasPath, title, description, imageType, sortOrder, category, displayName, showOnLandingPage, isFeatured) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        image.propertyId,
+        image.imageUrl,
+        image.nasPath || null,
+        image.title || null,
+        image.description || null,
+        'sonstiges', // Always use valid ENUM value
+        image.sortOrder ?? 0,
+        image.category || null,
+        image.displayName || null,
+        image.showOnLandingPage ?? 1,
+        image.isFeatured ?? 0,
+      ]
+    );
+    return result;
+  } finally {
+    await connection.end();
+  }
 }
 
 export async function getPropertyImages(propertyId: number) {

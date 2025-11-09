@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE propertyImages MODIFY COLUMN imageType ENUM('hausansicht', 'kueche', 'bad', 'wohnzimmer', 'schlafzimmer', 'garten', 'balkon', 'keller', 'dachboden', 'garage', 'grundrisse', 'sonstiges', 'main', 'exterior', 'interior', 'floorplan', 'map', 'other') DEFAULT 'sonstiges'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute ALTER TABLE propertyImages MODIFY COLUMN imageType ENUM('hausansicht', 'kueche', 'bad', 'wohnzimmer', 'schlafzimmer', 'garten', 'balkon', 'keller', 'dachboden', 'garage', 'grundrisse', 'sonstiges', 'main', 'exterior', 'interior', 'floorplan', 'map', 'other') DEFAULT 'sonstiges'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 807
+}
