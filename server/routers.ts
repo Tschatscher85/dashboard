@@ -725,19 +725,32 @@ export const appRouter = router({
           url = s3Result.url;
         }
         
-        // If category is "Bilder" AND we used S3 fallback, save to database
-        // (NAS files are listed directly from NAS, no database entry needed)
-        if (input.category === "Bilder" && usedFallback) {
+        // Always save images to database (for both NAS and S3)
+        if (input.category === "Bilder") {
           await db.createPropertyImage({
             propertyId: input.propertyId,
             imageUrl: url,
             nasPath,
             title: input.fileName,
             imageType: input.imageType || "sonstiges",
+            category: input.imageType || "sonstiges",
           });
-          console.log('[Upload] Created database entry for Cloud image with imageType:', input.imageType || "sonstiges");
-        } else if (input.category === "Bilder") {
-          console.log('[Upload] NAS upload - no database entry needed (files listed from NAS)');
+          console.log('[Upload] Created database entry for image with imageType:', input.imageType || "sonstiges", 'usedFallback:', usedFallback);
+        }
+        
+        // Always save documents to database (for both NAS and S3)
+        if (input.category !== "Bilder") {
+          await db.createDocument({
+            propertyId: input.propertyId,
+            title: input.fileName,
+            fileUrl: url,
+            fileKey: nasPath,
+            category: input.category === "Objektunterlagen" ? "objektunterlagen" : 
+                     input.category === "Sensible Daten" ? "sensible" : 
+                     input.category === "Vertragsunterlagen" ? "vertragsunterlagen" : "objektunterlagen",
+            mimeType: input.mimeType,
+          });
+          console.log('[Upload] Created database entry for document, category:', input.category);
         }
         
         return { 

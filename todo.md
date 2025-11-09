@@ -873,3 +873,11 @@
 - [ ] WebDAV URL: Trailing Slash (/) wird nicht automatisch entfernt
 - [ ] Modul-Deaktivierung: Toggles funktionieren nicht (Module lassen sich nicht ausschalten)
 - [ ] Medien-Tab: Hochgeladene Dokumente werden nicht angezeigt
+
+## Medien-Sync und Kategorisierung (Kritisch)
+- [ ] Bilder beim Upload auch in Datenbank speichern (nicht nur NAS)
+- [ ] Dokumente beim Upload auch in Datenbank speichern (nicht nur NAS)
+- [ ] Umbenennen-Funktion für Bilder in PropertyMedia hinzufügen
+- [ ] Kategorie-Änderung für hochgeladene Bilder ermöglichen
+- [ ] EnhancedMediaTab: NAS-Dateien UND Datenbank-Einträge anzeigen
+- [ ] Testen: Bilder/Dokumente in beiden Tabs sichtbar
