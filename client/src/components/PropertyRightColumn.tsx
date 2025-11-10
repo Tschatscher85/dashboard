@@ -732,6 +732,8 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    value={formData.energyConsumption || ""}
+                    onChange={(e) => handleChange("energyConsumption", e.target.value ? parseInt(e.target.value) : null)}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -747,6 +749,8 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    value={formData.energyConsumptionElectricity || ""}
+                    onChange={(e) => handleChange("energyConsumptionElectricity", e.target.value ? parseInt(e.target.value) : null)}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -762,6 +766,8 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    value={formData.energyConsumptionHeat || ""}
+                    onChange={(e) => handleChange("energyConsumptionHeat", e.target.value ? parseInt(e.target.value) : null)}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -778,6 +784,8 @@ export function PropertyRightColumn({
                 <Input
                   type="number"
                   placeholder="0"
+                  value={formData.co2Emissions || ""}
+                  onChange={(e) => handleChange("co2Emissions", e.target.value ? parseInt(e.target.value) : null)}
                   disabled={!isEditing}
                   className="h-10 pr-20"
                 />
@@ -925,13 +933,17 @@ export function PropertyRightColumn({
             <Label>Fußweg zu ÖPNV</Label>
             <div className="grid grid-cols-2 gap-2">
               <Input
+                type="number"
                 value={formData.walkingTimeToPublicTransport || ""}
-                readOnly
+                onChange={(e) => handleChange("walkingTimeToPublicTransport", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 5 Min"
               />
               <Input
+                type="number"
                 value={formData.distanceToPublicTransport || ""}
-                readOnly
+                onChange={(e) => handleChange("distanceToPublicTransport", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 0,4 km"
               />
             </div>
@@ -941,13 +953,17 @@ export function PropertyRightColumn({
             <Label>Fahrzeit nächste Autobahn</Label>
             <div className="grid grid-cols-2 gap-2">
               <Input
+                type="number"
                 value={formData.drivingTimeToHighway || ""}
-                readOnly
+                onChange={(e) => handleChange("drivingTimeToHighway", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 10 Min"
               />
               <Input
+                type="number"
                 value={formData.distanceToHighway || ""}
-                readOnly
+                onChange={(e) => handleChange("distanceToHighway", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 8 km"
               />
             </div>
@@ -957,13 +973,17 @@ export function PropertyRightColumn({
             <Label>Fahrzeit nächster HBF</Label>
             <div className="grid grid-cols-2 gap-2">
               <Input
+                type="number"
                 value={formData.drivingTimeToMainStation || ""}
-                readOnly
+                onChange={(e) => handleChange("drivingTimeToMainStation", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 15 Min"
               />
               <Input
+                type="number"
                 value={formData.distanceToMainStation || ""}
-                readOnly
+                onChange={(e) => handleChange("distanceToMainStation", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 12 km"
               />
             </div>
@@ -973,13 +993,17 @@ export function PropertyRightColumn({
             <Label>Fahrzeit nächster Flughafen</Label>
             <div className="grid grid-cols-2 gap-2">
               <Input
+                type="number"
                 value={formData.drivingTimeToAirport || ""}
-                readOnly
+                onChange={(e) => handleChange("drivingTimeToAirport", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 45 Min"
               />
               <Input
+                type="number"
                 value={formData.distanceToAirport || ""}
-                readOnly
+                onChange={(e) => handleChange("distanceToAirport", e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!isEditing}
                 placeholder="z.B. 60 km"
               />
             </div>

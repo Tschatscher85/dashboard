@@ -931,3 +931,15 @@
 - [x] Change default image view size to "small" in PropertyMedia and EnhancedMediaTab
 
 - [x] Swap image click behavior: PropertyMedia opens edit dialog, EnhancedMediaTab opens lightbox
+
+## Critical Bug Fixes - Property Form Save Issues
+
+- [ ] Fix Bad multi-select not saving (Dusche, Wanne, Fenster)
+- [ ] Fix Bodenbelag multi-select not saving (Beton, Fliesen, Laminat, Parkett, PVC)
+- [ ] Fix ÖPNV distance fields not saving (only shows placeholder "z.B. 5 Min")
+- [ ] Fix Energiekennwert fields not editable/saveable (Strom, Wärme, CO2-Emissionen)
+
+- [x] Fix Bad multi-select not saving (backend schema + frontend binding)
+- [x] Fix Bodenbelag multi-select not saving (backend schema + frontend binding)
+- [x] Fix ÖPNV distance fields not saving (removed readOnly, added onChange handlers)
+- [x] Fix energy certificate fields (Strom, Wärme, CO2) not editable/saving (added value and onChange bindings)
