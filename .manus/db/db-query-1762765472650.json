@@ -1,0 +1,16 @@
+{
+  "query": "SHOW TABLES LIKE '%property%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SHOW TABLES LIKE '%property%';",
+  "rows": [
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA (%property%)": "propertyImages"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA (%property%)": "propertyManagementContracts"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_nkYygABVVZPo6zrqu4mzvA (%property%)\npropertyImages\npropertyManagementContracts\n",
+  "stderr": "",
+  "execution_time_ms": 343
+}

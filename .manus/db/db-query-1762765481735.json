@@ -1,0 +1,58 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "activities"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "appConfig"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "appointments"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "brokerContracts"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "contacts"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "documents"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "inquiries"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "insurancePolicies"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "leads"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "maintenanceRecords"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "properties"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "propertyImages"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "propertyManagementContracts"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "users"
+    },
+    {
+      "Tables_in_nkYygABVVZPo6zrqu4mzvA": "utilityBills"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_nkYygABVVZPo6zrqu4mzvA\n__drizzle_migrations\nactivities\nappConfig\nappointments\nbrokerContracts\ncontacts\ndocuments\ninquiries\ninsurancePolicies\nleads\nmaintenanceRecords\nproperties\npropertyImages\npropertyManagementContracts\nusers\nutilityBills\n",
+  "stderr": "",
+  "execution_time_ms": 353
+}

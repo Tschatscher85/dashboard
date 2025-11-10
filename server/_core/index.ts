@@ -94,9 +94,14 @@ async function startServer() {
         console.log('[NAS Proxy] Using read-only user:', readOnlyUsername);
         
         // Create WebDAV client with read-only credentials
+        // Accept self-signed certificates (UGREEN NAS uses self-signed SSL)
+        const https = await import('https');
         const client = createClient(normalizedUrl, {
           username: readOnlyUsername,
           password: readOnlyPassword,
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false, // Accept self-signed certificates
+          }),
         });
         
         // Decode URL-encoded path (e.g., %20 -> space)

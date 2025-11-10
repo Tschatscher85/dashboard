@@ -709,15 +709,15 @@ export const appRouter = router({
                   fileBuffer
                 );
                 
-                // Build proxy URL for image preview
-                // Use backend proxy endpoint to avoid browser credential blocking
-                // Remove /volume1 prefix
+                // Build direct NAS URL (no proxy needed - browser can access directly)
+                // Format: https://ugreen.tschatscher.eu/Daten/.../filename.jpg
+                // Remove port from URL (nginx reverse proxy handles it)
+                const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
                 const relativePath = nasPath.replace(/^\/volume1/, '');
-                // Encode path for URL
-                const encodedPath = relativePath.split('/').map(encodeURIComponent).join('/');
-                // Use proxy endpoint: /api/nas/{path}
-                url = `/api/nas${relativePath}`;
-                console.log('[Upload] Using NAS proxy URL:', url);
+                // Build direct URL with proper encoding
+                const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
+                url = `${baseUrl}${encodedPath}`;
+                console.log('[Upload] Using direct NAS URL:', url);
                 
                 uploadSuccess = true;
                 console.log('[Upload] ✅ WebDAV upload successful');
@@ -772,10 +772,11 @@ export const appRouter = router({
                   fileBuffer
                 );
                 
-                // Build proxy URL for image preview
+                // Build direct NAS URL (no proxy needed)
                 const relativePath = nasPath.replace(/^\/volume1/, '');
-                url = `/api/nas${relativePath}`;
-                console.log('[Upload] Using NAS proxy URL:', url);
+                const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
+                url = `${ftpHost}${encodedPath}`;
+                console.log('[Upload] Using direct NAS URL:', url);
                 
                 uploadSuccess = true;
                 console.log('[Upload] ✅ FTP upload successful');

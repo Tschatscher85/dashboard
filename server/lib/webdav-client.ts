@@ -1,4 +1,5 @@
 import { createClient, WebDAVClient } from 'webdav';
+import https from 'https';
 
 /**
  * WebDAV Client for Synology NAS integration
@@ -50,9 +51,13 @@ export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
       basePath: BASE_PATH,
     });
 
+    // Accept self-signed certificates (UGREEN NAS uses self-signed SSL)
     webdavClient = createClient(url, {
       username,
       password,
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false, // Accept self-signed certificates
+      }),
     });
   }
 
