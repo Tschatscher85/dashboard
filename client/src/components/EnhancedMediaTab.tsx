@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { FileIcon, ImageIcon, Download, Edit, X } from "lucide-react";
+import { FileIcon, ImageIcon, Download, Edit, X, LayoutGrid, Grid3x3, Grid2x2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -29,6 +29,7 @@ interface MediaItem {
 export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("medium");
   
   // Form state for editing
   const [editTitle, setEditTitle] = useState("");
@@ -182,10 +183,42 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
         {Object.entries(groupedMedia).map(([category, items]) => (
           <Card key={category}>
             <CardHeader>
-              <CardTitle className="text-lg">{category}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{category}</CardTitle>
+                <div className="flex items-center gap-1 border rounded-md p-1">
+                  <Button
+                    variant={viewSize === "small" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewSize("small")}
+                    className="h-8 px-2"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewSize === "medium" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewSize("medium")}
+                    className="h-8 px-2"
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewSize === "large" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewSize("large")}
+                    className="h-8 px-2"
+                  >
+                    <Grid2x2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className={`grid gap-4 ${
+                viewSize === "small" ? "grid-cols-3 md:grid-cols-4 lg:grid-cols-6" :
+                viewSize === "medium" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
+                "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              }`}>
                 {items.map((item) => (
                   <button
                     key={`${item.type}-${item.id}`}
@@ -279,12 +312,25 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
             {/* Category */}
             <div>
               <Label htmlFor="edit-category">Kategorie</Label>
-              <Input
+              <select
                 id="edit-category"
                 value={editCategory}
                 onChange={(e) => setEditCategory(e.target.value)}
-                placeholder="z.B. Kinderzimmer 2, Energieausweis"
-              />
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="hausansicht">Hausansicht</option>
+                <option value="kueche">Küche</option>
+                <option value="bad">Bad</option>
+                <option value="wohnzimmer">Wohnzimmer</option>
+                <option value="schlafzimmer">Schlafzimmer</option>
+                <option value="garten">Garten</option>
+                <option value="balkon">Balkon/Terrasse</option>
+                <option value="keller">Keller</option>
+                <option value="dachboden">Dachboden</option>
+                <option value="garage">Garage</option>
+                <option value="grundrisse">Grundrisse</option>
+                <option value="sonstiges">Sonstiges</option>
+              </select>
             </div>
 
             {/* Toggles */}

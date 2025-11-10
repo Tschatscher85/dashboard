@@ -911,3 +911,16 @@
 - [ ] Remove usedFallback check from PropertyMedia frontend
 - [ ] Test complete upload flow: NAS upload → database entry → image display in gallery
 - [ ] Verify images display on landing page after NAS upload
+
+- [ ] Add image size toggle buttons (small/medium/large) to EnhancedMediaTab component
+
+- [ ] Add all property fields to landing page Objektdaten section (pricing, rooms, condition, energy, location)
+
+- [ ] Fix image editing dialog - add category dropdown and fix save functionality (create updateImage endpoint)
+
+- [ ] Make Unterart dropdown conditional based on Objektart (different options for Wohnung vs Haus)
+- [ ] Show Einheitennummer field only for Wohnung
+
+- [ ] Auto-generate property title from address (Straße Hausnummer, PLZ Stadt)
+- [ ] Display featured image thumbnail in property list table
+- [ ] Add featured image selection functionality

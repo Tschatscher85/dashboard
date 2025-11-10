@@ -214,7 +214,8 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectItem value="house">Haus</SelectItem>
                 <SelectItem value="commercial">Gewerbe</SelectItem>
                 <SelectItem value="land">Grundstück</SelectItem>
-                <SelectItem value="parking">Stellplatz</SelectItem>
+                <SelectItem value="parking">Garage</SelectItem>
+                <SelectItem value="temporary_living">Wohnen auf Zeit</SelectItem>
                 <SelectItem value="other">Sonstiges</SelectItem>
               </SelectContent>
             </Select>
@@ -222,12 +223,75 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
 
           <div className="space-y-2">
             <Label>Unterart</Label>
-            <Input
+            <Select
               value={formData.subType || ""}
-              onChange={(e) => handleChange("subType", e.target.value)}
+              onValueChange={(value: any) => handleChange("subType", value)}
               disabled={!isEditing}
-              placeholder="z.B. Etagenwohnung"
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Bitte wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {formData.propertyType === "apartment" && (
+                  <>
+                    <SelectItem value="dachgeschoss">Dachgeschoss</SelectItem>
+                    <SelectItem value="loft">Loft</SelectItem>
+                    <SelectItem value="maisonette">Maisonette</SelectItem>
+                    <SelectItem value="penthouse">Penthouse</SelectItem>
+                    <SelectItem value="terrassenwohnung">Terrassenwohnung</SelectItem>
+                    <SelectItem value="erdgeschosswohnung">Erdgeschosswohnung</SelectItem>
+                    <SelectItem value="etagenwohnung">Etagenwohnung</SelectItem>
+                    <SelectItem value="hochparterre">Hochparterre</SelectItem>
+                    <SelectItem value="souterrain">Souterrain</SelectItem>
+                    <SelectItem value="attikawohnung">Attikawohnung</SelectItem>
+                    <SelectItem value="sonstige">Sonstige</SelectItem>
+                  </>
+                )}
+                {formData.propertyType === "house" && (
+                  <>
+                    <SelectItem value="einfamilienhaus">Einfamilienhaus</SelectItem>
+                    <SelectItem value="zweifamilienhaus">Zweifamilienhaus</SelectItem>
+                    <SelectItem value="reihenhaus">Reihenhaus</SelectItem>
+                    <SelectItem value="reihenmittelhaus">Reihenmittelhaus</SelectItem>
+                    <SelectItem value="reihenendhaus">Reihenendhaus</SelectItem>
+                    <SelectItem value="reiheneckhaus">Reiheneckhaus</SelectItem>
+                    <SelectItem value="mehrfamilienhaus">Mehrfamilienhaus</SelectItem>
+                    <SelectItem value="stadthaus">Stadthaus</SelectItem>
+                    <SelectItem value="finca">Finca</SelectItem>
+                    <SelectItem value="bungalow">Bungalow</SelectItem>
+                    <SelectItem value="bauernhaus">Bauernhaus</SelectItem>
+                    <SelectItem value="doppelhaushaelfte">Doppelhaushälfte</SelectItem>
+                    <SelectItem value="villa">Villa</SelectItem>
+                    <SelectItem value="burg_schloss">Burg/Schloss</SelectItem>
+                    <SelectItem value="besondere_immobilie">Besondere Immobilie</SelectItem>
+                    <SelectItem value="doppeleinfamilienhaus">Doppeleinfamilienhaus</SelectItem>
+                    <SelectItem value="ferienhaus">Ferienhaus</SelectItem>
+                  </>
+                )}
+                {formData.propertyType === "parking" && (
+                  <>
+                    <SelectItem value="garage">Garage</SelectItem>
+                    <SelectItem value="aussenstellplatz">Außenstellplatz</SelectItem>
+                    <SelectItem value="carport">Carport</SelectItem>
+                    <SelectItem value="duplex">Duplex</SelectItem>
+                    <SelectItem value="parkhaus">Parkhaus</SelectItem>
+                    <SelectItem value="tiefgarage">Tiefgarage</SelectItem>
+                    <SelectItem value="doppelgarage">Doppelgarage</SelectItem>
+                  </>
+                )}
+                {formData.propertyType === "temporary_living" && (
+                  <>
+                    <SelectItem value="apartment_temp">Apartment</SelectItem>
+                    <SelectItem value="zimmer">Zimmer</SelectItem>
+                    <SelectItem value="haus_temp">Haus</SelectItem>
+                    <SelectItem value="wohnung_temp">Wohnung</SelectItem>
+                  </>
+                )}
+                {formData.propertyType !== "apartment" && formData.propertyType !== "house" && formData.propertyType !== "parking" && formData.propertyType !== "temporary_living" && (
+                  <SelectItem value="sonstiges">Sonstiges</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -252,14 +316,16 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Einheitennummer</Label>
-            <Input
-              value={formData.unitNumber || ""}
-              onChange={(e) => handleChange("unitNumber", e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
+          {formData.propertyType === "apartment" && (
+            <div className="space-y-2">
+              <Label>Einheitennummer</Label>
+              <Input
+                value={formData.unitNumber || ""}
+                onChange={(e) => handleChange("unitNumber", e.target.value)}
+                disabled={!isEditing}
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Wohnungsnummer</Label>

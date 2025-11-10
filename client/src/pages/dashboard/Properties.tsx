@@ -587,7 +587,15 @@ export default function Properties() {
                   </TableCell>
                   <TableCell>
                     <div className="w-16 h-12 bg-muted rounded overflow-hidden flex items-center justify-center">
-                      <Building2 className="h-6 w-6 text-muted-foreground" />
+                      {property.images && property.images.length > 0 ? (
+                        <img 
+                          src={property.images.find(img => img.isFeatured)?.imageUrl || property.images[0]?.imageUrl} 
+                          alt={property.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Building2 className="h-6 w-6 text-muted-foreground" />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">

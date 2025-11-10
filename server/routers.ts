@@ -525,8 +525,17 @@ export const appRouter = router({
         availableFrom: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Auto-generate title from address (same format as NAS path)
+        let title = input.title || '';
+        if (input.street && input.city) {
+          const parts = [input.street, input.houseNumber].filter(Boolean).join(' ');
+          const location = [input.zipCode, input.city].filter(Boolean).join(' ');
+          title = [parts, location].filter(Boolean).join(', ');
+        }
+        
         await db.createProperty({
           ...input,
+          title,
           createdBy: ctx.user.id,
         });
         return { success: true };
@@ -583,6 +592,27 @@ export const appRouter = router({
         if (input.data.availableFrom && typeof input.data.availableFrom === 'string') {
           processedData.availableFrom = new Date(input.data.availableFrom);
         }
+        
+        // Auto-generate title from address if address fields are being updated (same format as NAS path)
+        if (input.data.street || input.data.city || input.data.houseNumber || input.data.zipCode) {
+          // Get current property to merge with updates
+          const currentProperty = await db.getPropertyById(input.id);
+          if (currentProperty) {
+            const street = input.data.street ?? currentProperty.street;
+            const houseNumber = input.data.houseNumber ?? currentProperty.houseNumber;
+            const zipCode = input.data.zipCode ?? currentProperty.zipCode;
+            const city = input.data.city ?? currentProperty.city;
+            
+            if (street && city) {
+              const parts = [street, houseNumber].filter(Boolean).join(' ');
+              const location = [zipCode, city].filter(Boolean).join(' ');
+              const title = [parts, location].filter(Boolean).join(', ');
+              
+              processedData.title = title;
+            }
+          }
+        }
+        
         await db.updateProperty(input.id, processedData);
         return { success: true };
       }),
@@ -619,6 +649,20 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deletePropertyImage(input.id);
+        return { success: true };
+      }),
+
+    updateImage: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        category: z.string().optional(),
+        displayName: z.string().optional(),
+        showOnLandingPage: z.number().optional(),
+        isFeatured: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateImageMetadata(input);
         return { success: true };
       }),
 
