@@ -929,3 +929,5 @@
 - [ ] Add live title generation in property edit form
 
 - [x] Change default image view size to "small" in PropertyMedia and EnhancedMediaTab
+
+- [x] Swap image click behavior: PropertyMedia opens edit dialog, EnhancedMediaTab opens lightbox

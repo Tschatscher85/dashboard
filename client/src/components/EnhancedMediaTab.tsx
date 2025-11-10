@@ -5,9 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { FileIcon, ImageIcon, Download, Edit, X, LayoutGrid, Grid3x3, Grid2x2 } from "lucide-react";
+import { FileIcon, ImageIcon, Download, Edit, X, LayoutGrid, Grid3x3, Grid2x2, Pencil } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 interface EnhancedMediaTabProps {
   propertyId: number;
@@ -30,6 +31,11 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("small");
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxImages, setLightboxImages] = useState<MediaItem[]>([]);
   
   // Form state for editing
   const [editTitle, setEditTitle] = useState("");
@@ -124,7 +130,26 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
     return acc;
   }, {} as Record<string, MediaItem[]>);
 
-  const handleItemClick = (item: MediaItem) => {
+  const handleItemClick = (item: MediaItem, allImages: MediaItem[], index: number) => {
+    if (item.type === "image") {
+      // Open lightbox for images
+      setLightboxImages(allImages.filter(i => i.type === "image"));
+      setLightboxIndex(index);
+      setLightboxOpen(true);
+    } else {
+      // Open edit dialog for documents
+      setSelectedItem(item);
+      setEditTitle(item.title);
+      setEditCategory(item.category || "");
+      setEditDisplayName(item.displayName || item.title);
+      setShowOnLandingPage(!!item.showOnLandingPage);
+      setIsFloorPlan(!!item.isFloorPlan);
+      setUseInExpose(!!item.useInExpose);
+      setEditDialogOpen(true);
+    }
+  };
+  
+  const handleEditClick = (item: MediaItem) => {
     setSelectedItem(item);
     setEditTitle(item.title);
     setEditCategory(item.category || "");
@@ -219,12 +244,12 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                 viewSize === "medium" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
                 "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
               }`}>
-                {items.map((item) => (
-                  <button
-                    key={`${item.type}-${item.id}`}
-                    onClick={() => handleItemClick(item)}
-                    className="relative aspect-square overflow-hidden rounded-lg border group hover:border-primary transition-colors text-left"
-                  >
+                {items.map((item, index) => (
+                  <div key={`${item.type}-${item.id}`} className="relative">
+                    <button
+                      onClick={() => handleItemClick(item, items, index)}
+                      className="relative aspect-square overflow-hidden rounded-lg border group hover:border-primary transition-colors text-left w-full"
+                    >
                     {item.type === "image" ? (
                       <img
                         src={item.url}
@@ -251,7 +276,23 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                         Landing Page
                       </div>
                     )}
+                    
+                    {/* Edit button for images */}
+                    {item.type === "image" && (
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-2 left-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(item);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
                   </button>
+                </div>
                 ))}
               </div>
             </CardContent>
@@ -381,6 +422,17 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages.map(img => ({
+          url: img.url,
+          title: img.displayName || img.title
+        }))}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
     </>
   );
 }

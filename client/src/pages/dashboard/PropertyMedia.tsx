@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import DraggableImageGallery from "@/components/DraggableImageGallery";
@@ -64,6 +65,13 @@ export default function PropertyMedia() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxImages, setLightboxImages] = useState<any[]>([]);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<any | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [showOnLandingPage, setShowOnLandingPage] = useState(false);
   
   // Drag and drop state
   const [isDragDropEnabled, setIsDragDropEnabled] = useState(false);
@@ -538,13 +546,7 @@ export default function PropertyMedia() {
                           return (
                           <div 
                             key={imageId} 
-                            className="relative group cursor-pointer"
-                            onClick={() => {
-                              const allImages = [...filteredDbImages, ...(nasImages || [])];
-                              setLightboxImages(allImages);
-                              setLightboxIndex(index);
-                              setLightboxOpen(true);
-                            }}
+                            className="relative group"
                           >
                             <input
                               type="checkbox"
@@ -606,6 +608,24 @@ export default function PropertyMedia() {
                                 <ImageIcon className="w-4 h-4" />
                               </Button>
                               <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  
+                                  setSelectedImage(image);
+                                  setEditTitle(image.title || "");
+                                  setEditCategory(image.imageType || "");
+                                  setShowOnLandingPage(image.showOnLandingPage === 1);
+                                  setEditDialogOpen(true);
+                                }}
+                                title="Bild bearbeiten"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
                                 variant="destructive"
                                 size="icon"
                                 className="h-8 w-8 shadow-lg z-30 pointer-events-auto"
@@ -643,13 +663,7 @@ export default function PropertyMedia() {
                           return (
                           <div 
                             key={imageId} 
-                            className="relative group cursor-pointer"
-                            onClick={() => {
-                              const allImages = [...filteredDbImages, ...(nasImages || [])];
-                              setLightboxImages(allImages);
-                              setLightboxIndex(index);
-                              setLightboxOpen(true);
-                            }}
+                            className="relative group"
                           >
                             <input
                               type="checkbox"
@@ -859,6 +873,98 @@ export default function PropertyMedia() {
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
       />
+      
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Bild bearbeiten</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Preview */}
+            {selectedImage && (
+              <div className="flex justify-center">
+                <img
+                  src={selectedImage.imageUrl}
+                  alt={selectedImage.title}
+                  className="max-h-64 rounded-lg border"
+                />
+              </div>
+            )}
+
+            {/* Title */}
+            <div>
+              <Label htmlFor="edit-title">Titel</Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Titel eingeben"
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <Label htmlFor="edit-category">Kategorie</Label>
+              <select
+                id="edit-category"
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+                className="w-full p-2 border border-input rounded-md bg-background"
+              >
+                <option value="hausansicht">Hausansicht</option>
+                <option value="kueche">Küche</option>
+                <option value="bad">Bad</option>
+                <option value="wohnzimmer">Wohnzimmer</option>
+                <option value="schlafzimmer">Schlafzimmer</option>
+                <option value="garten">Garten</option>
+                <option value="balkon">Balkon/Terrasse</option>
+                <option value="keller">Keller</option>
+                <option value="dachboden">Dachboden</option>
+                <option value="garage">Garage</option>
+                <option value="grundrisse">Grundrisse</option>
+                <option value="sonstiges">Sonstiges</option>
+              </select>
+            </div>
+
+            {/* Landing Page Toggle */}
+            <div className="flex items-center justify-between border-t pt-4">
+              <Label htmlFor="show-landing">Auf Landing Page anzeigen</Label>
+              <Switch
+                id="show-landing"
+                checked={showOnLandingPage}
+                onCheckedChange={setShowOnLandingPage}
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2 border-t pt-4">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                <X className="h-4 w-4 mr-2" />
+                Abbrechen
+              </Button>
+              <Button onClick={() => {
+                if (!selectedImage?.id) {
+                  toast.error('Fehler: Bild hat keine ID!');
+                  return;
+                }
+                
+                updateImageMutation.mutate({
+                  id: selectedImage.id,
+                  title: editTitle,
+                  imageType: editCategory as any,
+                  showOnLandingPage: showOnLandingPage ? 1 : 0,
+                });
+                setEditDialogOpen(false);
+              }}>
+                <Pencil className="h-4 h-4 mr-2" />
+                Speichern
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
