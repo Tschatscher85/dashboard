@@ -644,16 +644,21 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Kaufpreis</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={formData.price ? formData.price / 100 : ""}
-                onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
-                disabled={!isEditing}
-                className="pr-8"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
-            </div>
+            {isEditing ? (
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={formData.price ? formData.price / 100 : ""}
+                  onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
+                  className="pr-8"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+              </div>
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.price) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="col-span-2 flex gap-4">
@@ -677,43 +682,63 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
           <div className="space-y-2">
-            <Label>Kaltmiete (€)</Label>
-            <Input
-              type="number"
-              value={formData.coldRent ? formData.coldRent / 100 : ""}
-              onChange={(e) => handleChange("coldRent", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Kaltmiete</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.coldRent ? formData.coldRent / 100 : ""}
+                onChange={(e) => handleChange("coldRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.coldRent) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Warmmiete (€)</Label>
-            <Input
-              type="number"
-              value={formData.warmRent ? formData.warmRent / 100 : ""}
-              onChange={(e) => handleChange("warmRent", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Warmmiete</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.warmRent ? formData.warmRent / 100 : ""}
+                onChange={(e) => handleChange("warmRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.warmRent) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Heizkosten (€)</Label>
-            <Input
-              type="number"
-              value={formData.heatingCosts ? formData.heatingCosts / 100 : ""}
-              onChange={(e) => handleChange("heatingCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Heizkosten</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.heatingCosts ? formData.heatingCosts / 100 : ""}
+                onChange={(e) => handleChange("heatingCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.heatingCosts) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Nebenkosten (€)</Label>
-            <Input
-              type="number"
-              value={formData.additionalCosts ? formData.additionalCosts / 100 : ""}
-              onChange={(e) => handleChange("additionalCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Nebenkosten</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.additionalCosts ? formData.additionalCosts / 100 : ""}
+                onChange={(e) => handleChange("additionalCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.additionalCosts) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="col-span-2 space-y-2">
@@ -728,57 +753,82 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
           <div className="space-y-2">
-            <Label>Nicht umlegbare Kosten (€)</Label>
-            <Input
-              type="number"
-              value={formData.nonRecoverableCosts ? formData.nonRecoverableCosts / 100 : ""}
-              onChange={(e) => handleChange("nonRecoverableCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Nicht umlegbare Kosten</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.nonRecoverableCosts ? formData.nonRecoverableCosts / 100 : ""}
+                onChange={(e) => handleChange("nonRecoverableCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.nonRecoverableCosts) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Hausgeld/Monat (€)</Label>
-            <Input
-              type="number"
-              value={formData.houseMoney ? formData.houseMoney / 100 : ""}
-              onChange={(e) => handleChange("houseMoney", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Hausgeld/Monat</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.houseMoney ? formData.houseMoney / 100 : ""}
+                onChange={(e) => handleChange("houseMoney", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.houseMoney) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Instandhaltungsrücklage (€)</Label>
-            <Input
-              type="number"
-              value={formData.maintenanceReserve ? formData.maintenanceReserve / 100 : ""}
-              onChange={(e) => handleChange("maintenanceReserve", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Instandhaltungsrücklage</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.maintenanceReserve ? formData.maintenanceReserve / 100 : ""}
+                onChange={(e) => handleChange("maintenanceReserve", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.maintenanceReserve) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Stellplatz-Preis (€)</Label>
-            <Input
-              type="number"
-              value={formData.parkingPrice ? formData.parkingPrice / 100 : ""}
-              onChange={(e) => handleChange("parkingPrice", Math.round(parseFloat(e.target.value || "0") * 100))}
-              disabled={!isEditing}
-            />
+            <Label>Stellplatz-Preis</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={formData.parkingPrice ? formData.parkingPrice / 100 : ""}
+                onChange={(e) => handleChange("parkingPrice", Math.round(parseFloat(e.target.value || "0") * 100))}
+              />
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.parkingPrice) || "-"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label>Mtl. Mieteinnahmen</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
-                onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
-                disabled={!isEditing}
-                className="pr-8"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
-            </div>
+            {isEditing ? (
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
+                  onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
+                  className="pr-8"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+              </div>
+            ) : (
+              <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
+                {formatPrice(formData.monthlyRentalIncome) || "-"}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
