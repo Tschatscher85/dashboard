@@ -963,3 +963,8 @@
   - [ ] travel time fields (all driving/walking time and distance fields)
   - [ ] contract fields (contractType, contractDuration, contractFrom, contractTo)
 - [ ] Test all fields save correctly and persist after page reload
+
+- [x] Capitalize media category names (dachboden → Dachboden)
+- [x] Add documents section to media tab (Propstack-style)
+- [ ] Improve price formatting with € symbol and thousand separators
+- [x] Fix latitude/longitude type validation error (backend expects string, frontend sends number)

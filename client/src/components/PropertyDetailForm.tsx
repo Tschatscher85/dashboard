@@ -22,6 +22,18 @@ import { Separator } from "./ui/separator";
 import { PropertyDetailFormLayout } from "./PropertyDetailFormLayout";
 import { PropertyRightColumn } from "./PropertyRightColumn";
 
+// Helper function to format price with thousand separators and € symbol
+const formatPrice = (cents: number | null | undefined): string => {
+  if (!cents && cents !== 0) return "";
+  const euros = cents / 100;
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(euros);
+};
+
 interface PropertyDetailFormProps {
   property: Property;
   onSave: (data: Partial<Property>) => void;

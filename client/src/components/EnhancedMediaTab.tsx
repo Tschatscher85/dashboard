@@ -27,6 +27,24 @@ interface MediaItem {
   nasPath?: string;
 }
 
+// Helper function to capitalize category names
+const formatCategoryName = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    hausansicht: "Hausansicht",
+    kueche: "Küche",
+    bad: "Bad",
+    wohnzimmer: "Wohnzimmer",
+    schlafzimmer: "Schlafzimmer",
+    balkon: "Balkon/Terrasse",
+    keller: "Keller",
+    dachboden: "Dachboden",
+    garage: "Garage",
+    grundrisse: "Grundrisse",
+    sonstiges: "Sonstiges",
+  };
+  return categoryMap[category.toLowerCase()] || category.charAt(0).toUpperCase() + category.slice(1);
+};
+
 export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -120,8 +138,22 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
     // NAS documents - REMOVED: All documents are now in database
   ];
 
-  // Group media by category
-  const groupedMedia = mediaItems.reduce((acc, item) => {
+  // Separate images and documents
+  const imageItems = mediaItems.filter(item => item.type === "image");
+  const documentItems = mediaItems.filter(item => item.type === "document");
+  
+  // Group images by category
+  const groupedImages = imageItems.reduce((acc, item) => {
+    const category = item.category || "Sonstiges";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {} as Record<string, MediaItem[]>);
+  
+  // Group documents by category (folder)
+  const groupedDocuments = documentItems.reduce((acc, item) => {
     const category = item.category || "Sonstiges";
     if (!acc[category]) {
       acc[category] = [];
@@ -205,11 +237,12 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   return (
     <>
       <div className="space-y-6">
-        {Object.entries(groupedMedia).map(([category, items]) => (
+        {/* Images Section */}
+        {Object.entries(groupedImages).map(([category, items]) => (
           <Card key={category}>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{category}</CardTitle>
+                <CardTitle className="text-lg">{formatCategoryName(category)}</CardTitle>
                 <div className="flex items-center gap-1 border rounded-md p-1">
                   <Button
                     variant={viewSize === "small" ? "default" : "ghost"}
@@ -298,6 +331,58 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
             </CardContent>
           </Card>
         ))}
+        
+        {/* Documents Section */}
+        {Object.keys(groupedDocuments).length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">
+                  {documentItems.length} Dokument{documentItems.length !== 1 ? 'e' : ''}
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Object.entries(groupedDocuments).map(([category, docs]) => (
+                  <div key={category} className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <FileIcon className="h-4 w-4" />
+                      {formatCategoryName(category)} ({docs.length})
+                    </div>
+                    <div className="space-y-1 ml-6">
+                      {docs.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer group"
+                          onClick={() => handleItemClick(doc, docs, docs.indexOf(doc))}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <FileIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                            <span className="text-sm truncate">{doc.title}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditClick(doc);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Edit Dialog */}
