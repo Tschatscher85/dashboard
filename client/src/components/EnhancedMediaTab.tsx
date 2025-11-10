@@ -29,7 +29,7 @@ interface MediaItem {
 export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("medium");
+  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("small");
   
   // Form state for editing
   const [editTitle, setEditTitle] = useState("");

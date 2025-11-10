@@ -55,7 +55,7 @@ export default function PropertyMedia() {
   const [selectedImageCategory, setSelectedImageCategory] = useState("hausansicht");
   
   // View size control
-  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("medium");
+  const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("small");
   
   // Category filter for gallery
   const [activeCategory, setActiveCategory] = useState<string>("alle");

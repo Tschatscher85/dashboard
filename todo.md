@@ -924,3 +924,8 @@
 - [ ] Auto-generate property title from address (Straße Hausnummer, PLZ Stadt)
 - [ ] Display featured image thumbnail in property list table
 - [ ] Add featured image selection functionality
+
+- [ ] Add live title generation in create property dialog (auto-update as user types address)
+- [ ] Add live title generation in property edit form
+
+- [x] Change default image view size to "small" in PropertyMedia and EnhancedMediaTab
