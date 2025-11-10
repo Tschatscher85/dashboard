@@ -949,3 +949,17 @@
 - [ ] Remove duplicate Objektzustand field (keep in Zusatzinformationen, remove IS24 Innenausstattung)
 - [ ] Remove duplicate Verfügbar ab / Frei ab field (keep one, remove the other)
 - [ ] Fix "Distanzen berechnen" button - not calculating/filling distance fields
+
+## CRITICAL: Property Form Save Issues (40+ fields not saving)
+- [ ] Fix ÖPNV time field not updating after distance calculation
+- [ ] Add missing fields to backend update mutation schema:
+  - [ ] category, subtype, caretaker
+  - [ ] landRegistry fields (amtsgericht, grundbuchblatt, grundbuchVon, gemarkung, flur, flurstück)
+  - [ ] commission fields (kaltmiete, warmmiete, heatingCostsInServiceCharge, nonRecoverableCosts, hausgeld, maintenanceReserve, parkingPrice, monthlyRentalIncome)
+  - [ ] area fields (usableArea, balconyArea, gardenArea)
+  - [ ] provision fields (all internal/external commission fields)
+  - [ ] quality fields (qualityOfFittings, numberOfParkingSpaces, parkingType, constructionPhase)
+  - [ ] energy fields (all energyConsumption, energyCertificate fields)
+  - [ ] travel time fields (all driving/walking time and distance fields)
+  - [ ] contract fields (contractType, contractDuration, contractFrom, contractTo)
+- [ ] Test all fields save correctly and persist after page reload
