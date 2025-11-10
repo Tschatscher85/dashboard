@@ -195,7 +195,19 @@ export async function getAllProperties(filters?: {
   }
   
   const result = await query.orderBy(desc(properties.createdAt));
-  return result;
+  
+  // Load images for each property
+  const propertiesWithImages = await Promise.all(
+    result.map(async (property) => {
+      const images = await getPropertyImages(property.id);
+      return {
+        ...property,
+        images,
+      };
+    })
+  );
+  
+  return propertiesWithImages;
 }
 
 export async function updateProperty(id: number, updates: Partial<InsertProperty> & { availableFrom?: string | Date | null }) {

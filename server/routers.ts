@@ -842,15 +842,15 @@ export const appRouter = router({
                   fileBuffer
                 );
                 
-                // Build direct NAS URL (no proxy needed - browser can access directly)
-                // Format: https://ugreen.tschatscher.eu/Daten/.../filename.jpg
-                // Remove port from URL (nginx reverse proxy handles it)
-                const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+                // Build proxy URL - direct NAS URLs don't work because WebDAV requires authentication
+                // Browsers cannot provide credentials in <img src="..."> tags
+                // Proxy endpoint (/api/nas/*) handles authentication server-side
+                // Format: /api/nas/Daten/.../filename.jpg
                 const relativePath = nasPath.replace(/^\/volume1/, '');
-                // Build direct URL with proper encoding
+                // Build proxy URL with proper encoding
                 const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
-                url = `${baseUrl}${encodedPath}`;
-                console.log('[Upload] Using direct NAS URL:', url);
+                url = `/api/nas${encodedPath}`;
+                console.log('[Upload] Using proxy URL (auth handled server-side):', url);
                 
                 uploadSuccess = true;
                 console.log('[Upload] ✅ WebDAV upload successful');
