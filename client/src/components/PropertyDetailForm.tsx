@@ -991,65 +991,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             </Select>
           </div>
 
-          {/* IS24-specific fields */}
-          <div className="space-y-2">
-            <Label>Innenausstattung (für IS24) <span className="text-xs text-muted-foreground">*Pflichtfeld für ImmoScout24</span></Label>
-            <Select
-              value={formData.interiorQuality || ""}
-              onValueChange={(value: any) => handleChange("interiorQuality", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Innenausstattung wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="luxury">Luxus</SelectItem>
-                <SelectItem value="sophisticated">Gehoben</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="simple">Einfach</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Anzahl Schlafzimmer (für IS24)</Label>
-            <Input
-              type="number"
-              value={formData.numberOfBedrooms || ""}
-              onChange={(e) => handleChange("numberOfBedrooms", parseInt(e.target.value || "0"))}
-              disabled={!isEditing}
-              placeholder="Anzahl Schlafzimmer"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Anzahl Badezimmer (für IS24)</Label>
-            <Input
-              type="number"
-              value={formData.numberOfBathrooms || ""}
-              onChange={(e) => handleChange("numberOfBathrooms", parseInt(e.target.value || "0"))}
-              disabled={!isEditing}
-              placeholder="Anzahl Badezimmer"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Frei ab (für IS24)</Label>
-            <Input
-              type="date"
-              value={
-                formData.freeFrom instanceof Date
-                  ? formData.freeFrom.toISOString().split('T')[0]
-                  : (typeof formData.freeFrom === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.freeFrom as string)
-                      ? (formData.freeFrom as string).split('T')[0]
-                      : "")
-              }
-              onChange={(e) => {
-                handleChange("freeFrom", e.target.value || null);
-              }}
-              disabled={!isEditing}
-            />
-          </div>
         </CardContent>
       </Card>
 

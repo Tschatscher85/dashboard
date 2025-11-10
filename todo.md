@@ -943,3 +943,9 @@
 - [x] Fix Bodenbelag multi-select not saving (backend schema + frontend binding)
 - [x] Fix ÖPNV distance fields not saving (removed readOnly, added onChange handlers)
 - [x] Fix energy certificate fields (Strom, Wärme, CO2) not editable/saving (added value and onChange bindings)
+
+- [ ] Remove duplicate Schlafzimmer field (keep in Flächen section, remove from IS24 section)
+- [ ] Remove duplicate Badezimmer field (keep in Flächen section, remove from IS24 section)
+- [ ] Remove duplicate Objektzustand field (keep in Zusatzinformationen, remove IS24 Innenausstattung)
+- [ ] Remove duplicate Verfügbar ab / Frei ab field (keep one, remove the other)
+- [ ] Fix "Distanzen berechnen" button - not calculating/filling distance fields

@@ -157,20 +157,24 @@ export function PropertyRightColumn({
                     const element = response.rows[0].elements[0];
                     const durationText = element.duration.text;
                     const distanceText = element.distance.text;
+                    
+                    // Extract numeric values from text (e.g., "5 Min" -> 5, "2,3 km" -> 2.3)
+                    const durationValue = element.duration.value / 60; // Convert seconds to minutes
+                    const distanceValue = element.distance.value / 1000; // Convert meters to kilometers
 
                     // Update form data based on type
                     if (destType === "transit") {
-                      handleChange("walkingTimeToPublicTransport", durationText);
-                      handleChange("distanceToPublicTransport", distanceText);
+                      handleChange("walkingTimeToPublicTransport", Math.round(durationValue));
+                      handleChange("distanceToPublicTransport", parseFloat(distanceValue.toFixed(1)));
                     } else if (destType === "highway") {
-                      handleChange("drivingTimeToHighway", durationText);
-                      handleChange("distanceToHighway", distanceText);
+                      handleChange("drivingTimeToHighway", Math.round(durationValue));
+                      handleChange("distanceToHighway", parseFloat(distanceValue.toFixed(1)));
                     } else if (destType === "train") {
-                      handleChange("drivingTimeToMainStation", durationText);
-                      handleChange("distanceToMainStation", distanceText);
+                      handleChange("drivingTimeToMainStation", Math.round(durationValue));
+                      handleChange("distanceToMainStation", parseFloat(distanceValue.toFixed(1)));
                     } else if (destType === "airport") {
-                      handleChange("drivingTimeToAirport", durationText);
-                      handleChange("distanceToAirport", distanceText);
+                      handleChange("drivingTimeToAirport", Math.round(durationValue));
+                      handleChange("distanceToAirport", parseFloat(distanceValue.toFixed(1)));
                     }
                   } else {
                     console.warn(`Could not calculate distance for ${destType}:`, matrixStatus);
