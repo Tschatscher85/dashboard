@@ -1,0 +1,25 @@
+{
+  "query": "SELECT * FROM propertyImages WHERE propertyId = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT * FROM propertyImages WHERE propertyId = 1;",
+  "rows": [
+    {
+      "id": "270002",
+      "propertyId": "1",
+      "imageUrl": "https://test.com/test.jpg",
+      "nasPath": "NULL",
+      "title": "Manual Test",
+      "description": "NULL",
+      "imageType": "sonstiges",
+      "sortOrder": "0",
+      "createdAt": "2025-11-10 09:44:03",
+      "category": "NULL",
+      "displayName": "NULL",
+      "showOnLandingPage": "1",
+      "isFeatured": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpropertyId\timageUrl\tnasPath\ttitle\tdescription\timageType\tsortOrder\tcreatedAt\tcategory\tdisplayName\tshowOnLandingPage\tisFeatured\n270002\t1\thttps://test.com/test.jpg\tNULL\tManual Test\tNULL\tsonstiges\t0\t2025-11-10 09:44:03\tNULL\tNULL\t1\t0\n",
+  "stderr": "",
+  "execution_time_ms": 359
+}

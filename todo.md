@@ -902,3 +902,12 @@
 - [ ] Test image upload saves to database with preview
 - [ ] Implement raw MySQL INSERT for document uploads
 - [ ] Test rename and metadata editing features work
+
+## NAS-Only Upload Fix (Current Priority)
+
+- [ ] Debug why database entries are not created despite success log in uploadToNAS
+- [ ] Fix createPropertyImage to actually save to database
+- [ ] Remove S3 fallback code from uploadToNAS endpoint
+- [ ] Remove usedFallback check from PropertyMedia frontend
+- [ ] Test complete upload flow: NAS upload → database entry → image display in gallery
+- [ ] Verify images display on landing page after NAS upload

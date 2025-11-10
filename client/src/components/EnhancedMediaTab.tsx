@@ -96,17 +96,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       showOnLandingPage: img.showOnLandingPage,
       nasPath: img.nasPath,
     })),
-    // NAS images
-    ...(nasImages || []).map((img: any, idx: number) => ({
-      id: -1 - idx, // Negative IDs for NAS files
-      type: "image" as const,
-      url: img.url || img.path,
-      title: img.name,
-      category: "Bilder",
-      displayName: img.name,
-      showOnLandingPage: 1,
-      nasPath: img.path,
-    })),
+    // NAS images - REMOVED: All images are now in database
     // Database documents
     ...(documents || []).map((doc: any) => ({
       id: doc.id,
@@ -120,34 +110,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       useInExpose: doc.useInExpose,
       nasPath: doc.nasPath,
     })),
-    // NAS documents
-    ...(nasObjektunterlagen || []).map((doc: any, idx: number) => ({
-      id: -1000 - idx,
-      type: "document" as const,
-      url: doc.url || doc.path,
-      title: doc.name,
-      category: "Objektunterlagen",
-      displayName: doc.name,
-      nasPath: doc.path,
-    })),
-    ...(nasSensibleDaten || []).map((doc: any, idx: number) => ({
-      id: -2000 - idx,
-      type: "document" as const,
-      url: doc.url || doc.path,
-      title: doc.name,
-      category: "Sensible Daten",
-      displayName: doc.name,
-      nasPath: doc.path,
-    })),
-    ...(nasVertragsunterlagen || []).map((doc: any, idx: number) => ({
-      id: -3000 - idx,
-      type: "document" as const,
-      url: doc.url || doc.path,
-      title: doc.name,
-      category: "Vertragsunterlagen",
-      displayName: doc.name,
-      nasPath: doc.path,
-    })),
+    // NAS documents - REMOVED: All documents are now in database
   ];
 
   // Group media by category

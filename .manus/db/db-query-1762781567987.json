@@ -1,0 +1,58 @@
+{
+  "query": "SELECT configKey, configValue FROM appConfig WHERE configKey LIKE '%webdav%' OR configKey LIKE '%ftp%' OR configKey LIKE '%nas%' LIMIT 20",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT configKey, configValue FROM appConfig WHERE configKey LIKE '%webdav%' OR configKey LIKE '%ftp%' OR configKey LIKE '%nas%' LIMIT 20",
+  "rows": [
+    {
+      "configKey": "FTP_HOST",
+      "configValue": "ftp.tschatscher.eu"
+    },
+    {
+      "configKey": "FTP_PASSWORD",
+      "configValue": "Survive1985#"
+    },
+    {
+      "configKey": "FTP_PORT",
+      "configValue": "21"
+    },
+    {
+      "configKey": "FTP_SECURE",
+      "configValue": "false"
+    },
+    {
+      "configKey": "FTP_USERNAME",
+      "configValue": "tschatscher"
+    },
+    {
+      "configKey": "NAS_BASE_PATH",
+      "configValue": "/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf"
+    },
+    {
+      "configKey": "NAS_PUBLIC_PASSWORD",
+      "configValue": "Survive1985#"
+    },
+    {
+      "configKey": "NAS_PUBLIC_USERNAME",
+      "configValue": "ImmoJaeger"
+    },
+    {
+      "configKey": "WEBDAV_PASSWORD",
+      "configValue": "Survive1985#"
+    },
+    {
+      "configKey": "WEBDAV_PORT",
+      "configValue": "2002"
+    },
+    {
+      "configKey": "WEBDAV_URL",
+      "configValue": "https://ugreen.tschatscher.eu"
+    },
+    {
+      "configKey": "WEBDAV_USERNAME",
+      "configValue": "tschatscher"
+    }
+  ],
+  "messages": [],
+  "stdout": "configKey\tconfigValue\nFTP_HOST\tftp.tschatscher.eu\nFTP_PASSWORD\tSurvive1985#\nFTP_PORT\t21\nFTP_SECURE\tfalse\nFTP_USERNAME\ttschatscher\nNAS_BASE_PATH\t/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf\nNAS_PUBLIC_PASSWORD\tSurvive1985#\nNAS_PUBLIC_USERNAME\tImmoJaeger\nWEBDAV_PASSWORD\tSurvive1985#\nWEBDAV_PORT\t2002\nWEBDAV_URL\thttps://ugreen.tschatscher.eu\nWEBDAV_USERNAME\ttschatscher\n",
+  "stderr": "",
+  "execution_time_ms": 346
+}

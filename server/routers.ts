@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -646,16 +647,19 @@ export const appRouter = router({
         // Convert base64 to buffer
         const fileBuffer = Buffer.from(input.fileData, 'base64');
         
-        // Get NAS configuration (new separate WebDAV and FTP configs)
-        const webdavUrl = process.env.WEBDAV_URL || "";
-        const webdavPort = process.env.WEBDAV_PORT || "2002";
-        const webdavUsername = process.env.WEBDAV_USERNAME || "";
-        const webdavPassword = process.env.WEBDAV_PASSWORD || "";
+        // Get NAS configuration from database (appConfig table)
+        const nasConfig = await db.getNASConfig();
+        const webdavUrl = nasConfig.WEBDAV_URL || "";
+        const webdavPort = nasConfig.WEBDAV_PORT || "2002";
+        const webdavUsername = nasConfig.WEBDAV_USERNAME || "";
+        const webdavPassword = nasConfig.WEBDAV_PASSWORD || "";
         
-        const ftpHost = process.env.FTP_HOST || "";
-        const ftpPort = process.env.FTP_PORT || "21";
-        const ftpUsername = process.env.FTP_USERNAME || "";
-        const ftpPassword = process.env.FTP_PASSWORD || "";
+        const ftpHost = nasConfig.FTP_HOST || "";
+        const ftpPort = nasConfig.FTP_PORT || "21";
+        const ftpUsername = nasConfig.FTP_USERNAME || "";
+        const ftpPassword = nasConfig.FTP_PASSWORD || "";
+        
+
         
         // Public Read-Only credentials for image URLs
         const nasPublicUsername = process.env.NAS_PUBLIC_USERNAME || "";
@@ -810,6 +814,13 @@ export const appRouter = router({
         // Save to database
         if (input.category === "Bilder") {
           try {
+            console.log('[Upload] Attempting to save to database:', {
+              propertyId: input.propertyId,
+              imageUrl: url,
+              nasPath,
+              title: input.fileName,
+              imageType: input.imageType || "sonstiges",
+            });
             await db.createPropertyImage({
               propertyId: input.propertyId,
               imageUrl: url,
@@ -817,9 +828,11 @@ export const appRouter = router({
               title: input.fileName,
               imageType: input.imageType || "sonstiges",
             });
-            console.log('[Upload] Created database entry for image');
+            console.log('[Upload] ✅ Database entry created successfully');
           } catch (dbError: any) {
-            console.error('[Upload] Failed to save image to database:', dbError.message);
+            console.error('[Upload] ❌ Failed to save image to database!');
+            console.error('[Upload] Error:', dbError.message);
+            console.error('[Upload] Stack:', dbError.stack);
             // Continue anyway - file is uploaded to NAS/S3
           }
         }

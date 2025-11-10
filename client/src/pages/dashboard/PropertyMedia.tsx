@@ -409,7 +409,7 @@ export default function PropertyMedia() {
                     ? dbImages 
                     : dbImages.filter((img: any) => img.imageType === activeCategory);
                   
-                  const totalImages = filteredDbImages.length + (nasImages?.length || 0);
+                  const totalImages = filteredDbImages.length; // Only show database images
                   
                   return (
                     <>
@@ -630,14 +630,14 @@ export default function PropertyMedia() {
                               {image.title || `Bild ${index + 1}`}
                             </p>
                             <p className="text-xs text-center text-muted-foreground">
-                              Cloud
+                              {image.imageUrl?.includes('ugreen.tschatscher.eu') ? 'NAS' : 'Cloud'}
                             </p>
                           </div>
                         );
                         })}
                         
-                        {/* NAS images */}
-                        {nasImages && nasImages.map((file: any, index: number) => {
+                        {/* NAS images - REMOVED: All images are now in database */}
+                        {false && nasImages && nasImages.map((file: any, index: number) => {
                           const imageId = `nas-${file.filename}`;
                           const isSelected = selectedImages.has(imageId);
                           return (

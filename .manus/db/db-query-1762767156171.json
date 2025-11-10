@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, propertyId, imageUrl, title, imageType, showOnLandingPage FROM propertyImages WHERE propertyId = 1 ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT id, propertyId, imageUrl, title, imageType, showOnLandingPage FROM propertyImages WHERE propertyId = 1 ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 357
+}

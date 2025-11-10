@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO propertyImages (propertyId, imageUrl, title, imageType) VALUES (1, 'https://test.com/test.jpg', 'Manual Test', 'sonstiges');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute INSERT INTO propertyImages (propertyId, imageUrl, title, imageType) VALUES (1, 'https://test.com/test.jpg', 'Manual Test', 'sonstiges');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 357
+}

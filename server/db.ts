@@ -150,7 +150,13 @@ export async function getPropertyById(id: number) {
     (property as any).availableFrom = property.availableFrom.toISOString().split('T')[0];
   }
   
-  return property;
+  // Load images for this property
+  const images = await getPropertyImages(id);
+  
+  return {
+    ...property,
+    images,
+  };
 }
 
 export async function getPropertyBySlug(slug: string) {
@@ -281,13 +287,34 @@ export async function deleteContact(id: number) {
 // ============ PROPERTY IMAGE OPERATIONS ============
 
 export async function createPropertyImage(image: InsertPropertyImage) {
-  if (!process.env.DATABASE_URL) throw new Error("Database not available");
+  console.log('[Database] createPropertyImage called with:', JSON.stringify(image, null, 2));
+  
+  if (!process.env.DATABASE_URL) {
+    console.error('[Database] DATABASE_URL not set!');
+    throw new Error("Database not available");
+  }
   
   // Use direct mysql2 connection instead of Drizzle
   const mysql2 = await import('mysql2/promise');
-  const connection = await mysql2.createConnection(process.env.DATABASE_URL);
+  console.log('[Database] Creating mysql2 connection...');
+  
+  let connection;
+  try {
+    // Add timeout to prevent hanging
+    const connectionPromise = mysql2.createConnection(process.env.DATABASE_URL);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Connection timeout after 5 seconds')), 5000)
+    );
+    
+    connection = await Promise.race([connectionPromise, timeoutPromise]) as any;
+    console.log('[Database] ✅ Connection established!');
+  } catch (connError: any) {
+    console.error('[Database] ❌ Connection failed:', connError.message);
+    throw new Error(`Database connection failed: ${connError.message}`);
+  }
   
   try {
+    console.log('[Database] Executing INSERT query...');
     const [result] = await connection.execute(
       `INSERT INTO propertyImages 
        (propertyId, imageUrl, nasPath, title, description, imageType, sortOrder, category, displayName, showOnLandingPage, isFeatured) 
@@ -298,7 +325,7 @@ export async function createPropertyImage(image: InsertPropertyImage) {
         image.nasPath || null,
         image.title || null,
         image.description || null,
-        'sonstiges', // Always use valid ENUM value
+        image.imageType || 'sonstiges', // Use provided imageType or default to 'sonstiges'
         image.sortOrder ?? 0,
         image.category || null,
         image.displayName || null,
@@ -306,8 +333,13 @@ export async function createPropertyImage(image: InsertPropertyImage) {
         image.isFeatured ?? 0,
       ]
     );
+    console.log('[Database] ✅ INSERT successful! Result:', result);
     return result;
+  } catch (error) {
+    console.error('[Database] ❌ INSERT failed:', error);
+    throw error;
   } finally {
+    console.log('[Database] Closing connection...');
     await connection.end();
   }
 }
@@ -948,4 +980,31 @@ export async function updateDocumentMetadata(data: {
   await db.update(documents)
     .set(updateData)
     .where(eq(documents.id, data.id));
+}
+
+// ============ NAS CONFIGURATION ============
+
+export async function getNASConfig(): Promise<Record<string, string>> {
+  const db = await getDb();
+  if (!db) {
+    console.warn('[Database] Cannot get NAS config: database not available');
+    return {};
+  }
+
+  try {
+    const { appConfig } = await import('../drizzle/schema');
+    const configs = await db.select().from(appConfig);
+    
+    const configMap: Record<string, string> = {};
+    for (const config of configs) {
+      if (config.configValue) {
+        configMap[config.configKey] = config.configValue;
+      }
+    }
+    
+    return configMap;
+  } catch (error) {
+    console.error('[Database] Failed to get NAS config:', error);
+    return {};
+  }
 }
