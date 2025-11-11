@@ -1046,3 +1046,14 @@
 - [x] Remove selectedDocuments state from EnhancedMediaTab
 - [x] Add PDF preview on document click (not just preview button)
 - [x] Keep preview, edit, and download buttons
+
+## Propstack Landing Page Redesign
+
+- [x] Get access to Propstack landing page examples (login or screenshots)
+- [x] Analyze Propstack design: layout, sections, colors, typography
+- [x] Document all required sections (Objektdaten, Bilder, Lage, Kontakt, etc.)
+- [x] Redesign PropertyLanding.tsx to match Propstack exactly
+- [x] Add Impressum section at bottom
+- [x] Add legal notices (Datenschutz, AGB, etc.)
+- [x] Ensure consistent branding across all landing pages
+- [x] Test with real property data

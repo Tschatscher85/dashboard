@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Printer, Phone } from "lucide-react";
+import { Check, Printer, Phone, X } from "lucide-react";
 import { useState, useRef } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { APP_LOGO } from "@/const";
 
@@ -27,6 +28,12 @@ export default function PropertyLanding() {
     phone: "",
     message: "",
   });
+
+  const [legalModal, setLegalModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: string;
+  }>({ isOpen: false, title: "", content: "" });
 
   const createLeadMutation = trpc.leads.create.useMutation({
     onSuccess: () => {
@@ -173,25 +180,25 @@ export default function PropertyLanding() {
                 onClick={() => scrollToSection(objektdatenRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Objektdaten
+                Details
               </button>
               <button
                 onClick={() => scrollToSection(bilderRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Bilder
+                Photos
               </button>
               <button
                 onClick={() => scrollToSection(lageRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Lage
+                Location
               </button>
               <button
                 onClick={() => scrollToSection(kontaktRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Kontakt
+                Contact
               </button>
               <Button
                 variant="outline"
@@ -638,28 +645,28 @@ export default function PropertyLanding() {
               <h3 className="font-semibold text-lg mb-4">Rechtliches</h3>
               <div className="space-y-2 text-sm">
                 {settings?.impressum && (
-                  <a href="#impressum" className="block text-gray-600 hover:text-primary" onClick={(e) => {
-                    e.preventDefault();
-                    alert(settings.impressum);
-                  }}>
+                  <button
+                    onClick={() => setLegalModal({ isOpen: true, title: "Impressum", content: settings.impressum || "" })}
+                    className="block text-gray-600 hover:text-primary text-left"
+                  >
                     Impressum
-                  </a>
+                  </button>
                 )}
                 {settings?.agb && (
-                  <a href="#agb" className="block text-gray-600 hover:text-primary" onClick={(e) => {
-                    e.preventDefault();
-                    alert(settings.agb);
-                  }}>
+                  <button
+                    onClick={() => setLegalModal({ isOpen: true, title: "AGB", content: settings.agb || "" })}
+                    className="block text-gray-600 hover:text-primary text-left"
+                  >
                     AGB
-                  </a>
+                  </button>
                 )}
                 {settings?.datenschutz && (
-                  <a href="#datenschutz" className="block text-gray-600 hover:text-primary" onClick={(e) => {
-                    e.preventDefault();
-                    alert(settings.datenschutz);
-                  }}>
+                  <button
+                    onClick={() => setLegalModal({ isOpen: true, title: "Datenschutzerklärung", content: settings.datenschutz || "" })}
+                    className="block text-gray-600 hover:text-primary text-left"
+                  >
                     Datenschutzerklärung
-                  </a>
+                  </button>
                 )}
               </div>
             </div>
@@ -677,6 +684,18 @@ export default function PropertyLanding() {
           </div>
         </div>
       </footer>
+
+      {/* Legal Modal */}
+      <Dialog open={legalModal.isOpen} onOpenChange={(open) => setLegalModal({ ...legalModal, isOpen: open })}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{legalModal.title}</DialogTitle>
+          </DialogHeader>
+          <div className="prose max-w-none">
+            <div className="whitespace-pre-wrap text-sm text-gray-700">{legalModal.content}</div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Print Styles */}
       <style>{`
