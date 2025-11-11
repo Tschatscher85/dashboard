@@ -1091,12 +1091,21 @@
 
 - [x] Add gray background (bg-muted) to all input fields with units (€, m², etc.)
 - [x] Apply consistent styling across all price, area, and measurement fields
-- [ ] Test visual appearance in PropertyDetailForm
+- [x] Test visual appearance in PropertyDetailForm
 
 ## Superchat Widget + Legal Texts on Landing Page
 
 - [x] Add Superchat widget script to PropertyLanding page (<script src='https://widget.superchat.de/snippet.js?applicationKey=WCyQKxJ081w98a8oE25VqAzXpn' referrerpolicy='no-referrer-when-downgrade'></script>)
 - [x] Add legal text fields to Settings (Impressum, AGB, Datenschutzerklärung) for Immobilienmakler branding (already exists in BrandingSection)
 - [x] Display legal texts as placeholders in landing page footer (already implemented with modal dialogs)
-- [ ] Test Superchat widget loads correctly
-- [ ] Test legal texts display in footer
+- [x] Test Superchat widget loads correctly
+- [x] Test legal texts display in footer
+
+## Documents on Landing Page
+
+- [x] Add showOnLandingPage boolean field to property documents/media schema (already exists)
+- [x] Add checkbox "Auf Landing Page anzeigen" in PropertyMedia tab for each document
+- [x] Create Documents section on PropertyLanding page
+- [x] Display only documents marked with showOnLandingPage=true
+- [x] Add download buttons for each document
+- [ ] Test document visibility toggle

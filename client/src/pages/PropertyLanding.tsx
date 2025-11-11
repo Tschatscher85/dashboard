@@ -21,6 +21,12 @@ export default function PropertyLanding() {
   // Fetch company branding settings
   const { data: settings } = trpc.settings.getCompanyBranding.useQuery();
 
+  // Fetch documents for landing page
+  const { data: documents } = trpc.documents.getByProperty.useQuery(
+    { propertyId },
+    { enabled: !!propertyId }
+  );
+
   const [leadData, setLeadData] = useState({
     firstName: "",
     lastName: "",
@@ -749,6 +755,39 @@ export default function PropertyLanding() {
                   {settings.companyPhone}
                 </a>
               </p>
+            </div>
+          </section>
+        )}
+
+        {/* Dokumente Section */}
+        {documents && documents.filter((doc: any) => doc.showOnLandingPage === 1).length > 0 && (
+          <section className="scroll-mt-20 mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Dokumente</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {documents
+                .filter((doc: any) => doc.showOnLandingPage === 1)
+                .map((doc: any) => (
+                  <a
+                    key={doc.id}
+                    href={doc.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 bg-white border rounded-lg hover:border-[#0066A1] hover:shadow-md transition-all group"
+                  >
+                    <div className="p-3 bg-[#0066A1]/10 rounded-lg group-hover:bg-[#0066A1]/20 transition-colors">
+                      <svg className="w-6 h-6 text-[#0066A1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{doc.title}</p>
+                      <p className="text-sm text-gray-500">{doc.category}</p>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-[#0066A1] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </a>
+                ))}
             </div>
           </section>
         )}
