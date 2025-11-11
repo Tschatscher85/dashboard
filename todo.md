@@ -1133,3 +1133,9 @@
 - [x] Test with browser console to see actual error messages - Browser blocks credentials in cross-origin img tags
 - [ ] Implement server-side proxy to load images from NAS with credentials
 - [ ] Update PropertyLanding to use proxy URLs instead of direct NAS URLs
+
+## UI/UX Improvements
+
+- [ ] Add gray background to input fields for better visibility
+
+- [ ] Format description highlights with checkboxes on landing page

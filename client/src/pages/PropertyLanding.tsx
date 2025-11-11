@@ -321,8 +321,28 @@ export default function PropertyLanding() {
         {property.descriptionHighlights && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">⭐ Ausstattung & Highlights</h2>
-            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {property.descriptionHighlights}
+            <div className="text-gray-700 leading-relaxed space-y-3">
+              {property.descriptionHighlights.split('\n').map((line, index) => {
+                // Check if line starts with checkbox emoji
+                const isCheckboxLine = line.trim().startsWith('✅') || line.trim().startsWith('☑') || line.trim().startsWith('✓');
+                
+                if (isCheckboxLine) {
+                  // Remove checkbox emoji and render as list item with green checkmark
+                  const text = line.replace(/^[\s]*[✅☑✓][\s]*/, '');
+                  return (
+                    <div key={index} className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span>{text}</span>
+                    </div>
+                  );
+                } else if (line.trim()) {
+                  // Regular paragraph
+                  return <p key={index}>{line}</p>;
+                } else {
+                  // Empty line for spacing
+                  return <div key={index} className="h-2" />;
+                }
+              })}
             </div>
           </section>
         )}
