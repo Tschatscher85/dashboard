@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Printer, Phone, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { APP_LOGO } from "@/const";
@@ -37,6 +37,22 @@ export default function PropertyLanding() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Load Superchat widget script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://widget.superchat.de/snippet.js?applicationKey=WCyQKxJ081w98a8oE25VqAzXpn';
+    script.referrerPolicy = 'no-referrer-when-downgrade';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup: remove script when component unmounts
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   const createLeadMutation = trpc.leads.create.useMutation({
     onSuccess: () => {

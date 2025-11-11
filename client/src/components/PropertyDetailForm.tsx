@@ -650,7 +650,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                   type="number"
                   value={formData.price ? formData.price / 100 : ""}
                   onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
-                  className="pr-8"
+                  className="pr-8 bg-muted"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               </div>
@@ -688,6 +688,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.coldRent ? formData.coldRent / 100 : ""}
                 onChange={(e) => handleChange("coldRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -703,6 +704,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.warmRent ? formData.warmRent / 100 : ""}
                 onChange={(e) => handleChange("warmRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -718,6 +720,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.heatingCosts ? formData.heatingCosts / 100 : ""}
                 onChange={(e) => handleChange("heatingCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -733,6 +736,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.additionalCosts ? formData.additionalCosts / 100 : ""}
                 onChange={(e) => handleChange("additionalCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -774,6 +778,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.houseMoney ? formData.houseMoney / 100 : ""}
                 onChange={(e) => handleChange("houseMoney", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -789,6 +794,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.maintenanceReserve ? formData.maintenanceReserve / 100 : ""}
                 onChange={(e) => handleChange("maintenanceReserve", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -804,6 +810,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.parkingPrice ? formData.parkingPrice / 100 : ""}
                 onChange={(e) => handleChange("parkingPrice", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -820,7 +827,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                   type="number"
                   value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
                   onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
-                  className="pr-8"
+                  className="pr-8 bg-muted"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               </div>
@@ -845,9 +852,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               <Input
                 type="number"
                 value={formData.livingArea || ""}
-                onChange={(e) => handleChange("livingArea", parseInt(e.target.value || "0"))}
+                onChange={(e) => handleChange("livingArea", parseFloat(e.target.value) || null)}
                 disabled={!isEditing}
-                className="pr-10"
+                className="pr-10 bg-muted"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
             </div>
@@ -859,9 +866,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               <Input
                 type="number"
                 value={formData.plotArea || ""}
-                onChange={(e) => handleChange("plotArea", parseInt(e.target.value || "0"))}
+                onChange={(e) => handleChange("plotArea", parseFloat(e.target.value) || null)}
                 disabled={!isEditing}
-                className="pr-10"
+                className="pr-10 bg-muted"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
             </div>
@@ -874,6 +881,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.usableArea || ""}
               onChange={(e) => handleChange("usableArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -884,6 +892,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.balconyArea || ""}
               onChange={(e) => handleChange("balconyArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -894,6 +903,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.gardenArea || ""}
               onChange={(e) => handleChange("gardenArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -1210,6 +1220,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               onChange={(e) => handleChange("energyConsumption", parseInt(e.target.value) || null)}
               disabled={!isEditing}
               placeholder="z.B. 120"
+              className="bg-muted"
             />
           </div>
 
@@ -1220,6 +1231,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.energyConsumptionElectricity || ""}
               onChange={(e) => handleChange("energyConsumptionElectricity", parseInt(e.target.value) || null)}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -1230,6 +1242,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.energyConsumptionHeat || ""}
               onChange={(e) => handleChange("energyConsumptionHeat", parseInt(e.target.value) || null)}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -1240,6 +1253,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.co2Emissions || ""}
               onChange={(e) => handleChange("co2Emissions", parseInt(e.target.value) || null)}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
