@@ -1139,3 +1139,5 @@
 - [ ] Add gray background to input fields for better visibility
 
 - [ ] Format description highlights with checkboxes on landing page
+
+- [ ] Add Exposé erstellen and Landing Page öffnen buttons to PropertyDetail header
