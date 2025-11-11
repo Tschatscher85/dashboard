@@ -1057,3 +1057,11 @@
 - [x] Add legal notices (Datenschutz, AGB, etc.)
 - [x] Ensure consistent branding across all landing pages
 - [x] Test with real property data
+
+## Energy Certificate Data Not Saving
+
+- [x] Investigate why Energieausweis fields are not being saved
+- [x] Check database schema for energy certificate fields
+- [x] Check PropertyDetailForm for energy certificate inputs
+- [x] Verify update mutation includes all energy fields
+- [x] Test saving and loading energy certificate data

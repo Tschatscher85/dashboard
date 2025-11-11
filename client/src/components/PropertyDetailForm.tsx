@@ -1057,6 +1057,186 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         </CardContent>
       </Card>
 
+      {/* Energieausweis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Energieausweis</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Energieausweis vorhanden</Label>
+            <Select
+              value={formData.energyCertificateAvailability || ""}
+              onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nicht_vorhanden">nicht vorhanden</SelectItem>
+                <SelectItem value="vorhanden">vorhanden</SelectItem>
+                <SelectItem value="liegt_zur_besichtigung_vor">liegt zur Besichtigung vor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieausweistyp</Label>
+            <Select
+              value={formData.energyCertificateType || ""}
+              onValueChange={(value) => handleChange("energyCertificateType", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Typ wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Bedarfsausweis">Bedarfsausweis</SelectItem>
+                <SelectItem value="Verbrauchsausweis">Verbrauchsausweis</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieeffizienzklasse</Label>
+            <Select
+              value={formData.energyClass || ""}
+              onValueChange={(value) => handleChange("energyClass", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Klasse wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="B">B</SelectItem>
+                <SelectItem value="C">C</SelectItem>
+                <SelectItem value="D">D</SelectItem>
+                <SelectItem value="E">E</SelectItem>
+                <SelectItem value="F">F</SelectItem>
+                <SelectItem value="G">G</SelectItem>
+                <SelectItem value="H">H</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Endenergiebedarf (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumption || ""}
+              onChange={(e) => handleChange("energyConsumption", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+              placeholder="z.B. 120"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Strom (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumptionElectricity || ""}
+              onChange={(e) => handleChange("energyConsumptionElectricity", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Wärme (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumptionHeat || ""}
+              onChange={(e) => handleChange("energyConsumptionHeat", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>CO2-Emissionen (kg/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.co2Emissions || ""}
+              onChange={(e) => handleChange("co2Emissions", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Heizungsart</Label>
+            <Input
+              value={formData.heatingType || ""}
+              onChange={(e) => handleChange("heatingType", e.target.value)}
+              disabled={!isEditing}
+              placeholder="z.B. Zentralheizung"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Wesentlicher Energieträger</Label>
+            <Input
+              value={formData.mainEnergySource || ""}
+              onChange={(e) => handleChange("mainEnergySource", e.target.value)}
+              disabled={!isEditing}
+              placeholder="z.B. Gas, Öl, Fernwärme"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ausstellungsdatum</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateIssueDate || ""}
+              onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Gültig bis</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateValidUntil || ""}
+              onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Baujahr Anlagentechnik</Label>
+            <Input
+              type="number"
+              value={formData.heatingSystemYear || ""}
+              onChange={(e) => handleChange("heatingSystemYear", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.includesWarmWater || false}
+                onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
+                disabled={!isEditing}
+              />
+              <Label>Energieverbrauch für Warmwasser enthalten</Label>
+            </div>
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.buildingYearUnknown || false}
+                onCheckedChange={(checked) => handleChange("buildingYearUnknown", checked)}
+                disabled={!isEditing}
+              />
+              <Label>Baujahr unbekannt</Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ImmoScout24 Integration */}
       <Card>
         <CardHeader>
