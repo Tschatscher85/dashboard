@@ -502,6 +502,24 @@ export default function PropertyLanding() {
           </section>
         )}
 
+        {/* Floorplans Section */}
+        {property.floorPlans && property.floorPlans.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Grundrisse</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {property.floorPlans.map((plan: any, index: number) => (
+                <div key={index} className="border rounded-lg overflow-hidden">
+                  <img
+                    src={plan.imageUrl || plan}
+                    alt={`Grundriss ${index + 1}`}
+                    className="w-full h-auto object-contain bg-white"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Lage Section */}
         <section ref={lageRef} className="mb-12 scroll-mt-20">
           <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Lage</h2>
@@ -525,19 +543,42 @@ export default function PropertyLanding() {
           )}
         </section>
 
-        {/* Kontakt Section */}
-        <section ref={kontaktRef} className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontakt</h2>
-          <div className="max-w-2xl">
-            <div className="bg-gray-50 border rounded-lg p-6 mb-6">
-              <p className="text-gray-700 mb-2">📞 Kontaktieren Sie uns direkt!</p>
+        {/* Other Section - Contact Info */}
+        {settings?.companyPhone && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontaktinformationen</h2>
+            <div className="space-y-3">
               <p className="text-gray-700">
-                📲 Gerne auch per WhatsApp:{" "}
-                <a href="tel:073319460350" className="text-primary hover:underline font-medium">
-                  07331 9460350
+                <span className="font-semibold">📞 Jetzt Besichtigungstermin vereinbaren!</span>
+              </p>
+              <p className="text-gray-700">
+                📲 Telefon:{" "}
+                <a href={`tel:${settings.companyPhone}`} className="text-primary hover:underline font-medium">
+                  {settings.companyPhone}
+                </a>
+              </p>
+              {settings.companyEmail && (
+                <p className="text-gray-700">
+                  📧 E-Mail:{" "}
+                  <a href={`mailto:${settings.companyEmail}`} className="text-primary hover:underline font-medium">
+                    {settings.companyEmail}
+                  </a>
+                </p>
+              )}
+              <p className="text-gray-700">
+                💬 Oder einfach per WhatsApp:{" "}
+                <a href={`https://wa.me/${settings.companyPhone?.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                  {settings.companyPhone}
                 </a>
               </p>
             </div>
+          </section>
+        )}
+
+        {/* Kontakt Section */}
+        <section ref={kontaktRef} className="scroll-mt-20">
+          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontaktformular</h2>
+          <div className="max-w-2xl">
 
             <form onSubmit={handleSubmitLead} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
