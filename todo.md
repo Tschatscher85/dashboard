@@ -1002,3 +1002,10 @@
 - [x] Add image preview lightbox when clicking on images in Medien tab
 - [x] Remove delete (X) buttons from Medien tab (only show in Medien verwalten)
 - [x] Test that preview works and delete buttons are hidden
+
+## Preview Features
+
+- [ ] Add image lightbox preview to PropertyMedia page (Medien verwalten)
+- [ ] Add PDF preview dialog for documents in Medien tab
+- [ ] Add PDF preview dialog for documents in Medien verwalten
+- [ ] Test all previews work correctly

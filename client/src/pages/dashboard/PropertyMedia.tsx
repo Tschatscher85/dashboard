@@ -575,7 +575,8 @@ export default function PropertyMedia() {
                           return (
                           <div 
                             key={imageId} 
-                            className="relative group"
+                            className="relative group cursor-pointer"
+                            onClick={() => { setLightboxImages(filteredDbImages); setLightboxIndex(index); setLightboxOpen(true); }}
                           >
                             <input
                               type="checkbox"
@@ -994,6 +995,14 @@ export default function PropertyMedia() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages.map(img => ({ url: img.imageUrl, title: img.title }))}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
     </div>
   );
 }
