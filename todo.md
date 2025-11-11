@@ -1140,11 +1140,15 @@
 
 - [ ] Format description highlights with checkboxes on landing page
 
-- [ ] Add Exposé erstellen and Landing Page öffnen buttons to PropertyDetail header
+- [x] Add Exposé erstellen and Landing Page öffnen buttons to PropertyDetail header
 
 - [ ] Fix PropertyLanding to display headline instead of title in hero section
 
 - [ ] Synchronize status options in PropertyDetailForm to match new schema
 
-- [ ] Fix headline not being saved in PropertyDetailForm
-- [ ] Fix headline not displaying on PropertyLanding
+- [x] Fix headline not being saved in PropertyDetailForm
+- [x] Fix headline not displaying on PropertyLanding
+
+- [x] Keep Landing Page proxy only (dashboard uses direct access)
+
+- [x] Verified Landing Page uses proxy and dashboard uses direct access
