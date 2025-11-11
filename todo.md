@@ -1108,4 +1108,13 @@
 - [x] Create Documents section on PropertyLanding page
 - [x] Display only documents marked with showOnLandingPage=true
 - [x] Add download buttons for each document
-- [ ] Test document visibility toggle
+- [x] Test document visibility toggle
+
+## Public Access to Landing Page Assets (WebDAV Read-Only)
+
+- [x] Create function to generate public WebDAV URLs with read-only credentials (addPublicAuth function)
+- [x] Hardcode read-only credentials (ImmoJaeger / Survive1985#) into landing page URLs
+- [x] Update PropertyLanding to use public URLs for all images (hero, gallery, floor plans, lightbox)
+- [x] Update PropertyLanding to use public URLs for documents
+- [ ] Test landing page in incognito mode (images and documents should load without authentication)
+- [ ] Verify private files (Sensible Daten) remain protected

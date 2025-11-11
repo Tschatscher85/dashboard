@@ -27,6 +27,23 @@ export default function PropertyLanding() {
     { enabled: !!propertyId }
   );
 
+  // Function to inject public read-only credentials into NAS URLs
+  const addPublicAuth = (url: string | undefined): string => {
+    if (!url) return '';
+    
+    // Public read-only credentials
+    const username = 'ImmoJaeger';
+    const password = encodeURIComponent('Survive1985#'); // URL-encode the password
+    
+    // Only add auth if URL is from NAS (contains ugreen.tschatscher.eu)
+    if (url.includes('ugreen.tschatscher.eu')) {
+      // Insert credentials after https://
+      return url.replace('https://', `https://${username}:${password}@`);
+    }
+    
+    return url;
+  };
+
   const [leadData, setLeadData] = useState({
     firstName: "",
     lastName: "",
@@ -244,7 +261,7 @@ export default function PropertyLanding() {
         {property.images && property.images.length > 0 ? (
           <div className="w-full h-[500px] overflow-hidden">
             <img
-              src={(typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || ''}
+              src={addPublicAuth((typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || '')}
               alt={property.title}
               className="w-full h-full object-cover"
             />
@@ -676,7 +693,7 @@ export default function PropertyLanding() {
                   }}
                 >
                   <img
-                    src={image.imageUrl || image}
+                    src={addPublicAuth(image.imageUrl || image)}
                     alt={`${property.title} - Bild ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
@@ -694,7 +711,7 @@ export default function PropertyLanding() {
               {property.floorPlans.map((plan: any, index: number) => (
                 <div key={index} className="border rounded-lg overflow-hidden">
                   <img
-                    src={plan.imageUrl || plan}
+                    src={addPublicAuth(plan.imageUrl || plan)}
                     alt={`Grundriss ${index + 1}`}
                     className="w-full h-auto object-contain bg-white"
                   />
@@ -769,7 +786,7 @@ export default function PropertyLanding() {
                 .map((doc: any) => (
                   <a
                     key={doc.id}
-                    href={doc.fileUrl}
+                    href={addPublicAuth(doc.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 bg-white border rounded-lg hover:border-[#0066A1] hover:shadow-md transition-all group"
@@ -975,7 +992,7 @@ export default function PropertyLanding() {
             {property?.images && property.images.length > 0 && (
               <>
                 <img
-                  src={property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex]}
+                  src={addPublicAuth(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
                   alt={`${property.title} - Bild ${lightboxIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />
