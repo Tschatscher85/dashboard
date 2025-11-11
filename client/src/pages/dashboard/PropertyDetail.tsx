@@ -109,7 +109,7 @@ export default function PropertyDetail() {
     const finalData = {
       ...dataWithoutTitle,
       title: newTitle,
-      headline: newTitle, // Sync headline with title
+      // headline is independent and comes from formData
     };
     
     updateMutation.mutate({
