@@ -58,6 +58,13 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxImages, setLightboxImages] = useState<MediaItem[]>([]);
   
+  // PDF preview state
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState("");
+  
+  // Selected documents for bulk download
+  const [selectedDocuments, setSelectedDocuments] = useState<number[]>([]);
+  
   // Form state for editing
   const [editTitle, setEditTitle] = useState("");
   const [editCategory, setEditCategory] = useState("");
@@ -387,7 +394,26 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
         {Object.keys(groupedDocuments).length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Dokumente ({documentItems.length})</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Dokumente ({documentItems.length})</CardTitle>
+                {selectedDocuments.length > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      // Download selected documents as ZIP
+                      const selectedDocs = documentItems.filter(doc => selectedDocuments.includes(doc.id));
+                      selectedDocs.forEach(doc => {
+                        window.open(doc.url, '_blank');
+                      });
+                      toast.success(`${selectedDocuments.length} Dokument(e) werden heruntergeladen`);
+                      setSelectedDocuments([]);
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {selectedDocuments.length} Dokument(e) herunterladen
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -404,6 +430,19 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                           className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 cursor-pointer group"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={selectedDocuments.includes(doc.id)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                if (e.target.checked) {
+                                  setSelectedDocuments([...selectedDocuments, doc.id]);
+                                } else {
+                                  setSelectedDocuments(selectedDocuments.filter(id => id !== doc.id));
+                                }
+                              }}
+                              className="h-4 w-4 rounded border-gray-300"
+                            />
                             <FileIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="font-medium truncate">{doc.title}</p>
@@ -418,12 +457,35 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                               variant="ghost"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setPdfPreviewUrl(doc.url);
+                                setPdfPreviewOpen(true);
+                              }}
+                              title="Vorschau"
+                            >
+                              <FileIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditClick(doc);
+                              }}
+                              title="Bearbeiten"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 window.open(doc.url, '_blank');
                               }}
+                              title="Herunterladen"
                             >
                               <Download className="h-4 w-4" />
                             </Button>
-
                           </div>
                         </div>
                       ))}
@@ -453,7 +515,37 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
             </div>
             <div>
               <Label>Kategorie</Label>
-              <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} />
+              {selectedItem?.type === "document" ? (
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="objektunterlagen">Objektunterlagen</option>
+                  <option value="sensible">Sensible Daten</option>
+                  <option value="vertragsunterlagen">Vertragsunterlagen</option>
+                  <option value="upload">Upload-Bereich</option>
+                </select>
+              ) : (
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="hausansicht">Hausansicht</option>
+                  <option value="kueche">Küche</option>
+                  <option value="bad">Bad</option>
+                  <option value="wohnzimmer">Wohnzimmer</option>
+                  <option value="schlafzimmer">Schlafzimmer</option>
+                  <option value="garten">Garten</option>
+                  <option value="balkon">Balkon/Terrasse</option>
+                  <option value="keller">Keller</option>
+                  <option value="dachboden">Dachboden</option>
+                  <option value="garage">Garage/Stellplatz</option>
+                  <option value="grundrisse">Grundrisse</option>
+                  <option value="sonstiges">Sonstiges</option>
+                </select>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={showOnLandingPage} onCheckedChange={setShowOnLandingPage} />
@@ -490,6 +582,22 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
       />
+      
+      {/* PDF Preview Dialog */}
+      <Dialog open={pdfPreviewOpen} onOpenChange={setPdfPreviewOpen}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Dokument-Vorschau</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 h-full">
+            <iframe
+              src={pdfPreviewUrl}
+              className="w-full h-full border-0"
+              title="PDF Vorschau"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

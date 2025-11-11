@@ -1014,3 +1014,14 @@
 
 - [x] Fix document download button in EnhancedMediaTab to open PDFs in new tab
 - [x] Test that clicking on document opens PDF in browser
+
+## Document Management Enhancements
+
+- [x] Implement PDF preview dialog in Medien tab (embedded viewer, no new tab)
+- [x] Add document category editing functionality (change category after upload)
+- [x] Implement bulk ZIP download for multiple documents
+- [x] Add document selection checkboxes in Medien tab
+- [x] Create backend endpoint for ZIP generation
+- [x] Test PDF preview with real documents
+- [x] Test category editing and database updates
+- [x] Test bulk download with multiple files
