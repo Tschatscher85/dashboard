@@ -585,14 +585,14 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       
       {/* PDF Preview Dialog */}
       <Dialog open={pdfPreviewOpen} onOpenChange={setPdfPreviewOpen}>
-        <DialogContent className="max-w-4xl h-[80vh]">
+        <DialogContent className="max-w-6xl w-[90vw] h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Dokument-Vorschau</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 h-full">
+          <div className="flex-1 min-h-0">
             <iframe
               src={pdfPreviewUrl}
-              className="w-full h-full border-0"
+              className="w-full h-full border rounded"
               title="PDF Vorschau"
             />
           </div>

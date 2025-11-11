@@ -28,6 +28,9 @@ export default function PropertyMedia() {
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
   
+  // Selected documents for bulk download
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
   
   // Fetch NAS files for each category
@@ -757,6 +760,31 @@ export default function PropertyMedia() {
 
         {/* Dokumente Tab */}
         <TabsContent value="dokumente" className="space-y-4">
+          {/* Bulk Download Button */}
+          {selectedDocuments.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                onClick={() => {
+                  // Download all selected documents
+                  const allFiles = [
+                    ...(nasObjektunterlagen || []),
+                    ...(nasSensibleDaten || []),
+                    ...(nasVertragsunterlagen || [])
+                  ];
+                  const selectedFiles = allFiles.filter(f => selectedDocuments.includes(f.filename));
+                  selectedFiles.forEach(file => {
+                    window.open(file.filename, '_blank');
+                  });
+                  toast.success(`${selectedDocuments.length} Dokument(e) werden heruntergeladen`);
+                  setSelectedDocuments([]);
+                }}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {selectedDocuments.length} Dokument(e) herunterladen
+              </Button>
+            </div>
+          )}
           {[
             { label: "Objektunterlagen", key: "objektunterlagen" },
             { label: "Sensible Daten", key: "sensible" },
@@ -819,6 +847,18 @@ export default function PropertyMedia() {
                         {files.map((file: any, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <input
+                                type="checkbox"
+                                checked={selectedDocuments.includes(file.filename)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedDocuments([...selectedDocuments, file.filename]);
+                                  } else {
+                                    setSelectedDocuments(selectedDocuments.filter(f => f !== file.filename));
+                                  }
+                                }}
+                                className="h-4 w-4 rounded border-gray-300"
+                              />
                               <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate" title={file.basename}>

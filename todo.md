@@ -1025,3 +1025,16 @@
 - [x] Test PDF preview with real documents
 - [x] Test category editing and database updates
 - [x] Test bulk download with multiple files
+
+## PDF Preview Dialog Bug
+
+- [ ] Fix PDF preview dialog not opening when clicking preview button
+- [ ] Test that iframe loads PDF correctly
+
+## PropertyMedia Bulk Download
+
+- [x] Add checkboxes to documents in PropertyMedia page
+- [x] Add selected documents state management
+- [x] Add "X Dokument(e) herunterladen" button to header (blue, primary)
+- [x] Implement bulk download functionality
+- [x] Test with multiple document selection
