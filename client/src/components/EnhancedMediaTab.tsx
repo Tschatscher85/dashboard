@@ -62,9 +62,6 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState("");
   
-  // Selected documents for bulk download
-  const [selectedDocuments, setSelectedDocuments] = useState<number[]>([]);
-  
   // Form state for editing
   const [editTitle, setEditTitle] = useState("");
   const [editCategory, setEditCategory] = useState("");
@@ -394,26 +391,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
         {Object.keys(groupedDocuments).length > 0 && (
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Dokumente ({documentItems.length})</CardTitle>
-                {selectedDocuments.length > 0 && (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      // Download selected documents as ZIP
-                      const selectedDocs = documentItems.filter(doc => selectedDocuments.includes(doc.id));
-                      selectedDocs.forEach(doc => {
-                        window.open(doc.url, '_blank');
-                      });
-                      toast.success(`${selectedDocuments.length} Dokument(e) werden heruntergeladen`);
-                      setSelectedDocuments([]);
-                    }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    {selectedDocuments.length} Dokument(e) herunterladen
-                  </Button>
-                )}
-              </div>
+              <CardTitle className="text-lg">Dokumente ({documentItems.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -428,21 +406,12 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                         <div
                           key={doc.id}
                           className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 cursor-pointer group"
+                          onClick={() => {
+                            setPdfPreviewUrl(doc.url);
+                            setPdfPreviewOpen(true);
+                          }}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <input
-                              type="checkbox"
-                              checked={selectedDocuments.includes(doc.id)}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                if (e.target.checked) {
-                                  setSelectedDocuments([...selectedDocuments, doc.id]);
-                                } else {
-                                  setSelectedDocuments(selectedDocuments.filter(id => id !== doc.id));
-                                }
-                              }}
-                              className="h-4 w-4 rounded border-gray-300"
-                            />
                             <FileIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="font-medium truncate">{doc.title}</p>

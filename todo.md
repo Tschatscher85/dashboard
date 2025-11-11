@@ -1038,3 +1038,11 @@
 - [x] Add "X Dokument(e) herunterladen" button to header (blue, primary)
 - [x] Implement bulk download functionality
 - [x] Test with multiple document selection
+
+## EnhancedMediaTab UI Cleanup
+
+- [x] Remove checkboxes from documents in EnhancedMediaTab (Medien tab)
+- [x] Remove bulk download button from EnhancedMediaTab
+- [x] Remove selectedDocuments state from EnhancedMediaTab
+- [x] Add PDF preview on document click (not just preview button)
+- [x] Keep preview, edit, and download buttons
