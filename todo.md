@@ -990,3 +990,9 @@
 - [ ] Implement category filtering when clicking tabs
 - [ ] Add documents section with Propstack-style layout
 - [ ] Test gallery filtering and document display
+
+## Document NAS Sync
+
+- [x] Extend syncFromNAS endpoint to scan document folders (Objektunterlagen, Sensible Daten, Vertragsunterlagen)
+- [x] Import found documents into database with correct category
+- [x] Test sync with existing NAS document files

@@ -1097,13 +1097,47 @@ export const appRouter = router({
           results.errors.push(`Bilder-Ordner: ${error.message}`);
         }
         
-        // Sync documents from Objektunterlagen and Sensible Daten folders
-        for (const category of ["Objektunterlagen", "Sensible Daten"] as const) {
+        // Sync documents from Objektunterlagen, Sensible Daten, and Vertragsunterlagen folders
+        for (const category of ["Objektunterlagen", "Sensible Daten", "Vertragsunterlagen"] as const) {
           try {
             const docFiles = await listFiles(propertyFolderName, category);
-            // Note: We don't have a documents table yet, so just count them
-            // This can be extended later when document management is implemented
-            results.newDocuments += docFiles.filter(f => !f.basename.match(/\.(jpg|jpeg|png|gif|webp)$/i)).length;
+            const existingDocs = await db.getDocumentsByProperty(input.propertyId);
+            const existingPaths = new Set(existingDocs.map(doc => doc.nasPath));
+            
+            for (const file of docFiles) {
+              // Skip if already in database
+              if (existingPaths.has(file.filename)) {
+                continue;
+              }
+              
+              // Only process document files (skip images)
+              if (file.basename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                continue;
+              }
+              
+              // Build NAS URL
+              const nasConfig = await db.getNASConfig();
+              const webdavUrl = nasConfig.WEBDAV_URL || "";
+              const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+              const relativePath = file.filename.replace(/^\/volume1/, '');
+              const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
+              const url = `${baseUrl}${encodedPath}`;
+              
+              try {
+                await db.createDocument({
+                  propertyId: input.propertyId,
+                  title: file.basename,
+                  fileUrl: url,
+                  nasPath: file.filename,
+                  documentType: "other",
+                  category: category,
+                  uploadedBy: 1, // System user for synced documents
+                });
+                results.newDocuments++;
+              } catch (error: any) {
+                results.errors.push(`Dokument ${file.basename}: ${error.message}`);
+              }
+            }
           } catch (error: any) {
             results.errors.push(`${category}: ${error.message}`);
           }
@@ -1112,7 +1146,7 @@ export const appRouter = router({
         return {
           success: true,
           ...results,
-          message: `${results.newImages} neue Bilder importiert${results.errors.length > 0 ? ` (${results.errors.length} Fehler)` : ''}`
+          message: `${results.newImages} neue Bilder und ${results.newDocuments} Dokumente importiert${results.errors.length > 0 ? ` (${results.errors.length} Fehler)` : ''}`
         };
       }),
 
