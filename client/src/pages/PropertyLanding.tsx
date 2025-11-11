@@ -282,7 +282,7 @@ export default function PropertyLanding() {
           <div className="w-full h-[500px] overflow-hidden">
             <img
               src={convertToProxyUrl((typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || '')}
-              alt={property.title}
+              alt={property.headline || property.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -714,7 +714,7 @@ export default function PropertyLanding() {
                 >
                   <img
                     src={convertToProxyUrl(image.imageUrl || image)}
-                    alt={`${property.title} - Bild ${index + 1}`}
+                    alt={`${property.headline || property.title} - Bild ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -1013,7 +1013,7 @@ export default function PropertyLanding() {
               <>
                 <img
                   src={convertToProxyUrl(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
-                  alt={`${property.title} - Bild ${lightboxIndex + 1}`}
+                  alt={`${property.headline || property.title} - Bild ${lightboxIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />
                 {property.images.length > 1 && (

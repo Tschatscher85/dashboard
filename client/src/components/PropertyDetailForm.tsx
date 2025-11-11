@@ -165,7 +165,24 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
   }, [isEditing]);
 
   const handleChange = (field: keyof Property, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // Auto-generate title from address when address fields change
+      if (['street', 'houseNumber', 'zipCode', 'city'].includes(field)) {
+        const street = field === 'street' ? value : (updated.street || '');
+        const houseNumber = field === 'houseNumber' ? value : (updated.houseNumber || '');
+        const zipCode = field === 'zipCode' ? value : (updated.zipCode || '');
+        const city = field === 'city' ? value : (updated.city || '');
+        
+        // Generate title: "Straße Hausnummer, PLZ Ort"
+        if (street && houseNumber && zipCode && city) {
+          updated.title = `${street} ${houseNumber}, ${zipCode} ${city}`;
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const handleSave = () => {
@@ -358,15 +375,11 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
           <div className="col-span-2 space-y-2">
-            <Label>Überschrift (wird automatisch mit Titel synchronisiert)</Label>
+            <Label>Überschrift (für Landing Page)</Label>
             <div className="flex gap-2">
               <Input
-                value={formData.headline || formData.title || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleChange("headline", value);
-                  handleChange("title", value); // Sync title with headline
-                }}
+                value={formData.headline || ""}
+                onChange={(e) => handleChange("headline", e.target.value)}
                 disabled={!isEditing}
                 placeholder="Attraktive Überschrift für die Immobilie"
                 className="flex-1"
