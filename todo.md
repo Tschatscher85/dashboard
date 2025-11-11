@@ -1073,3 +1073,16 @@
 - [x] Add all missing property fields to details table (50+ fields from Propstack)
 - [x] Add image lightbox/modal for fullscreen viewing
 - [x] Test all changes with real property data
+
+## Duplicate Energy Certificate Section
+
+- [x] Remove duplicate Energieausweis section from PropertyDetailForm
+- [x] Keep only one comprehensive energy certificate section
+- [x] Verify all energy fields are in the remaining section
+
+## Auftrag Fields Not Saving
+
+- [x] Check if Auftrag fields exist in database schema (auftragsart, laufzeit, auftragVonBis)
+- [x] Add missing Auftrag fields to database if needed
+- [x] Verify Auftrag section in PropertyDetailForm is connected to database
+- [x] Test saving Auftrag data

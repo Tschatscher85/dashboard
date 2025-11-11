@@ -1057,6 +1057,86 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         </CardContent>
       </Card>
 
+      {/* Auftrag */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Auftrag</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Auftragsart</Label>
+            <Select
+              value={formData.auftragsart || ""}
+              onValueChange={(value) => handleChange("auftragsart", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alleinauftrag">Alleinauftrag</SelectItem>
+                <SelectItem value="mehrfachauftrag">Mehrfachauftrag</SelectItem>
+                <SelectItem value="suchauftrag">Suchauftrag</SelectItem>
+                <SelectItem value="vermittlungsauftrag">Vermittlungsauftrag</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Laufzeit</Label>
+            <Select
+              value={formData.laufzeit || ""}
+              onValueChange={(value) => handleChange("laufzeit", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="befristet">befristet</SelectItem>
+                <SelectItem value="unbefristet">unbefristet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Auftrag von</Label>
+            <Input
+              type="date"
+              value={
+                formData.auftragVonDate instanceof Date
+                  ? formData.auftragVonDate.toISOString().split('T')[0]
+                  : (typeof formData.auftragVonDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragVonDate as string)
+                      ? (formData.auftragVonDate as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                handleChange("auftragVonDate", e.target.value || null);
+              }}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Auftrag bis</Label>
+            <Input
+              type="date"
+              value={
+                formData.auftragBisDate instanceof Date
+                  ? formData.auftragBisDate.toISOString().split('T')[0]
+                  : (typeof formData.auftragBisDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragBisDate as string)
+                      ? (formData.auftragBisDate as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                handleChange("auftragBisDate", e.target.value || null);
+              }}
+              disabled={!isEditing}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Energieausweis */}
       <Card>
         <CardHeader>

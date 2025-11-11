@@ -127,6 +127,13 @@
       "when": 1762713730969,
       "tag": "0017_wild_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1762836111361,
+      "tag": "0018_smooth_madame_masque",
+      "breakpoints": true
     }
   ]
 }

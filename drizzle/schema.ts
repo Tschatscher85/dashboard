@@ -244,6 +244,12 @@ export const properties = mysqlTable("properties", {
   // Auto-export settings
   autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
   
+  // Auftrag (Contract/Assignment)
+  auftragsart: varchar("auftragsart", { length: 100 }), // Auftragsart (z.B. Alleinauftrag, Mehrfachauftrag)
+  laufzeit: varchar("laufzeit", { length: 100 }), // Laufzeit (z.B. befristet, unbefristet)
+  auftragVonDate: timestamp("auftragVonDate"), // Auftrag von (Startdatum)
+  auftragBisDate: timestamp("auftragBisDate"), // Auftrag bis (Enddatum)
+  
   // Landing page
   hasLandingPage: boolean("hasLandingPage").default(false),
   landingPageSlug: varchar("landingPageSlug", { length: 255 }).unique(),
