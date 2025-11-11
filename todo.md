@@ -1124,3 +1124,12 @@
 - [x] Add "Dokumente" link to navigation header (next to Objektdaten, Bilder, Grundrisse, Kontakt)
 - [x] Add legal links to footer (Impressum, Datenschutz, AGB) - already existed
 - [x] Ensure footer legal links open modals with content from settings - already implemented
+
+## Fix Image Loading on Landing Page
+
+- [x] Debug addPublicAuth function - images not loading
+- [x] Check if credentials are being added correctly to URLs - URLs are correct
+- [x] Verify URL format is correct for WebDAV authentication - format is correct
+- [x] Test with browser console to see actual error messages - Browser blocks credentials in cross-origin img tags
+- [ ] Implement server-side proxy to load images from NAS with credentials
+- [ ] Update PropertyLanding to use proxy URLs instead of direct NAS URLs

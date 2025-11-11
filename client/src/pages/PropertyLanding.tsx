@@ -29,7 +29,12 @@ export default function PropertyLanding() {
 
   // Function to inject public read-only credentials into NAS URLs
   const addPublicAuth = (url: string | undefined): string => {
-    if (!url) return '';
+    if (!url) {
+      console.log('[addPublicAuth] Empty URL');
+      return '';
+    }
+    
+    console.log('[addPublicAuth] Input URL:', url);
     
     // Public read-only credentials
     const username = 'ImmoJaeger';
@@ -37,10 +42,18 @@ export default function PropertyLanding() {
     
     // Only add auth if URL is from NAS (contains ugreen.tschatscher.eu)
     if (url.includes('ugreen.tschatscher.eu')) {
+      // Check if auth already exists
+      if (url.includes('@')) {
+        console.log('[addPublicAuth] Auth already exists, returning original');
+        return url;
+      }
       // Insert credentials after https://
-      return url.replace('https://', `https://${username}:${password}@`);
+      const authUrl = url.replace('https://', `https://${username}:${password}@`);
+      console.log('[addPublicAuth] Output URL:', authUrl);
+      return authUrl;
     }
     
+    console.log('[addPublicAuth] Not a NAS URL, returning original');
     return url;
   };
 
