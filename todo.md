@@ -1009,3 +1009,8 @@
 - [ ] Add PDF preview dialog for documents in Medien tab
 - [ ] Add PDF preview dialog for documents in Medien verwalten
 - [ ] Test all previews work correctly
+
+## Document Preview Bug in Medien Tab
+
+- [x] Fix document download button in EnhancedMediaTab to open PDFs in new tab
+- [x] Test that clicking on document opens PDF in browser

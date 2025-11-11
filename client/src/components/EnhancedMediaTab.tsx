@@ -416,7 +416,10 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => window.open(doc.url, '_blank')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(doc.url, '_blank');
+                              }}
                             >
                               <Download className="h-4 w-4" />
                             </Button>
