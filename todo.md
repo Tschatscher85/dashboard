@@ -996,3 +996,9 @@
 - [x] Extend syncFromNAS endpoint to scan document folders (Objektunterlagen, Sensible Daten, Vertragsunterlagen)
 - [x] Import found documents into database with correct category
 - [x] Test sync with existing NAS document files
+
+## Media Tab Fixes
+
+- [x] Add image preview lightbox when clicking on images in Medien tab
+- [x] Remove delete (X) buttons from Medien tab (only show in Medien verwalten)
+- [x] Test that preview works and delete buttons are hidden

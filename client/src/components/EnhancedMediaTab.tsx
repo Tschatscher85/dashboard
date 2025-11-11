@@ -374,31 +374,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                           <p className="text-white text-sm truncate">{item.title}</p>
                         </div>
                       </button>
-                      {/* Edit/Delete buttons */}
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          className="h-8 w-8"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditClick(item);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          className="h-8 w-8"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(item);
-                          }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
+
                     </div>
                   ))}
                 </div>
@@ -444,20 +420,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                             >
                               <Download className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleEditClick(doc)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDeleteClick(doc)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+
                           </div>
                         </div>
                       ))}
@@ -521,8 +484,8 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       <ImageLightbox
         images={lightboxImages.map(img => ({ url: img.url, title: img.title }))}
         initialIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
       />
     </>
   );
