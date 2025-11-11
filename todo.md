@@ -1065,3 +1065,11 @@
 - [x] Check PropertyDetailForm for energy certificate inputs
 - [x] Verify update mutation includes all energy fields
 - [x] Test saving and loading energy certificate data
+
+## Landing Page Fixes
+
+- [x] Use headline field as main title (not property.title)
+- [x] Translate navigation from English to German (Objektdaten/Bilder/Lage/Kontakt)
+- [x] Add all missing property fields to details table (50+ fields from Propstack)
+- [x] Add image lightbox/modal for fullscreen viewing
+- [x] Test all changes with real property data

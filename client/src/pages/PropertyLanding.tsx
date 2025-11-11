@@ -35,6 +35,9 @@ export default function PropertyLanding() {
     content: string;
   }>({ isOpen: false, title: "", content: "" });
 
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   const createLeadMutation = trpc.leads.create.useMutation({
     onSuccess: () => {
       toast.success("Ihre Anfrage wurde erfolgreich gesendet!");
@@ -180,25 +183,25 @@ export default function PropertyLanding() {
                 onClick={() => scrollToSection(objektdatenRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Details
+                Objektdaten
               </button>
               <button
                 onClick={() => scrollToSection(bilderRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Photos
+                Bilder
               </button>
               <button
                 onClick={() => scrollToSection(lageRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Location
+                Lage
               </button>
               <button
                 onClick={() => scrollToSection(kontaktRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Contact
+                Kontakt
               </button>
               <Button
                 variant="outline"
@@ -234,7 +237,7 @@ export default function PropertyLanding() {
       {/* Title Section */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-2 text-[#0066A1]">
-          {property.title}
+          {property.headline || property.title}
         </h1>
         <p className="text-gray-600">
           {[property.street, property.houseNumber, property.zipCode, property.city]
@@ -479,6 +482,158 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{new Date(property.energyCertificateValidUntil).toLocaleDateString('de-DE')}</td>
                   </tr>
                 )}
+
+                {/* Additional fields from Propstack */}
+                {property.unitNumber && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Einheit</td>
+                    <td className="px-4 py-3">{property.unitNumber}</td>
+                  </tr>
+                )}
+                {property.buyerCommission && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
+                    <td className="px-4 py-3">{property.buyerCommission}</td>
+                  </tr>
+                )}
+                {property.floors && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Etagenzahl</td>
+                    <td className="px-4 py-3">{property.floors}</td>
+                  </tr>
+                )}
+                {property.parkingSpaces && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Anzahl Parkplätze</td>
+                    <td className="px-4 py-3">{property.parkingSpaces}</td>
+                  </tr>
+                )}
+                {property.parkingPrice && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Stellplatz-Preis</td>
+                    <td className="px-4 py-3">{(property.parkingPrice / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
+                  </tr>
+                )}
+                {property.parkingType && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Stellplatztyp</td>
+                    <td className="px-4 py-3">{property.parkingType}</td>
+                  </tr>
+                )}
+                {property.usableArea && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Nutzfläche ca.</td>
+                    <td className="px-4 py-3">{property.usableArea} m²</td>
+                  </tr>
+                )}
+                {property.coldRent && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Kaltmiete</td>
+                    <td className="px-4 py-3">{(property.coldRent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
+                  </tr>
+                )}
+                {property.warmRent && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Warmmiete</td>
+                    <td className="px-4 py-3">{(property.warmRent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
+                  </tr>
+                )}
+                {property.additionalCosts && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Nebenkosten</td>
+                    <td className="px-4 py-3">{(property.additionalCosts / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
+                  </tr>
+                )}
+                {property.heatingCostsIncluded !== null && property.heatingCostsIncluded !== undefined && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Heizkosten in Nebenkosten enthalten</td>
+                    <td className="px-4 py-3">{property.heatingCostsIncluded ? 'Ja' : 'Nein'}</td>
+                  </tr>
+                )}
+                {property.equipmentQuality && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Qualität der Ausstattung</td>
+                    <td className="px-4 py-3">{property.equipmentQuality}</td>
+                  </tr>
+                )}
+                {property.constructionPhase && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Bauphase</td>
+                    <td className="px-4 py-3">{property.constructionPhase}</td>
+                  </tr>
+                )}
+                {property.monthlyRentalIncome && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Mtl. Mieteinnahmen</td>
+                    <td className="px-4 py-3">{(property.monthlyRentalIncome / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
+                  </tr>
+                )}
+                {property.isRented !== null && property.isRented !== undefined && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Vermietet</td>
+                    <td className="px-4 py-3">{property.isRented ? 'Ja' : 'Nein'}</td>
+                  </tr>
+                )}
+                {property.flooringTypes && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Bodenbelag</td>
+                    <td className="px-4 py-3">{property.flooringTypes}</td>
+                  </tr>
+                )}
+                {property.bathroomEquipment && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Bad</td>
+                    <td className="px-4 py-3">{property.bathroomEquipment}</td>
+                  </tr>
+                )}
+                {property.suitableForVacation !== null && property.suitableForVacation !== undefined && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Als Ferienwohnung geeignet</td>
+                    <td className="px-4 py-3">{property.suitableForVacation ? 'Ja' : 'Nein'}</td>
+                  </tr>
+                )}
+                {property.hasStorageRoom !== null && property.hasStorageRoom !== undefined && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Abstellraum</td>
+                    <td className="px-4 py-3">{property.hasStorageRoom ? 'Ja' : 'Nein'}</td>
+                  </tr>
+                )}
+                {property.distanceToMainStation && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Fahrzeit nächster Hauptbahnhof</td>
+                    <td className="px-4 py-3">{property.distanceToMainStation} Min.</td>
+                  </tr>
+                )}
+                {property.distanceToAirport && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Fahrzeit nächster Flughafen</td>
+                    <td className="px-4 py-3">{property.distanceToAirport} Min.</td>
+                  </tr>
+                )}
+                {property.distanceToPublicTransportKm && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung zu öffentl. Verkehrsmitteln</td>
+                    <td className="px-4 py-3">{property.distanceToPublicTransportKm} km</td>
+                  </tr>
+                )}
+                {property.distanceToMainStationKm && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Hauptbahnhof</td>
+                    <td className="px-4 py-3">{property.distanceToMainStationKm} km</td>
+                  </tr>
+                )}
+                {property.distanceToAirportKm && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Flughafen</td>
+                    <td className="px-4 py-3">{property.distanceToAirportKm} km</td>
+                  </tr>
+                )}
+                {property.heatingSystemYear && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Baujahr Anlagentechnik</td>
+                    <td className="px-4 py-3">{property.heatingSystemYear}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -490,7 +645,14 @@ export default function PropertyLanding() {
             <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Bildergalerie</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {property.images.map((image: any, index: number) => (
-                <div key={index} className="aspect-video overflow-hidden rounded-lg border">
+                <div 
+                  key={index} 
+                  className="aspect-video overflow-hidden rounded-lg border cursor-pointer"
+                  onClick={() => {
+                    setLightboxIndex(index);
+                    setLightboxOpen(true);
+                  }}
+                >
                   <img
                     src={image.imageUrl || image}
                     alt={`${property.title} - Bild ${index + 1}`}
@@ -750,6 +912,52 @@ export default function PropertyLanding() {
           }
         }
       `}</style>
+
+      {/* Image Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0">
+          <div className="relative w-full h-full flex items-center justify-center bg-black">
+            {property?.images && property.images.length > 0 && (
+              <>
+                <img
+                  src={property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex]}
+                  alt={`${property.title} - Bild ${lightboxIndex + 1}`}
+                  className="max-w-full max-h-full object-contain"
+                />
+                {property.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex((prev) => (prev > 0 ? prev - 1 : property.images.length - 1));
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex((prev) => (prev < property.images.length - 1 ? prev + 1 : 0));
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full">
+                      {lightboxIndex + 1} / {property.images.length}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
