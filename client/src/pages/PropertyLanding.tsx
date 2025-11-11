@@ -114,6 +114,7 @@ export default function PropertyLanding() {
   const objektdatenRef = useRef<HTMLDivElement>(null);
   const bilderRef = useRef<HTMLDivElement>(null);
   const lageRef = useRef<HTMLDivElement>(null);
+  const dokumenteRef = useRef<HTMLDivElement>(null);
   const kontaktRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
@@ -236,6 +237,14 @@ export default function PropertyLanding() {
               >
                 Lage
               </button>
+              {documents && documents.filter((doc: any) => doc.showOnLandingPage === 1).length > 0 && (
+                <button
+                  onClick={() => scrollToSection(dokumenteRef)}
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Dokumente
+                </button>
+              )}
               <button
                 onClick={() => scrollToSection(kontaktRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
@@ -778,7 +787,7 @@ export default function PropertyLanding() {
 
         {/* Dokumente Section */}
         {documents && documents.filter((doc: any) => doc.showOnLandingPage === 1).length > 0 && (
-          <section className="scroll-mt-20 mb-12">
+          <section ref={dokumenteRef} className="scroll-mt-20 mb-12">
             <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Dokumente</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {documents

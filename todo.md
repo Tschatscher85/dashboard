@@ -1116,5 +1116,11 @@
 - [x] Hardcode read-only credentials (ImmoJaeger / Survive1985#) into landing page URLs
 - [x] Update PropertyLanding to use public URLs for all images (hero, gallery, floor plans, lightbox)
 - [x] Update PropertyLanding to use public URLs for documents
-- [ ] Test landing page in incognito mode (images and documents should load without authentication)
-- [ ] Verify private files (Sensible Daten) remain protected
+- [x] Test landing page in incognito mode (images and documents should load without authentication)
+- [x] Verify private files (Sensible Daten) remain protected (only files with showOnLandingPage=1 are accessible)
+
+## Landing Page Navigation & Footer Improvements
+
+- [x] Add "Dokumente" link to navigation header (next to Objektdaten, Bilder, Grundrisse, Kontakt)
+- [x] Add legal links to footer (Impressum, Datenschutz, AGB) - already existed
+- [x] Ensure footer legal links open modals with content from settings - already implemented
