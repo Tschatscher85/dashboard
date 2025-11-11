@@ -310,7 +310,7 @@ export default function PropertyLanding() {
         {/* Objektbeschreibung Section */}
         {property.description && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Objektbeschreibung</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📝 Objektbeschreibung</h2>
             <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {property.description}
             </div>
@@ -318,16 +318,41 @@ export default function PropertyLanding() {
         )}
 
         {/* Ausstattung & Highlights */}
-        {features.length > 0 && (
+        {property.descriptionHighlights && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Ausstattung & Highlights</h2>
-            <div className="space-y-2">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{feature}</span>
-                </div>
-              ))}
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">⭐ Ausstattung & Highlights</h2>
+            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {property.descriptionHighlights}
+            </div>
+          </section>
+        )}
+        
+        {/* Lage */}
+        {property.descriptionLocation && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📍 Lage</h2>
+            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {property.descriptionLocation}
+            </div>
+          </section>
+        )}
+        
+        {/* Fazit */}
+        {property.descriptionFazit && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">💚 Fazit</h2>
+            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {property.descriptionFazit}
+            </div>
+          </section>
+        )}
+        
+        {/* Call-to-Action */}
+        {property.descriptionCTA && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📞 Kontaktieren Sie uns direkt!</h2>
+            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {property.descriptionCTA}
             </div>
           </section>
         )}

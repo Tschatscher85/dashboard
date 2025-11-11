@@ -24,7 +24,11 @@ export type InsertUser = typeof users.$inferInsert;
 export const properties = mysqlTable("properties", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
+  description: text("description"), // Hauptbeschreibung (Objektbeschreibung)
+  descriptionHighlights: text("descriptionHighlights"), // Ausstattung & Highlights
+  descriptionLocation: text("descriptionLocation"), // Lage
+  descriptionFazit: text("descriptionFazit"), // Fazit
+  descriptionCTA: text("descriptionCTA"), // Call-to-Action
   
   // Stammdaten
   unitNumber: varchar("unitNumber", { length: 100 }), // Einheitennummer

@@ -1602,13 +1602,57 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Objektbeschreibung</Label>
+            <Label>📝 Objektbeschreibung</Label>
             <Textarea
               value={formData.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               disabled={!isEditing}
               rows={6}
-              placeholder="Detaillierte Beschreibung der Immobilie..."
+              placeholder="Willkommen in Ihrem neuen Zuhause! Diese gepflegte und 2023 modernisierte Doppelhaushälfte bietet..."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>⭐ Ausstattung & Highlights</Label>
+            <Textarea
+              value={formData.descriptionHighlights || ""}
+              onChange={(e) => handleChange("descriptionHighlights", e.target.value)}
+              disabled={!isEditing}
+              rows={8}
+              placeholder="Diese Immobilie wurde 2023 umfassend modernisiert und befindet sich in einem sehr gepflegten Zustand...\n\n✅ Letzte Modernisierung 2023: Elektrik, Malerarbeiten, Bodenbeläge & Badaufbereitung\n✅ Helle, freundliche Räume mit flexiblem Grundriss\n✅ Offener Wohn-/Essbereich mit Kamin für gemütliche Abende"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>📍 Lage</Label>
+            <Textarea
+              value={formData.descriptionLocation || ""}
+              onChange={(e) => handleChange("descriptionLocation", e.target.value)}
+              disabled={!isEditing}
+              rows={4}
+              placeholder="Diese Doppelhaushälfte liegt in einer ruhigen und familienfreundlichen Wohngegend von Geislingen. Einkaufsmöglichkeiten, Schulen, Kindergärten sowie der Anschluss an den ÖPNV sind in wenigen Minuten erreichbar."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>💚 Fazit</Label>
+            <Textarea
+              value={formData.descriptionFazit || ""}
+              onChange={(e) => handleChange("descriptionFazit", e.target.value)}
+              disabled={!isEditing}
+              rows={2}
+              placeholder="Dieses Haus ist ideal für Familien, die Wert auf eine moderne, gepflegte Immobilie mit Garten in ruhiger Lage legen und sich den Traum vom Eigenheim erfüllen möchten."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>📞 Kontaktieren Sie uns direkt!</Label>
+            <Textarea
+              value={formData.descriptionCTA || ""}
+              onChange={(e) => handleChange("descriptionCTA", e.target.value)}
+              disabled={!isEditing}
+              rows={3}
+              placeholder="Überzeugen Sie sich selbst von der Qualität und dem Potenzial dieser Doppelhaushälfte und vereinbaren Sie noch heute einen Besichtigungstermin.\n\n📱 Gerne auch per WhatsApp: 07331 9460350\n\nWir freuen uns auf Ihre Anfrage und begleiten Sie zuverlässig auf dem Weg in Ihr neues Zuhause!"
             />
           </div>
         </CardContent>
