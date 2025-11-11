@@ -30,6 +30,7 @@ interface MediaItem {
 // Helper function to capitalize category names
 const formatCategoryName = (category: string): string => {
   const categoryMap: Record<string, string> = {
+    "alle bilder": "Alle Bilder",
     hausansicht: "Hausansicht",
     kueche: "Küche",
     bad: "Bad",
@@ -41,6 +42,7 @@ const formatCategoryName = (category: string): string => {
     garage: "Garage",
     grundrisse: "Grundrisse",
     sonstiges: "Sonstiges",
+    garten: "Garten",
   };
   return categoryMap[category.toLowerCase()] || category.charAt(0).toUpperCase() + category.slice(1);
 };
@@ -49,6 +51,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("small");
+  const [activeCategory, setActiveCategory] = useState<string>("Alle Bilder");
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -65,24 +68,6 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
 
   const { data: property } = trpc.properties.getById.useQuery({ id: propertyId });
   const { data: documents } = trpc.documents.listByProperty.useQuery({ propertyId });
-  
-  // Load NAS files for all categories
-  const { data: nasImages } = trpc.properties.listNASFiles.useQuery(
-    { propertyId, category: 'Bilder' },
-    { enabled: !!propertyId }
-  );
-  const { data: nasObjektunterlagen } = trpc.properties.listNASFiles.useQuery(
-    { propertyId, category: 'Objektunterlagen' },
-    { enabled: !!propertyId }
-  );
-  const { data: nasSensibleDaten } = trpc.properties.listNASFiles.useQuery(
-    { propertyId, category: 'Sensible Daten' },
-    { enabled: !!propertyId }
-  );
-  const { data: nasVertragsunterlagen } = trpc.properties.listNASFiles.useQuery(
-    { propertyId, category: 'Vertragsunterlagen' },
-    { enabled: !!propertyId }
-  );
   
   const utils = trpc.useUtils();
 
@@ -104,7 +89,6 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
         toast.error(`Fehler: ${data.errors.join(', ')}`);
       }
       utils.properties.getById.invalidate({ id: propertyId });
-      utils.properties.listNASFiles.invalidate();
     },
     onError: (error) => {
       toast.error(`Sync fehlgeschlagen: ${error.message}`);
@@ -116,6 +100,26 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       toast.success("Dokument aktualisiert");
       utils.documents.listByProperty.invalidate({ propertyId });
       setEditDialogOpen(false);
+    },
+    onError: (error) => {
+      toast.error(`Fehler: ${error.message}`);
+    },
+  });
+
+  const deleteImageMutation = trpc.properties.deleteImage.useMutation({
+    onSuccess: () => {
+      toast.success("Bild gelöscht");
+      utils.properties.getById.invalidate({ id: propertyId });
+    },
+    onError: (error) => {
+      toast.error(`Fehler: ${error.message}`);
+    },
+  });
+
+  const deleteDocumentMutation = trpc.documents.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Dokument gelöscht");
+      utils.documents.listByProperty.invalidate({ propertyId });
     },
     onError: (error) => {
       toast.error(`Fehler: ${error.message}`);
@@ -135,7 +139,6 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       showOnLandingPage: img.showOnLandingPage,
       nasPath: img.nasPath,
     })),
-    // NAS images - REMOVED: All images are now in database
     // Database documents
     ...(documents || []).map((doc: any) => ({
       id: doc.id,
@@ -149,7 +152,6 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
       useInExpose: doc.useInExpose,
       nasPath: doc.nasPath,
     })),
-    // NAS documents - REMOVED: All documents are now in database
   ];
 
   // Separate images and documents
@@ -176,10 +178,18 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
     return acc;
   }, {} as Record<string, MediaItem[]>);
 
-  const handleItemClick = (item: MediaItem, allImages: MediaItem[], index: number) => {
+  // Get all categories for filter tabs
+  const imageCategories = ["Alle Bilder", ...Object.keys(groupedImages).sort()];
+  
+  // Filter images based on active category
+  const filteredImages = activeCategory === "Alle Bilder" 
+    ? imageItems 
+    : imageItems.filter(item => item.category === activeCategory);
+
+  const handleItemClick = (item: MediaItem, index: number) => {
     if (item.type === "image") {
       // Open lightbox for images
-      setLightboxImages(allImages.filter(i => i.type === "image"));
+      setLightboxImages(filteredImages);
       setLightboxIndex(index);
       setLightboxOpen(true);
     } else {
@@ -204,6 +214,18 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
     setIsFloorPlan(!!item.isFloorPlan);
     setUseInExpose(!!item.useInExpose);
     setEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = (item: MediaItem) => {
+    if (!confirm(`${item.type === "image" ? "Bild" : "Dokument"} "${item.title}" wirklich löschen?`)) {
+      return;
+    }
+    
+    if (item.type === "image") {
+      deleteImageMutation.mutate({ id: item.id });
+    } else {
+      deleteDocumentMutation.mutate({ id: item.id });
+    }
   };
 
   const handleSave = () => {
@@ -263,12 +285,13 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
             {syncFromNASMutation.isPending ? 'Synchronisiere...' : 'Vom NAS synchronisieren'}
           </Button>
         </div>
-        {/* Images Section */}
-        {Object.entries(groupedImages).map(([category, items]) => (
-          <Card key={category}>
+        
+        {/* Unified Images Gallery with Filter Tabs */}
+        {imageItems.length > 0 && (
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{formatCategoryName(category)}</CardTitle>
+                <CardTitle className="text-lg">Bildergalerie ({imageItems.length})</CardTitle>
                 <div className="flex items-center gap-1 border rounded-md p-1">
                   <Button
                     variant={viewSize === "small" ? "default" : "ghost"}
@@ -296,108 +319,144 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                   </Button>
                 </div>
               </div>
+              
+              {/* Category Filter Tabs */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {imageCategories.map((cat) => {
+                  const count = cat === "Alle Bilder" ? imageItems.length : (groupedImages[cat]?.length || 0);
+                  return (
+                    <Button
+                      key={cat}
+                      variant={activeCategory === cat ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActiveCategory(cat)}
+                      className="h-9"
+                    >
+                      {formatCategoryName(cat)} ({count})
+                    </Button>
+                  );
+                })}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className={`grid gap-4 ${
-                viewSize === "small" ? "grid-cols-3 md:grid-cols-4 lg:grid-cols-6" :
-                viewSize === "medium" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
-                "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-              }`}>
-                {items.map((item, index) => (
-                  <div key={`${item.type}-${item.id}`} className="relative">
-                    <button
-                      onClick={() => handleItemClick(item, items, index)}
-                      className="relative aspect-square overflow-hidden rounded-lg border group hover:border-primary transition-colors text-left w-full"
-                    >
-                    {item.type === "image" ? (
-                      <img
-                        src={item.url}
-                        alt={item.displayName || item.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3EBild%3C/text%3E%3C/svg%3E';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-muted">
-                        <FileIcon className="h-12 w-12 text-muted-foreground mb-2" />
-                        <span className="text-xs text-muted-foreground px-2 text-center line-clamp-2">
-                          {item.title}
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 line-clamp-1">
-                      {item.displayName || item.title}
-                    </div>
-                    {item.showOnLandingPage === 1 && (
-                      <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                        Landing Page
-                      </div>
-                    )}
-                    
-                    {/* Edit button for images */}
-                    {item.type === "image" && (
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="absolute top-2 left-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditClick(item);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </button>
+              {filteredImages.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Keine Bilder in dieser Kategorie</p>
                 </div>
-                ))}
-              </div>
+              ) : (
+                <div className={`grid gap-4 ${
+                  viewSize === "small" ? "grid-cols-3 md:grid-cols-4 lg:grid-cols-6" :
+                  viewSize === "medium" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
+                  "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                }`}>
+                  {filteredImages.map((item, index) => (
+                    <div key={item.id} className="relative group">
+                      <button
+                        onClick={() => handleItemClick(item, index)}
+                        className="relative aspect-square overflow-hidden rounded-lg border hover:border-primary transition-colors text-left w-full"
+                      >
+                        <img
+                          src={item.url}
+                          alt={item.displayName || item.title}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3EBild%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
+                        {item.showOnLandingPage === 1 && (
+                          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                            Landing Page
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                          <p className="text-white text-sm truncate">{item.title}</p>
+                        </div>
+                      </button>
+                      {/* Edit/Delete buttons */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(item);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(item);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
-        ))}
+        )}
         
-        {/* Documents Section */}
+        {/* Documents Section - Propstack Style */}
         {Object.keys(groupedDocuments).length > 0 && (
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">
-                  {documentItems.length} Dokument{documentItems.length !== 1 ? 'e' : ''}
-                </CardTitle>
-              </div>
+              <CardTitle className="text-lg">Dokumente ({documentItems.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {Object.entries(groupedDocuments).map(([category, docs]) => (
-                  <div key={category} className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <FileIcon className="h-4 w-4" />
-                      {formatCategoryName(category)} ({docs.length})
+                  <div key={category} className="border rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileIcon className="h-5 w-5 text-muted-foreground" />
+                      <h3 className="font-semibold">{formatCategoryName(category)} ({docs.length})</h3>
                     </div>
-                    <div className="space-y-1 ml-6">
+                    <div className="space-y-2">
                       {docs.map((doc) => (
                         <div
                           key={doc.id}
-                          className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer group"
-                          onClick={() => handleItemClick(doc, docs, docs.indexOf(doc))}
+                          className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 cursor-pointer group"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <FileIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
-                            <span className="text-sm truncate">{doc.title}</span>
+                            <FileIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{doc.title}</p>
+                              {doc.showOnLandingPage === 1 && (
+                                <span className="text-xs text-green-600">Auf Landing Page</span>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Button
-                              variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditClick(doc);
-                              }}
+                              variant="ghost"
+                              onClick={() => window.open(doc.url, '_blank')}
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEditClick(doc)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteClick(doc)}
+                            >
+                              <X className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -413,136 +472,57 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedItem?.type === "image" ? "Bild bearbeiten" : "Dokument bearbeiten"}
-            </DialogTitle>
+            <DialogTitle>{selectedItem?.type === "image" ? "Bild bearbeiten" : "Dokument bearbeiten"}</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
-            {/* Preview */}
-            {selectedItem && (
-              <div className="flex justify-center">
-                {selectedItem.type === "image" ? (
-                  <img
-                    src={selectedItem.url}
-                    alt={selectedItem.title}
-                    className="max-h-64 rounded-lg border"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-8 bg-muted rounded-lg">
-                    <FileIcon className="h-16 w-16 text-muted-foreground mb-2" />
-                    <span className="text-sm text-muted-foreground">{selectedItem.title}</span>
-                  </div>
-                )}
-              </div>
+            <div>
+              <Label>Titel</Label>
+              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+            </div>
+            <div>
+              <Label>Anzeigename</Label>
+              <Input value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} />
+            </div>
+            <div>
+              <Label>Kategorie</Label>
+              <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={showOnLandingPage} onCheckedChange={setShowOnLandingPage} />
+              <Label>Auf Landing Page anzeigen</Label>
+            </div>
+            {selectedItem?.type === "document" && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Switch checked={isFloorPlan} onCheckedChange={setIsFloorPlan} />
+                  <Label>Ist Grundriss</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={useInExpose} onCheckedChange={setUseInExpose} />
+                  <Label>Im Exposé verwenden</Label>
+                </div>
+              </>
             )}
-
-            {/* Title */}
-            <div>
-              <Label htmlFor="edit-title">Titel</Label>
-              <Input
-                id="edit-title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Titel eingeben"
-              />
-            </div>
-
-            {/* Display Name */}
-            <div>
-              <Label htmlFor="edit-display-name">Anzeigename</Label>
-              <Input
-                id="edit-display-name"
-                value={editDisplayName}
-                onChange={(e) => setEditDisplayName(e.target.value)}
-                placeholder="Anzeigename für Benutzer"
-              />
-            </div>
-
-            {/* Category */}
-            <div>
-              <Label htmlFor="edit-category">Kategorie</Label>
-              <select
-                id="edit-category"
-                value={editCategory}
-                onChange={(e) => setEditCategory(e.target.value)}
-                className="w-full p-2 border border-input rounded-md bg-background"
-              >
-                <option value="hausansicht">Hausansicht</option>
-                <option value="kueche">Küche</option>
-                <option value="bad">Bad</option>
-                <option value="wohnzimmer">Wohnzimmer</option>
-                <option value="schlafzimmer">Schlafzimmer</option>
-                <option value="garten">Garten</option>
-                <option value="balkon">Balkon/Terrasse</option>
-                <option value="keller">Keller</option>
-                <option value="dachboden">Dachboden</option>
-                <option value="garage">Garage</option>
-                <option value="grundrisse">Grundrisse</option>
-                <option value="sonstiges">Sonstiges</option>
-              </select>
-            </div>
-
-            {/* Toggles */}
-            <div className="space-y-3 border-t pt-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-landing">Auf Landing Page anzeigen</Label>
-                <Switch
-                  id="show-landing"
-                  checked={showOnLandingPage}
-                  onCheckedChange={setShowOnLandingPage}
-                />
-              </div>
-
-              {selectedItem?.type === "document" && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="is-floorplan">Als Grundriss markieren</Label>
-                    <Switch
-                      id="is-floorplan"
-                      checked={isFloorPlan}
-                      onCheckedChange={setIsFloorPlan}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="use-expose">Als Exposé verwenden</Label>
-                    <Switch
-                      id="use-expose"
-                      checked={useInExpose}
-                      onCheckedChange={setUseInExpose}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-2 border-t pt-4">
+            <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                <X className="h-4 w-4 mr-2" />
                 Abbrechen
               </Button>
               <Button onClick={handleSave}>
-                <Edit className="h-4 w-4 mr-2" />
                 Speichern
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Image Lightbox */}
       <ImageLightbox
-        images={lightboxImages.map(img => ({
-          url: img.url,
-          title: img.displayName || img.title
-        }))}
+        images={lightboxImages.map(img => ({ url: img.url, title: img.title }))}
         initialIndex={lightboxIndex}
-        open={lightboxOpen}
-        onOpenChange={setLightboxOpen}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
       />
     </>
   );

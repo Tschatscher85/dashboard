@@ -977,3 +977,16 @@
 - [x] Add "Vom NAS synchronisieren" button to media tab
 - [x] Show sync progress and results (X neue Bilder gefunden, Y Dokumente importiert)
 - [x] Test sync with existing NAS files (TEST2.jpg)
+
+## NAS Sync Button Fix
+
+- [ ] Add sync button to PropertyMedia page (/media route) where user actually uploads
+- [ ] Test sync button visibility and functionality
+
+## Media Gallery Redesign
+
+- [ ] Combine all image categories into one unified gallery view
+- [ ] Add filter tabs above gallery (Alle Bilder, Hausansicht, Küche, Bad, etc.)
+- [ ] Implement category filtering when clicking tabs
+- [ ] Add documents section with Propstack-style layout
+- [ ] Test gallery filtering and document display

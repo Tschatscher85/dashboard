@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2 } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -76,6 +76,24 @@ export default function PropertyMedia() {
   // Drag and drop state
   const [isDragDropEnabled, setIsDragDropEnabled] = useState(false);
   
+  // Sync from NAS mutation
+  const syncFromNASMutation = trpc.properties.syncFromNAS.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`Fehler: ${data.errors.join(', ')}`);
+      }
+      // Refresh all file lists
+      refetchImages();
+      refetchObjektunterlagen();
+      refetchSensibleDaten();
+      refetchVertragsunterlagen();
+    },
+    onError: (error) => {
+      toast.error(`Sync fehlgeschlagen: ${error.message}`);
+    },
+  });
+
   // Reorder images mutation
   const reorderImagesMutation = trpc.properties.reorderImages.useMutation({
     onSuccess: () => {
@@ -322,7 +340,18 @@ export default function PropertyMedia() {
         <TabsContent value="medien" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Bilder hochladen</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Bilder hochladen</CardTitle>
+                <Button
+                  onClick={() => syncFromNASMutation.mutate({ propertyId })}
+                  disabled={syncFromNASMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${syncFromNASMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncFromNASMutation.isPending ? 'Synchronisiere...' : 'Vom NAS synchronisieren'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {/* Category Selection */}

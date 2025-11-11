@@ -764,7 +764,7 @@ export const appRouter = router({
           "grundrisse", "sonstiges"
         ]).optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { storagePut } = await import("./storage");
         
         // Get property to build folder name
@@ -963,6 +963,32 @@ export const appRouter = router({
             console.error('[Upload] Error:', dbError.message);
             console.error('[Upload] Stack:', dbError.stack);
             // Continue anyway - file is uploaded to NAS/S3
+          }
+        } else {
+          // Save documents to database
+          try {
+            console.log('[Upload] Attempting to save document to database:', {
+              propertyId: input.propertyId,
+              fileUrl: url,
+              nasPath,
+              title: input.fileName,
+              category: input.category,
+            });
+            await db.createDocument({
+              propertyId: input.propertyId,
+              title: input.fileName,
+              fileUrl: url,
+              nasPath,
+              documentType: "other", // Default type
+              category: input.category,
+              uploadedBy: ctx.user.id,
+            });
+            console.log('[Upload] ✅ Document database entry created successfully');
+          } catch (dbError: any) {
+            console.error('[Upload] ❌ Failed to save document to database!');
+            console.error('[Upload] Error:', dbError.message);
+            console.error('[Upload] Stack:', dbError.stack);
+            // Continue anyway - file is uploaded to NAS
           }
         }
         
