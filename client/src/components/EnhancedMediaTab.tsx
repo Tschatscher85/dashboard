@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { FileIcon, ImageIcon, Download, Edit, X, LayoutGrid, Grid3x3, Grid2x2, Pencil } from "lucide-react";
+import { FileIcon, ImageIcon, Download, Edit, X, LayoutGrid, Grid3x3, Grid2x2, Pencil, RefreshCw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ImageLightbox } from "@/components/ImageLightbox";
@@ -94,6 +94,20 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
     },
     onError: (error) => {
       toast.error(`Fehler: ${error.message}`);
+    },
+  });
+
+  const syncFromNASMutation = trpc.properties.syncFromNAS.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`Fehler: ${data.errors.join(', ')}`);
+      }
+      utils.properties.getById.invalidate({ id: propertyId });
+      utils.properties.listNASFiles.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Sync fehlgeschlagen: ${error.message}`);
     },
   });
 
@@ -237,6 +251,18 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
   return (
     <>
       <div className="space-y-6">
+        {/* Sync Button */}
+        <div className="flex justify-end">
+          <Button
+            onClick={() => syncFromNASMutation.mutate({ propertyId })}
+            disabled={syncFromNASMutation.isPending}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncFromNASMutation.isPending ? 'animate-spin' : ''}`} />
+            {syncFromNASMutation.isPending ? 'Synchronisiere...' : 'Vom NAS synchronisieren'}
+          </Button>
+        </div>
         {/* Images Section */}
         {Object.entries(groupedImages).map(([category, items]) => (
           <Card key={category}>

@@ -994,6 +994,102 @@ export const appRouter = router({
         return files;
       }),
 
+    syncFromNAS: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { listFiles, getPropertyFolderName } = await import("./lib/webdav-client");
+        
+        // Get property to build folder name
+        const property = await db.getPropertyById(input.propertyId);
+        if (!property) {
+          throw new Error("Property not found");
+        }
+        
+        const propertyFolderName = getPropertyFolderName(property);
+        const results = {
+          newImages: 0,
+          newDocuments: 0,
+          errors: [] as string[],
+        };
+        
+        // Sync images from Bilder folder
+        try {
+          const imageFiles = await listFiles(propertyFolderName, "Bilder");
+          const existingImages = await db.getPropertyImages(input.propertyId);
+          const existingPaths = new Set(existingImages.map(img => img.nasPath));
+          
+          for (const file of imageFiles) {
+            // Skip if already in database
+            if (existingPaths.has(file.filename)) {
+              continue;
+            }
+            
+            // Only process image files
+            if (!file.basename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+              continue;
+            }
+            
+            // Build NAS URL
+            const nasConfig = await db.getNASConfig();
+            const webdavUrl = nasConfig.WEBDAV_URL || "";
+            const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+            const relativePath = file.filename.replace(/^\/volume1/, '');
+            const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
+            const url = `${baseUrl}${encodedPath}`;
+            
+            // Determine image type from filename
+            let imageType = "sonstiges";
+            const lowerName = file.basename.toLowerCase();
+            if (lowerName.includes('hausansicht') || lowerName.includes('aussen')) imageType = "hausansicht";
+            else if (lowerName.includes('kueche') || lowerName.includes('küche')) imageType = "kueche";
+            else if (lowerName.includes('bad')) imageType = "bad";
+            else if (lowerName.includes('wohnzimmer') || lowerName.includes('wohnen')) imageType = "wohnzimmer";
+            else if (lowerName.includes('schlafzimmer') || lowerName.includes('schlaf')) imageType = "schlafzimmer";
+            else if (lowerName.includes('garten')) imageType = "garten";
+            else if (lowerName.includes('balkon') || lowerName.includes('terrasse')) imageType = "balkon";
+            else if (lowerName.includes('keller')) imageType = "keller";
+            else if (lowerName.includes('dachboden') || lowerName.includes('dach')) imageType = "dachboden";
+            else if (lowerName.includes('garage') || lowerName.includes('carport')) imageType = "garage";
+            else if (lowerName.includes('grundriss')) imageType = "grundrisse";
+            
+            try {
+              await db.createPropertyImage({
+                propertyId: input.propertyId,
+                imageUrl: url,
+                nasPath: file.filename,
+                title: file.basename,
+                imageType: imageType as any,
+              });
+              results.newImages++;
+            } catch (error: any) {
+              results.errors.push(`Bild ${file.basename}: ${error.message}`);
+            }
+          }
+        } catch (error: any) {
+          results.errors.push(`Bilder-Ordner: ${error.message}`);
+        }
+        
+        // Sync documents from Objektunterlagen and Sensible Daten folders
+        for (const category of ["Objektunterlagen", "Sensible Daten"] as const) {
+          try {
+            const docFiles = await listFiles(propertyFolderName, category);
+            // Note: We don't have a documents table yet, so just count them
+            // This can be extended later when document management is implemented
+            results.newDocuments += docFiles.filter(f => !f.basename.match(/\.(jpg|jpeg|png|gif|webp)$/i)).length;
+          } catch (error: any) {
+            results.errors.push(`${category}: ${error.message}`);
+          }
+        }
+        
+        return {
+          success: true,
+          ...results,
+          message: `${results.newImages} neue Bilder importiert${results.errors.length > 0 ? ` (${results.errors.length} Fehler)` : ''}`
+        };
+      }),
+
     deleteFromNAS: protectedProcedure
       .input(z.object({
         nasPath: z.string(),

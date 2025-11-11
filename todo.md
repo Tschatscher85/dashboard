@@ -968,3 +968,12 @@
 - [x] Add documents section to media tab (Propstack-style)
 - [ ] Improve price formatting with € symbol and thousand separators
 - [x] Fix latitude/longitude type validation error (backend expects string, frontend sends number)
+
+## NAS Sync Feature
+
+- [x] Create backend endpoint to scan NAS folders for new files
+- [x] Implement sync logic for images (Bilder folder)
+- [x] Implement sync logic for documents (Objektunterlagen, Sensible Daten folders)
+- [x] Add "Vom NAS synchronisieren" button to media tab
+- [x] Show sync progress and results (X neue Bilder gefunden, Y Dokumente importiert)
+- [x] Test sync with existing NAS files (TEST2.jpg)
