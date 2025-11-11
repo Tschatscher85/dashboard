@@ -27,33 +27,31 @@ export default function PropertyLanding() {
     { enabled: !!propertyId }
   );
 
-  // Function to inject public read-only credentials into NAS URLs
-  const addPublicAuth = (url: string | undefined): string => {
+  // Convert NAS URLs to proxy URLs (server-side authentication)
+  const convertToProxyUrl = (url: string | undefined): string => {
     if (!url) {
-      console.log('[addPublicAuth] Empty URL');
+      console.log('[convertToProxyUrl] Empty URL');
       return '';
     }
     
-    console.log('[addPublicAuth] Input URL:', url);
+    console.log('[convertToProxyUrl] Input URL:', url);
     
-    // Public read-only credentials
-    const username = 'ImmoJaeger';
-    const password = encodeURIComponent('Survive1985#'); // URL-encode the password
-    
-    // Only add auth if URL is from NAS (contains ugreen.tschatscher.eu)
+    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
     if (url.includes('ugreen.tschatscher.eu')) {
-      // Check if auth already exists
-      if (url.includes('@')) {
-        console.log('[addPublicAuth] Auth already exists, returning original');
-        return url;
+      // Extract path after domain
+      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
+      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      if (match && match[1]) {
+        const nasPath = match[1];
+        // Remove leading slash for proxy endpoint
+        const proxyUrl = `/api/nas${nasPath}`;
+        console.log('[convertToProxyUrl] Converted to proxy URL:', proxyUrl);
+        return proxyUrl;
       }
-      // Insert credentials after https://
-      const authUrl = url.replace('https://', `https://${username}:${password}@`);
-      console.log('[addPublicAuth] Output URL:', authUrl);
-      return authUrl;
     }
     
-    console.log('[addPublicAuth] Not a NAS URL, returning original');
+    // For S3/Cloud URLs or other sources, return as-is
+    console.log('[convertToProxyUrl] Not a NAS URL, returning original');
     return url;
   };
 
@@ -283,7 +281,7 @@ export default function PropertyLanding() {
         {property.images && property.images.length > 0 ? (
           <div className="w-full h-[500px] overflow-hidden">
             <img
-              src={addPublicAuth((typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || '')}
+              src={convertToProxyUrl((typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || '')}
               alt={property.title}
               className="w-full h-full object-cover"
             />
@@ -715,7 +713,7 @@ export default function PropertyLanding() {
                   }}
                 >
                   <img
-                    src={addPublicAuth(image.imageUrl || image)}
+                    src={convertToProxyUrl(image.imageUrl || image)}
                     alt={`${property.title} - Bild ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
@@ -733,7 +731,7 @@ export default function PropertyLanding() {
               {property.floorPlans.map((plan: any, index: number) => (
                 <div key={index} className="border rounded-lg overflow-hidden">
                   <img
-                    src={addPublicAuth(plan.imageUrl || plan)}
+                    src={convertToProxyUrl(plan.imageUrl || plan)}
                     alt={`Grundriss ${index + 1}`}
                     className="w-full h-auto object-contain bg-white"
                   />
@@ -808,7 +806,7 @@ export default function PropertyLanding() {
                 .map((doc: any) => (
                   <a
                     key={doc.id}
-                    href={addPublicAuth(doc.fileUrl)}
+                    href={convertToProxyUrl(doc.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 bg-white border rounded-lg hover:border-[#0066A1] hover:shadow-md transition-all group"
@@ -1014,7 +1012,7 @@ export default function PropertyLanding() {
             {property?.images && property.images.length > 0 && (
               <>
                 <img
-                  src={addPublicAuth(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
+                  src={convertToProxyUrl(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
                   alt={`${property.title} - Bild ${lightboxIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />

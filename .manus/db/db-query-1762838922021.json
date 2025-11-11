@@ -1,0 +1,22 @@
+{
+  "query": "SELECT p.id, p.title, p.headline, COUNT(pi.id) as image_count \nFROM properties p \nLEFT JOIN propertyImages pi ON p.id = pi.propertyId \nGROUP BY p.id \nORDER BY image_count DESC \nLIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SELECT p.id, p.title, p.headline, COUNT(pi.id) as image_count \nFROM properties p \nLEFT JOIN propertyImages pi ON p.id = pi.propertyId \nGROUP BY p.id \nORDER BY image_count DESC \nLIMIT 5;",
+  "rows": [
+    {
+      "id": "30001",
+      "title": "Bahnhofstraße 2, 73329 Kuchen",
+      "headline": "NULL",
+      "image_count": "3"
+    },
+    {
+      "id": "2",
+      "title": "Klingenweg 15, 73312 Geislingen an der Steige",
+      "headline": "NULL",
+      "image_count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\theadline\timage_count\n30001\tBahnhofstraße 2, 73329 Kuchen\tNULL\t3\n2\tKlingenweg 15, 73312 Geislingen an der Steige\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 96
+}
