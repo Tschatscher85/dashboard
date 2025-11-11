@@ -175,9 +175,9 @@ export default function PropertyDetail() {
       preparation: { label: "Vorbereitung", variant: "secondary" },
       marketing: { label: "Vermarktung", variant: "default" },
       reserved: { label: "Reserviert", variant: "secondary" },
+      notary: { label: "Notartermin", variant: "default" },
       sold: { label: "Verkauft", variant: "outline" },
-      rented: { label: "Vermietet", variant: "outline" },
-      inactive: { label: "Inaktiv", variant: "destructive" },
+      completed: { label: "Abgeschlossen", variant: "outline" },
     };
     const { label, variant } = config[status] || { label: status, variant: "default" as const };
     return <Badge variant={variant}>{label}</Badge>;

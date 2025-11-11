@@ -190,7 +190,15 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     const cleanedData: any = {};
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
-        cleanedData[key] = value;
+        // Convert latitude/longitude strings to numbers
+        if ((key === 'latitude' || key === 'longitude') && typeof value === 'string') {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue)) {
+            cleanedData[key] = numValue;
+          }
+        } else {
+          cleanedData[key] = value;
+        }
       }
     });
     onSave(cleanedData);
@@ -338,9 +346,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectItem value="preparation">Vorbereitung</SelectItem>
                 <SelectItem value="marketing">Vermarktung</SelectItem>
                 <SelectItem value="reserved">Reserviert</SelectItem>
+                <SelectItem value="notary">Notartermin</SelectItem>
                 <SelectItem value="sold">Verkauft</SelectItem>
-                <SelectItem value="rented">Vermietet</SelectItem>
-                <SelectItem value="inactive">Inaktiv</SelectItem>
+                <SelectItem value="completed">Abgeschlossen</SelectItem>
               </SelectContent>
             </Select>
           </div>

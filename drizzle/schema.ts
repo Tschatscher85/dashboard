@@ -45,7 +45,7 @@ export const properties = mysqlTable("properties", {
   ]).notNull(),
   subType: varchar("subType", { length: 100 }), // Wohnung, Etagenwohnung, etc.
   marketingType: mysqlEnum("marketingType", ["sale", "rent", "lease"]).notNull(),
-  status: mysqlEnum("status", ["acquisition", "preparation", "marketing", "negotiation", "reserved", "sold", "rented", "inactive"]).default("acquisition").notNull(),
+  status: mysqlEnum("status", ["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).default("acquisition").notNull(),
   
   // Address
   street: varchar("street", { length: 255 }),
