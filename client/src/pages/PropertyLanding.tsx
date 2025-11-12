@@ -269,12 +269,7 @@ export default function PropertyLanding() {
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
               <tbody className="divide-y">
-                {property.unit && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Einheit</td>
-                    <td className="px-4 py-3">{property.unit}</td>
-                  </tr>
-                )}
+                {/* Unit field not in schema */}
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-gray-600 font-medium">Kategorie</td>
                   <td className="px-4 py-3">
@@ -287,12 +282,7 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3 font-semibold">{formatPrice(property.price)}</td>
                   </tr>
                 )}
-                {property.buyerCommission && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
-                    <td className="px-4 py-3">{property.buyerCommission}</td>
-                  </tr>
-                )}
+                {/* Käuferprovision field not in schema */}
                 {property.rooms && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Zimmer</td>

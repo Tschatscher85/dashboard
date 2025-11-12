@@ -127,6 +127,27 @@
       "when": 1762713730969,
       "tag": "0017_wild_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1762836111361,
+      "tag": "0018_smooth_madame_masque",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1762957103490,
+      "tag": "0019_cold_nico_minoru",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1762958147942,
+      "tag": "0020_sad_spencer_smythe",
+      "breakpoints": true
     }
   ]
 }

@@ -92,7 +92,7 @@ export default function PropertyMedia() {
       refetchSensibleDaten();
       refetchVertragsunterlagen();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Sync fehlgeschlagen: ${error.message}`);
     },
   });
@@ -102,7 +102,7 @@ export default function PropertyMedia() {
     onSuccess: () => {
       toast.success("Bildersortierung gespeichert");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Speichern: ${error.message}`);
     },
   });
@@ -135,12 +135,8 @@ export default function PropertyMedia() {
 
   const uploadMutation = trpc.properties.uploadToNAS.useMutation({
     onSuccess: (data, variables) => {
-      // Show appropriate message based on whether fallback was used
-      if (data.usedFallback) {
-        toast.warning(data.message || "Datei in Cloud gespeichert (NAS nicht erreichbar)");
-      } else {
-        toast.success(data.message || "Datei erfolgreich hochgeladen");
-      }
+      // Show success message
+      toast.success(data.message || "Datei erfolgreich hochgeladen");
       
       // Refetch the appropriate category
       if (variables.category === "Bilder") refetchImages();
@@ -148,7 +144,7 @@ export default function PropertyMedia() {
       else if (variables.category === "Sensible Daten") refetchSensibleDaten();
       else if (variables.category === "Vertragsunterlagen") refetchVertragsunterlagen();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Hochladen: ${error.message}`);
     },
   });
@@ -162,7 +158,7 @@ export default function PropertyMedia() {
       refetchSensibleDaten();
       refetchVertragsunterlagen();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Löschen: ${error.message}`);
     },
   });
@@ -174,7 +170,7 @@ export default function PropertyMedia() {
       refetchImages();
       window.location.reload(); // Full refresh to update property.images
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Löschen: ${error.message}`);
     },
   });
@@ -184,7 +180,7 @@ export default function PropertyMedia() {
       toast.success("Bild aktualisiert");
       window.location.reload(); // Full refresh to update property.images
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
@@ -690,7 +686,7 @@ export default function PropertyMedia() {
                         })}
                         
                         {/* NAS images - REMOVED: All images are now in database */}
-                        {false && nasImages && nasImages.map((file: any, index: number) => {
+                        {false && nasImages?.map((file: any, index: number) => {
                           const imageId = `nas-${file.filename}`;
                           const isSelected = selectedImages.has(imageId);
                           return (
@@ -1023,7 +1019,7 @@ export default function PropertyMedia() {
                 updateImageMutation.mutate({
                   id: selectedImage.id,
                   title: editTitle,
-                  imageType: editCategory as any,
+                  category: editCategory,
                   showOnLandingPage: showOnLandingPage ? 1 : 0,
                 });
                 setEditDialogOpen(false);

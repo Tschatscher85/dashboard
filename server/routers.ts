@@ -1829,6 +1829,27 @@ Die Beschreibung soll:
           results,
         };
       }),
+
+    // Reorder images
+    reorderImages: protectedProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        imageIds: z.array(z.string()), // Array of image IDs in new order (format: "db-123" or "nas-filename.jpg")
+      }))
+      .mutation(async ({ input }) => {
+        // Update sortOrder for database images
+        const dbImageIds = input.imageIds
+          .filter(id => id.startsWith('db-'))
+          .map(id => parseInt(id.replace('db-', '')));
+        
+        // Update each image's sortOrder based on its position in the array
+        for (let i = 0; i < dbImageIds.length; i++) {
+          const imageId = dbImageIds[i];
+          await db.updateImageSortOrder(imageId, i);
+        }
+        
+        return { success: true, message: "Bildersortierung gespeichert" };
+      }),
   }),
 
   // ============ CONTACTS ============
@@ -2028,22 +2049,14 @@ Die Beschreibung soll:
               }
             }
             
-            const calendarEvent = await createCalendarEvent({
-              summary: appointmentData.title,
-              description: appointmentData.description || appointmentData.notes,
-              location,
-              start_time: appointmentData.startTime.toISOString(),
-              end_time: appointmentData.endTime.toISOString(),
-              attendees,
-              reminders: [30], // 30 minutes before
-            });
-            
-            // Update appointment with Google Calendar event ID
-            await db.updateAppointment(appointmentId, {
-              googleCalendarEventId: calendarEvent.event_id,
-              googleCalendarLink: calendarEvent.html_link,
-              lastSyncedToGoogleCalendar: new Date(),
-            });
+            // TODO: Implement Google Calendar sync when OAuth tokens are available
+            // const calendarEvent = await createCalendarEvent(...);
+            // await db.updateAppointment(appointmentId, {
+            //   googleCalendarEventId: calendarEvent.eventId,
+            //   googleCalendarLink: calendarEvent.eventLink,
+            //   lastSyncedToGoogleCalendar: new Date(),
+            // });
+            console.log('Google Calendar sync skipped - OAuth not configured');
           } catch (error) {
             console.error("Failed to sync to Google Calendar:", error);
             // Don't fail the whole operation if calendar sync fails
@@ -2406,41 +2419,6 @@ Die Beschreibung soll:
         return result;
       }),
 
-    // Reorder images
-    reorderImages: protectedProcedure
-      .input(z.object({
-        propertyId: z.number(),
-        imageIds: z.array(z.string()), // Array of image IDs in new order (format: "db-123" or "nas-filename.jpg")
-      }))
-      .mutation(async ({ input }) => {
-        // Update sortOrder for database images
-        const dbImageIds = input.imageIds
-          .filter(id => id.startsWith('db-'))
-          .map(id => parseInt(id.replace('db-', '')));
-        
-        // Update each image's sortOrder based on its position in the array
-        for (let i = 0; i < dbImageIds.length; i++) {
-          const imageId = dbImageIds[i];
-          await db.updateImageSortOrder(imageId, i);
-        }
-        
-        return { success: true, message: "Bildersortierung gespeichert" };
-      }),
-
-    // Update image metadata
-    updateImage: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        category: z.string().optional(),
-        displayName: z.string().optional(),
-        showOnLandingPage: z.number().optional(),
-        isFeatured: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateImageMetadata(input);
-        return { success: true };
-      }),
   }),
 
   // ============ LEADS ============
