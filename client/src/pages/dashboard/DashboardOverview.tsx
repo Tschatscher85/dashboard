@@ -9,13 +9,14 @@ import { de } from "date-fns/locale";
 // Helper function for status colors
 function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    'Akquise': '#ef4444',
+    'Akquisition': '#ef4444',
     'Vorbereitung': '#f97316', 
     'Vermarktung': '#22c55e',
+    'Verhandlung': '#3b82f6',
     'Reserviert': '#a855f7',
-    'Notartermin': '#3b82f6',
     'Verkauft': '#10b981',
-    'Abgeschlossen': '#6b7280',
+    'Vermietet': '#06b6d4',
+    'Inaktiv': '#6b7280',
   };
   return colors[status] || '#6b7280';
 }

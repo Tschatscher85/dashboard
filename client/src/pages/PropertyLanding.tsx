@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Printer, Phone, X } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Check, Printer, Phone } from "lucide-react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { APP_LOGO } from "@/const";
 
@@ -21,40 +20,6 @@ export default function PropertyLanding() {
   // Fetch company branding settings
   const { data: settings } = trpc.settings.getCompanyBranding.useQuery();
 
-  // Fetch documents for landing page
-  const { data: documents } = trpc.documents.getByProperty.useQuery(
-    { propertyId },
-    { enabled: !!propertyId }
-  );
-
-  // Convert NAS URLs to proxy URLs (server-side authentication)
-  const convertToProxyUrl = (url: string | undefined): string => {
-    if (!url) {
-      console.log('[convertToProxyUrl] Empty URL');
-      return '';
-    }
-    
-    console.log('[convertToProxyUrl] Input URL:', url);
-    
-    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
-    if (url.includes('ugreen.tschatscher.eu')) {
-      // Extract path after domain
-      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
-      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
-      if (match && match[1]) {
-        const nasPath = match[1];
-        // Remove leading slash for proxy endpoint
-        const proxyUrl = `/api/nas${nasPath}`;
-        console.log('[convertToProxyUrl] Converted to proxy URL:', proxyUrl);
-        return proxyUrl;
-      }
-    }
-    
-    // For S3/Cloud URLs or other sources, return as-is
-    console.log('[convertToProxyUrl] Not a NAS URL, returning original');
-    return url;
-  };
-
   const [leadData, setLeadData] = useState({
     firstName: "",
     lastName: "",
@@ -62,31 +27,6 @@ export default function PropertyLanding() {
     phone: "",
     message: "",
   });
-
-  const [legalModal, setLegalModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    content: string;
-  }>({ isOpen: false, title: "", content: "" });
-
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  // Load Superchat widget script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://widget.superchat.de/snippet.js?applicationKey=WCyQKxJ081w98a8oE25VqAzXpn';
-    script.referrerPolicy = 'no-referrer-when-downgrade';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup: remove script when component unmounts
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
 
   const createLeadMutation = trpc.leads.create.useMutation({
     onSuccess: () => {
@@ -125,7 +65,6 @@ export default function PropertyLanding() {
   const objektdatenRef = useRef<HTMLDivElement>(null);
   const bilderRef = useRef<HTMLDivElement>(null);
   const lageRef = useRef<HTMLDivElement>(null);
-  const dokumenteRef = useRef<HTMLDivElement>(null);
   const kontaktRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
@@ -248,14 +187,6 @@ export default function PropertyLanding() {
               >
                 Lage
               </button>
-              {documents && documents.filter((doc: any) => doc.showOnLandingPage === 1).length > 0 && (
-                <button
-                  onClick={() => scrollToSection(dokumenteRef)}
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
-                  Dokumente
-                </button>
-              )}
               <button
                 onClick={() => scrollToSection(kontaktRef)}
                 className="text-sm font-medium hover:text-primary transition-colors"
@@ -281,8 +212,8 @@ export default function PropertyLanding() {
         {property.images && property.images.length > 0 ? (
           <div className="w-full h-[500px] overflow-hidden">
             <img
-              src={convertToProxyUrl((typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || '')}
-              alt={property.headline || property.title}
+              src={(typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.imageUrl) || ''}
+              alt={property.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -296,7 +227,7 @@ export default function PropertyLanding() {
       {/* Title Section */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-2 text-[#0066A1]">
-          {property.headline || property.title}
+          {property.title}
         </h1>
         <p className="text-gray-600">
           {[property.street, property.houseNumber, property.zipCode, property.city]
@@ -310,7 +241,7 @@ export default function PropertyLanding() {
         {/* Objektbeschreibung Section */}
         {property.description && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📝 Objektbeschreibung</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Objektbeschreibung</h2>
             <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {property.description}
             </div>
@@ -318,61 +249,16 @@ export default function PropertyLanding() {
         )}
 
         {/* Ausstattung & Highlights */}
-        {property.descriptionHighlights && (
+        {features.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">⭐ Ausstattung & Highlights</h2>
-            <div className="text-gray-700 leading-relaxed space-y-3">
-              {property.descriptionHighlights.split('\n').map((line, index) => {
-                // Check if line starts with checkbox emoji
-                const isCheckboxLine = line.trim().startsWith('✅') || line.trim().startsWith('☑') || line.trim().startsWith('✓');
-                
-                if (isCheckboxLine) {
-                  // Remove checkbox emoji and render as list item with green checkmark
-                  const text = line.replace(/^[\s]*[✅☑✓][\s]*/, '');
-                  return (
-                    <div key={index} className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span>{text}</span>
-                    </div>
-                  );
-                } else if (line.trim()) {
-                  // Regular paragraph
-                  return <p key={index}>{line}</p>;
-                } else {
-                  // Empty line for spacing
-                  return <div key={index} className="h-2" />;
-                }
-              })}
-            </div>
-          </section>
-        )}
-        
-        {/* Lage */}
-        {property.descriptionLocation && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📍 Lage</h2>
-            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {property.descriptionLocation}
-            </div>
-          </section>
-        )}
-        
-        {/* Fazit */}
-        {property.descriptionFazit && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">💚 Fazit</h2>
-            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {property.descriptionFazit}
-            </div>
-          </section>
-        )}
-        
-        {/* Call-to-Action */}
-        {property.descriptionCTA && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">📞 Kontaktieren Sie uns direkt!</h2>
-            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {property.descriptionCTA}
+            <h2 className="text-2xl font-bold mb-4 text-[#0066A1]">Ausstattung & Highlights</h2>
+            <div className="space-y-2">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">{feature}</span>
+                </div>
+              ))}
             </div>
           </section>
         )}
@@ -586,158 +472,6 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{new Date(property.energyCertificateValidUntil).toLocaleDateString('de-DE')}</td>
                   </tr>
                 )}
-
-                {/* Additional fields from Propstack */}
-                {property.unitNumber && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Einheit</td>
-                    <td className="px-4 py-3">{property.unitNumber}</td>
-                  </tr>
-                )}
-                {property.buyerCommission && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
-                    <td className="px-4 py-3">{property.buyerCommission}</td>
-                  </tr>
-                )}
-                {property.floors && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Etagenzahl</td>
-                    <td className="px-4 py-3">{property.floors}</td>
-                  </tr>
-                )}
-                {property.parkingSpaces && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Anzahl Parkplätze</td>
-                    <td className="px-4 py-3">{property.parkingSpaces}</td>
-                  </tr>
-                )}
-                {property.parkingPrice && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Stellplatz-Preis</td>
-                    <td className="px-4 py-3">{(property.parkingPrice / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
-                  </tr>
-                )}
-                {property.parkingType && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Stellplatztyp</td>
-                    <td className="px-4 py-3">{property.parkingType}</td>
-                  </tr>
-                )}
-                {property.usableArea && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Nutzfläche ca.</td>
-                    <td className="px-4 py-3">{property.usableArea} m²</td>
-                  </tr>
-                )}
-                {property.coldRent && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Kaltmiete</td>
-                    <td className="px-4 py-3">{(property.coldRent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
-                  </tr>
-                )}
-                {property.warmRent && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Warmmiete</td>
-                    <td className="px-4 py-3">{(property.warmRent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
-                  </tr>
-                )}
-                {property.additionalCosts && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Nebenkosten</td>
-                    <td className="px-4 py-3">{(property.additionalCosts / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
-                  </tr>
-                )}
-                {property.heatingCostsIncluded !== null && property.heatingCostsIncluded !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Heizkosten in Nebenkosten enthalten</td>
-                    <td className="px-4 py-3">{property.heatingCostsIncluded ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
-                {property.equipmentQuality && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Qualität der Ausstattung</td>
-                    <td className="px-4 py-3">{property.equipmentQuality}</td>
-                  </tr>
-                )}
-                {property.constructionPhase && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Bauphase</td>
-                    <td className="px-4 py-3">{property.constructionPhase}</td>
-                  </tr>
-                )}
-                {property.monthlyRentalIncome && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Mtl. Mieteinnahmen</td>
-                    <td className="px-4 py-3">{(property.monthlyRentalIncome / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
-                  </tr>
-                )}
-                {property.isRented !== null && property.isRented !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Vermietet</td>
-                    <td className="px-4 py-3">{property.isRented ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
-                {property.flooringTypes && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Bodenbelag</td>
-                    <td className="px-4 py-3">{property.flooringTypes}</td>
-                  </tr>
-                )}
-                {property.bathroomEquipment && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Bad</td>
-                    <td className="px-4 py-3">{property.bathroomEquipment}</td>
-                  </tr>
-                )}
-                {property.suitableForVacation !== null && property.suitableForVacation !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Als Ferienwohnung geeignet</td>
-                    <td className="px-4 py-3">{property.suitableForVacation ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
-                {property.hasStorageRoom !== null && property.hasStorageRoom !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Abstellraum</td>
-                    <td className="px-4 py-3">{property.hasStorageRoom ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
-                {property.distanceToMainStation && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Fahrzeit nächster Hauptbahnhof</td>
-                    <td className="px-4 py-3">{property.distanceToMainStation} Min.</td>
-                  </tr>
-                )}
-                {property.distanceToAirport && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Fahrzeit nächster Flughafen</td>
-                    <td className="px-4 py-3">{property.distanceToAirport} Min.</td>
-                  </tr>
-                )}
-                {property.distanceToPublicTransportKm && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung zu öffentl. Verkehrsmitteln</td>
-                    <td className="px-4 py-3">{property.distanceToPublicTransportKm} km</td>
-                  </tr>
-                )}
-                {property.distanceToMainStationKm && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Hauptbahnhof</td>
-                    <td className="px-4 py-3">{property.distanceToMainStationKm} km</td>
-                  </tr>
-                )}
-                {property.distanceToAirportKm && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Flughafen</td>
-                    <td className="px-4 py-3">{property.distanceToAirportKm} km</td>
-                  </tr>
-                )}
-                {property.heatingSystemYear && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Baujahr Anlagentechnik</td>
-                    <td className="px-4 py-3">{property.heatingSystemYear}</td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -749,36 +483,11 @@ export default function PropertyLanding() {
             <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Bildergalerie</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {property.images.map((image: any, index: number) => (
-                <div 
-                  key={index} 
-                  className="aspect-video overflow-hidden rounded-lg border cursor-pointer"
-                  onClick={() => {
-                    setLightboxIndex(index);
-                    setLightboxOpen(true);
-                  }}
-                >
+                <div key={index} className="aspect-video overflow-hidden rounded-lg border">
                   <img
-                    src={convertToProxyUrl(image.imageUrl || image)}
-                    alt={`${property.headline || property.title} - Bild ${index + 1}`}
+                    src={image.imageUrl || image}
+                    alt={`${property.title} - Bild ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Floorplans Section */}
-        {property.floorPlans && property.floorPlans.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Grundrisse</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {property.floorPlans.map((plan: any, index: number) => (
-                <div key={index} className="border rounded-lg overflow-hidden">
-                  <img
-                    src={convertToProxyUrl(plan.imageUrl || plan)}
-                    alt={`Grundriss ${index + 1}`}
-                    className="w-full h-auto object-contain bg-white"
                   />
                 </div>
               ))}
@@ -809,75 +518,19 @@ export default function PropertyLanding() {
           )}
         </section>
 
-        {/* Other Section - Contact Info */}
-        {settings?.companyPhone && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontaktinformationen</h2>
-            <div className="space-y-3">
-              <p className="text-gray-700">
-                <span className="font-semibold">📞 Jetzt Besichtigungstermin vereinbaren!</span>
-              </p>
-              <p className="text-gray-700">
-                📲 Telefon:{" "}
-                <a href={`tel:${settings.companyPhone}`} className="text-primary hover:underline font-medium">
-                  {settings.companyPhone}
-                </a>
-              </p>
-              {settings.companyEmail && (
-                <p className="text-gray-700">
-                  📧 E-Mail:{" "}
-                  <a href={`mailto:${settings.companyEmail}`} className="text-primary hover:underline font-medium">
-                    {settings.companyEmail}
-                  </a>
-                </p>
-              )}
-              <p className="text-gray-700">
-                💬 Oder einfach per WhatsApp:{" "}
-                <a href={`https://wa.me/${settings.companyPhone?.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                  {settings.companyPhone}
-                </a>
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* Dokumente Section */}
-        {documents && documents.filter((doc: any) => doc.showOnLandingPage === 1).length > 0 && (
-          <section ref={dokumenteRef} className="scroll-mt-20 mb-12">
-            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Dokumente</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {documents
-                .filter((doc: any) => doc.showOnLandingPage === 1)
-                .map((doc: any) => (
-                  <a
-                    key={doc.id}
-                    href={convertToProxyUrl(doc.fileUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 bg-white border rounded-lg hover:border-[#0066A1] hover:shadow-md transition-all group"
-                  >
-                    <div className="p-3 bg-[#0066A1]/10 rounded-lg group-hover:bg-[#0066A1]/20 transition-colors">
-                      <svg className="w-6 h-6 text-[#0066A1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{doc.title}</p>
-                      <p className="text-sm text-gray-500">{doc.category}</p>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-[#0066A1] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                  </a>
-                ))}
-            </div>
-          </section>
-        )}
-
         {/* Kontakt Section */}
         <section ref={kontaktRef} className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontaktformular</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Kontakt</h2>
           <div className="max-w-2xl">
+            <div className="bg-gray-50 border rounded-lg p-6 mb-6">
+              <p className="text-gray-700 mb-2">📞 Kontaktieren Sie uns direkt!</p>
+              <p className="text-gray-700">
+                📲 Gerne auch per WhatsApp:{" "}
+                <a href="tel:073319460350" className="text-primary hover:underline font-medium">
+                  07331 9460350
+                </a>
+              </p>
+            </div>
 
             <form onSubmit={handleSubmitLead} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -985,28 +638,28 @@ export default function PropertyLanding() {
               <h3 className="font-semibold text-lg mb-4">Rechtliches</h3>
               <div className="space-y-2 text-sm">
                 {settings?.impressum && (
-                  <button
-                    onClick={() => setLegalModal({ isOpen: true, title: "Impressum", content: settings.impressum || "" })}
-                    className="block text-gray-600 hover:text-primary text-left"
-                  >
+                  <a href="#impressum" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.impressum);
+                  }}>
                     Impressum
-                  </button>
+                  </a>
                 )}
                 {settings?.agb && (
-                  <button
-                    onClick={() => setLegalModal({ isOpen: true, title: "AGB", content: settings.agb || "" })}
-                    className="block text-gray-600 hover:text-primary text-left"
-                  >
+                  <a href="#agb" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.agb);
+                  }}>
                     AGB
-                  </button>
+                  </a>
                 )}
                 {settings?.datenschutz && (
-                  <button
-                    onClick={() => setLegalModal({ isOpen: true, title: "Datenschutzerklärung", content: settings.datenschutz || "" })}
-                    className="block text-gray-600 hover:text-primary text-left"
-                  >
+                  <a href="#datenschutz" className="block text-gray-600 hover:text-primary" onClick={(e) => {
+                    e.preventDefault();
+                    alert(settings.datenschutz);
+                  }}>
                     Datenschutzerklärung
-                  </button>
+                  </a>
                 )}
               </div>
             </div>
@@ -1025,18 +678,6 @@ export default function PropertyLanding() {
         </div>
       </footer>
 
-      {/* Legal Modal */}
-      <Dialog open={legalModal.isOpen} onOpenChange={(open) => setLegalModal({ ...legalModal, isOpen: open })}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{legalModal.title}</DialogTitle>
-          </DialogHeader>
-          <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-sm text-gray-700">{legalModal.content}</div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Print Styles */}
       <style>{`
         @media print {
@@ -1049,52 +690,6 @@ export default function PropertyLanding() {
           }
         }
       `}</style>
-
-      {/* Image Lightbox */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0">
-          <div className="relative w-full h-full flex items-center justify-center bg-black">
-            {property?.images && property.images.length > 0 && (
-              <>
-                <img
-                  src={convertToProxyUrl(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
-                  alt={`${property.headline || property.title} - Bild ${lightboxIndex + 1}`}
-                  className="max-w-full max-h-full object-contain"
-                />
-                {property.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxIndex((prev) => (prev > 0 ? prev - 1 : property.images.length - 1));
-                      }}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxIndex((prev) => (prev < property.images.length - 1 ? prev + 1 : 0));
-                      }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                      </svg>
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full">
-                      {lightboxIndex + 1} / {property.images.length}
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

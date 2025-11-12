@@ -18,8 +18,6 @@ import {
   Trash2,
   Save,
   X,
-  FileDown,
-  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -109,7 +107,7 @@ export default function PropertyDetail() {
     const finalData = {
       ...dataWithoutTitle,
       title: newTitle,
-      // headline is independent and comes from formData
+      headline: newTitle, // Sync headline with title
     };
     
     updateMutation.mutate({
@@ -177,9 +175,9 @@ export default function PropertyDetail() {
       preparation: { label: "Vorbereitung", variant: "secondary" },
       marketing: { label: "Vermarktung", variant: "default" },
       reserved: { label: "Reserviert", variant: "secondary" },
-      notary: { label: "Notartermin", variant: "default" },
       sold: { label: "Verkauft", variant: "outline" },
-      completed: { label: "Abgeschlossen", variant: "outline" },
+      rented: { label: "Vermietet", variant: "outline" },
+      inactive: { label: "Inaktiv", variant: "destructive" },
     };
     const { label, variant } = config[status] || { label: status, variant: "default" as const };
     return <Badge variant={variant}>{label}</Badge>;
@@ -261,26 +259,6 @@ export default function PropertyDetail() {
               <div className="flex gap-2">
                 {!isEditing ? (
                   <>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        // Open landing page in new tab
-                        window.open(`/property/${propertyId}`, '_blank');
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Landing Page öffnen
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        // Open landing page in print mode
-                        window.open(`/property/${propertyId}?print=true`, '_blank');
-                      }}
-                    >
-                      <FileDown className="h-4 w-4 mr-2" />
-                      Exposé erstellen
-                    </Button>
                     <Button variant="outline" onClick={() => setLocation(`/dashboard/properties/${propertyId}/media`)}>
                       <ImageIcon className="h-4 w-4 mr-2" />
                       Medien verwalten

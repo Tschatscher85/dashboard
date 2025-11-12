@@ -24,11 +24,7 @@ export type InsertUser = typeof users.$inferInsert;
 export const properties = mysqlTable("properties", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"), // Hauptbeschreibung (Objektbeschreibung)
-  descriptionHighlights: text("descriptionHighlights"), // Ausstattung & Highlights
-  descriptionLocation: text("descriptionLocation"), // Lage
-  descriptionFazit: text("descriptionFazit"), // Fazit
-  descriptionCTA: text("descriptionCTA"), // Call-to-Action
+  description: text("description"),
   
   // Stammdaten
   unitNumber: varchar("unitNumber", { length: 100 }), // Einheitennummer
@@ -49,7 +45,7 @@ export const properties = mysqlTable("properties", {
   ]).notNull(),
   subType: varchar("subType", { length: 100 }), // Wohnung, Etagenwohnung, etc.
   marketingType: mysqlEnum("marketingType", ["sale", "rent", "lease"]).notNull(),
-  status: mysqlEnum("status", ["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).default("acquisition").notNull(),
+  status: mysqlEnum("status", ["acquisition", "preparation", "marketing", "negotiation", "reserved", "sold", "rented", "inactive"]).default("acquisition").notNull(),
   
   // Address
   street: varchar("street", { length: 255 }),
@@ -247,12 +243,6 @@ export const properties = mysqlTable("properties", {
   
   // Auto-export settings
   autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
-  
-  // Auftrag (Contract/Assignment)
-  auftragsart: varchar("auftragsart", { length: 100 }), // Auftragsart (z.B. Alleinauftrag, Mehrfachauftrag)
-  laufzeit: varchar("laufzeit", { length: 100 }), // Laufzeit (z.B. befristet, unbefristet)
-  auftragVonDate: timestamp("auftragVonDate"), // Auftrag von (Startdatum)
-  auftragBisDate: timestamp("auftragBisDate"), // Auftrag bis (Enddatum)
   
   // Landing page
   hasLandingPage: boolean("hasLandingPage").default(false),
