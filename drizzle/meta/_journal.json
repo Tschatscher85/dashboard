@@ -148,6 +148,27 @@
       "when": 1762839775781,
       "tag": "0020_yummy_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1763044066195,
+      "tag": "0021_military_katie_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1763045010612,
+      "tag": "0022_stale_wilson_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1763045220223,
+      "tag": "0023_lethal_mantis",
+      "breakpoints": true
     }
   ]
 }
