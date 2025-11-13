@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e9bcd927-e059-44da-9869-92bc11519eda",
-  "prevId": "017ed145-dce5-4e3e-a699-d7fe32b9a4c3",
+  "id": "995ca35c-a0a3-4fbc-8f37-62128e4b5e55",
+  "prevId": "965d4052-fb7d-4bb4-b62f-89afab93b2f9",
   "tables": {
     "activities": {
       "name": "activities",
@@ -1276,6 +1276,34 @@
           "notNull": false,
           "autoincrement": false
         },
+        "descriptionHighlights": {
+          "name": "descriptionHighlights",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "descriptionLocation": {
+          "name": "descriptionLocation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "descriptionFazit": {
+          "name": "descriptionFazit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "descriptionCTA": {
+          "name": "descriptionCTA",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "unitNumber": {
           "name": "unitNumber",
           "type": "varchar(100)",
@@ -1377,7 +1405,7 @@
         },
         "status": {
           "name": "status",
-          "type": "enum('acquisition','preparation','marketing','negotiation','reserved','sold','rented','inactive')",
+          "type": "enum('acquisition','preparation','marketing','reserved','notary','sold','completed')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -2359,6 +2387,34 @@
           "notNull": false,
           "autoincrement": false,
           "default": true
+        },
+        "auftragsart": {
+          "name": "auftragsart",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "laufzeit": {
+          "name": "laufzeit",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auftragVonDate": {
+          "name": "auftragVonDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "auftragBisDate": {
+          "name": "auftragBisDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "hasLandingPage": {
           "name": "hasLandingPage",

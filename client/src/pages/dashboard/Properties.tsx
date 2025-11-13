@@ -163,22 +163,22 @@ export default function Properties() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      acquisition: "default",
+      acquisition: "secondary",
       preparation: "secondary",
       marketing: "default",
       reserved: "secondary",
-      sold: "destructive",
-      rented: "destructive",
-      inactive: "outline",
+      notary: "default",
+      sold: "outline",
+      completed: "outline",
     };
     const labels: Record<string, string> = {
       acquisition: "Akquise",
       preparation: "Vorbereitung",
       marketing: "Vermarktung",
       reserved: "Reserviert",
+      notary: "Notartermin",
       sold: "Verkauft",
-      rented: "Vermietet",
-      inactive: "Inaktiv",
+      completed: "Abgeschlossen",
     };
     return <Badge variant={variants[status] || "default"}>{labels[status] || status}</Badge>;
   };
@@ -527,11 +527,13 @@ export default function Properties() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alle Status</SelectItem>
-            <SelectItem value="available">Verfügbar</SelectItem>
+            <SelectItem value="acquisition">Akquise</SelectItem>
+            <SelectItem value="preparation">Vorbereitung</SelectItem>
+            <SelectItem value="marketing">Vermarktung</SelectItem>
             <SelectItem value="reserved">Reserviert</SelectItem>
+            <SelectItem value="notary">Notartermin</SelectItem>
             <SelectItem value="sold">Verkauft</SelectItem>
-            <SelectItem value="rented">Vermietet</SelectItem>
-            <SelectItem value="inactive">Inaktiv</SelectItem>
+            <SelectItem value="completed">Abgeschlossen</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="icon">

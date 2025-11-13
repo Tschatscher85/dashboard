@@ -400,13 +400,13 @@ export async function generateExpose(options: ExposeOptions): Promise<Uint8Array
 
     if (property.energyClass) {
       // Draw energy class badge
-      const energyColorValues = getEnergyClassColor(property.energyClass);
+      const energyColor = getEnergyClassColor(property.energyClass);
       detailsPage.drawRectangle({
         x: MARGIN,
         y: yPos - 30,
         width: 80,
         height: 40,
-        color: rgb(energyColorValues[0], energyColorValues[1], energyColorValues[2]),
+        color: energyColor,
       });
 
       detailsPage.drawText(property.energyClass, {

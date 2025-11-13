@@ -33,6 +33,12 @@ export default function PropertyMedia() {
   
   const { data: property, isLoading } = trpc.properties.getById.useQuery({ id: propertyId });
   
+  // Fetch documents from database
+  const { data: dbDocuments, refetch: refetchDocuments } = trpc.documents.getByProperty.useQuery(
+    { propertyId },
+    { enabled: !!propertyId }
+  );
+  
   // Fetch NAS files for each category
   const { data: nasImages, refetch: refetchImages } = trpc.properties.listNASFiles.useQuery(
     { propertyId, category: "Bilder" },
@@ -92,7 +98,7 @@ export default function PropertyMedia() {
       refetchSensibleDaten();
       refetchVertragsunterlagen();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Sync fehlgeschlagen: ${error.message}`);
     },
   });
@@ -102,7 +108,7 @@ export default function PropertyMedia() {
     onSuccess: () => {
       toast.success("Bildersortierung gespeichert");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Fehler beim Speichern: ${error.message}`);
     },
   });
@@ -135,8 +141,12 @@ export default function PropertyMedia() {
 
   const uploadMutation = trpc.properties.uploadToNAS.useMutation({
     onSuccess: (data, variables) => {
-      // Show success message
-      toast.success(data.message || "Datei erfolgreich hochgeladen");
+      // Show appropriate message based on whether fallback was used
+      if (data.usedFallback) {
+        toast.warning(data.message || "Datei in Cloud gespeichert (NAS nicht erreichbar)");
+      } else {
+        toast.success(data.message || "Datei erfolgreich hochgeladen");
+      }
       
       // Refetch the appropriate category
       if (variables.category === "Bilder") refetchImages();
@@ -144,7 +154,7 @@ export default function PropertyMedia() {
       else if (variables.category === "Sensible Daten") refetchSensibleDaten();
       else if (variables.category === "Vertragsunterlagen") refetchVertragsunterlagen();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Fehler beim Hochladen: ${error.message}`);
     },
   });
@@ -157,9 +167,20 @@ export default function PropertyMedia() {
       refetchObjektunterlagen();
       refetchSensibleDaten();
       refetchVertragsunterlagen();
+      refetchDocuments();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Fehler beim Löschen: ${error.message}`);
+    },
+  });
+
+  const updateDocumentMutation = trpc.documents.update.useMutation({
+    onSuccess: () => {
+      toast.success("Dokument aktualisiert");
+      refetchDocuments();
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
 
@@ -170,7 +191,7 @@ export default function PropertyMedia() {
       refetchImages();
       window.location.reload(); // Full refresh to update property.images
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Fehler beim Löschen: ${error.message}`);
     },
   });
@@ -180,7 +201,7 @@ export default function PropertyMedia() {
       toast.success("Bild aktualisiert");
       window.location.reload(); // Full refresh to update property.images
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(`Fehler beim Aktualisieren: ${error.message}`);
     },
   });
@@ -686,7 +707,7 @@ export default function PropertyMedia() {
                         })}
                         
                         {/* NAS images - REMOVED: All images are now in database */}
-                        {false && nasImages?.map((file: any, index: number) => {
+                        {false && nasImages && nasImages.map((file: any, index: number) => {
                           const imageId = `nas-${file.filename}`;
                           const isSelected = selectedImages.has(imageId);
                           return (
@@ -831,47 +852,47 @@ export default function PropertyMedia() {
                 {/* Document List */}
                 <div className="mt-4 space-y-2">
                   {(() => {
-                    let files: any[] = [];
-                    if (key === "objektunterlagen") files = nasObjektunterlagen || [];
-                    else if (key === "sensible") files = nasSensibleDaten || [];
-                    else if (key === "vertragsunterlagen") files = nasVertragsunterlagen || [];
-                    else files = nasObjektunterlagen || []; // Default for "upload"
+                    // Filter documents by category
+                    let docs: any[] = [];
+                    const categoryMap: Record<string, string> = {
+                      "objektunterlagen": "Objektunterlagen",
+                      "sensible": "Sensible Daten",
+                      "vertragsunterlagen": "Vertragsunterlagen",
+                      "upload": "Objektunterlagen" // Default
+                    };
+                    const targetCategory = categoryMap[key];
+                    docs = (dbDocuments || []).filter((doc: any) => doc.category === targetCategory);
 
-                    return files.length > 0 ? (
+                    return docs.length > 0 ? (
                       <>
-                        <p className="text-sm font-medium mb-2">{files.length} Dokument(e)</p>
-                        {files.map((file: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <input
-                                type="checkbox"
-                                checked={selectedDocuments.includes(file.filename)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedDocuments([...selectedDocuments, file.filename]);
-                                  } else {
-                                    setSelectedDocuments(selectedDocuments.filter(f => f !== file.filename));
-                                  }
+                        <p className="text-sm font-medium mb-2">{docs.length} Dokument(e)</p>
+                        {docs.map((doc: any) => (
+                          <div key={doc.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                            <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate" title={doc.title}>
+                                {doc.title}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs whitespace-nowrap">Auf Landing Page</Label>
+                              <Switch
+                                checked={doc.showOnLandingPage === 1}
+                                onCheckedChange={(checked) => {
+                                  updateDocumentMutation.mutate({
+                                    id: doc.id,
+                                    showOnLandingPage: checked ? 1 : 0
+                                  });
                                 }}
-                                className="h-4 w-4 rounded border-gray-300"
                               />
-                              <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate" title={file.basename}>
-                                  {file.basename}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {(file.size / 1024).toFixed(1)} KB
-                                </p>
-                              </div>
                             </div>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="flex-shrink-0"
                               onClick={() => {
-                                if (confirm(`Dokument "${file.basename}" wirklich löschen?`)) {
-                                  deleteMutation.mutate({ nasPath: file.filename });
+                                if (confirm(`Dokument "${doc.title}" wirklich löschen?`)) {
+                                  deleteMutation.mutate({ nasPath: doc.nasPath });
                                 }
                               }}
                             >
@@ -1019,7 +1040,7 @@ export default function PropertyMedia() {
                 updateImageMutation.mutate({
                   id: selectedImage.id,
                   title: editTitle,
-                  category: editCategory,
+                  imageType: editCategory as any,
                   showOnLandingPage: showOnLandingPage ? 1 : 0,
                 });
                 setEditDialogOpen(false);

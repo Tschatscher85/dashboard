@@ -165,7 +165,24 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
   }, [isEditing]);
 
   const handleChange = (field: keyof Property, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // Auto-generate title from address when address fields change
+      if (['street', 'houseNumber', 'zipCode', 'city'].includes(field)) {
+        const street = field === 'street' ? value : (updated.street || '');
+        const houseNumber = field === 'houseNumber' ? value : (updated.houseNumber || '');
+        const zipCode = field === 'zipCode' ? value : (updated.zipCode || '');
+        const city = field === 'city' ? value : (updated.city || '');
+        
+        // Generate title: "Straße Hausnummer, PLZ Ort"
+        if (street && houseNumber && zipCode && city) {
+          updated.title = `${street} ${houseNumber}, ${zipCode} ${city}`;
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const handleSave = () => {
@@ -173,7 +190,15 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     const cleanedData: any = {};
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
-        cleanedData[key] = value;
+        // Convert latitude/longitude strings to numbers
+        if ((key === 'latitude' || key === 'longitude') && typeof value === 'string') {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue)) {
+            cleanedData[key] = numValue;
+          }
+        } else {
+          cleanedData[key] = value;
+        }
       }
     });
     onSave(cleanedData);
@@ -321,9 +346,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectItem value="preparation">Vorbereitung</SelectItem>
                 <SelectItem value="marketing">Vermarktung</SelectItem>
                 <SelectItem value="reserved">Reserviert</SelectItem>
+                <SelectItem value="notary">Notartermin</SelectItem>
                 <SelectItem value="sold">Verkauft</SelectItem>
-                <SelectItem value="rented">Vermietet</SelectItem>
-                <SelectItem value="inactive">Inaktiv</SelectItem>
+                <SelectItem value="completed">Abgeschlossen</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -358,15 +383,11 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
           <div className="col-span-2 space-y-2">
-            <Label>Überschrift (wird automatisch mit Titel synchronisiert)</Label>
+            <Label>Überschrift (für Landing Page)</Label>
             <div className="flex gap-2">
               <Input
-                value={formData.headline || formData.title || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleChange("headline", value);
-                  handleChange("title", value); // Sync title with headline
-                }}
+                value={formData.headline || ""}
+                onChange={(e) => handleChange("headline", e.target.value)}
                 disabled={!isEditing}
                 placeholder="Attraktive Überschrift für die Immobilie"
                 className="flex-1"
@@ -650,7 +671,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                   type="number"
                   value={formData.price ? formData.price / 100 : ""}
                   onChange={(e) => handleChange("price", Math.round(parseFloat(e.target.value || "0") * 100))}
-                  className="pr-8"
+                  className="pr-8 bg-muted"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               </div>
@@ -688,6 +709,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.coldRent ? formData.coldRent / 100 : ""}
                 onChange={(e) => handleChange("coldRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -703,6 +725,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.warmRent ? formData.warmRent / 100 : ""}
                 onChange={(e) => handleChange("warmRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -718,6 +741,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.heatingCosts ? formData.heatingCosts / 100 : ""}
                 onChange={(e) => handleChange("heatingCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -733,6 +757,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.additionalCosts ? formData.additionalCosts / 100 : ""}
                 onChange={(e) => handleChange("additionalCosts", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -774,6 +799,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.houseMoney ? formData.houseMoney / 100 : ""}
                 onChange={(e) => handleChange("houseMoney", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -789,6 +815,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.maintenanceReserve ? formData.maintenanceReserve / 100 : ""}
                 onChange={(e) => handleChange("maintenanceReserve", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -804,6 +831,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 type="number"
                 value={formData.parkingPrice ? formData.parkingPrice / 100 : ""}
                 onChange={(e) => handleChange("parkingPrice", Math.round(parseFloat(e.target.value || "0") * 100))}
+                className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
@@ -820,7 +848,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                   type="number"
                   value={formData.monthlyRentalIncome ? formData.monthlyRentalIncome / 100 : ""}
                   onChange={(e) => handleChange("monthlyRentalIncome", Math.round(parseFloat(e.target.value || "0") * 100))}
-                  className="pr-8"
+                  className="pr-8 bg-muted"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               </div>
@@ -845,9 +873,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               <Input
                 type="number"
                 value={formData.livingArea || ""}
-                onChange={(e) => handleChange("livingArea", parseInt(e.target.value || "0"))}
+                onChange={(e) => handleChange("livingArea", parseFloat(e.target.value) || null)}
                 disabled={!isEditing}
-                className="pr-10"
+                className="pr-10 bg-muted"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
             </div>
@@ -859,9 +887,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               <Input
                 type="number"
                 value={formData.plotArea || ""}
-                onChange={(e) => handleChange("plotArea", parseInt(e.target.value || "0"))}
+                onChange={(e) => handleChange("plotArea", parseFloat(e.target.value) || null)}
                 disabled={!isEditing}
-                className="pr-10"
+                className="pr-10 bg-muted"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
             </div>
@@ -874,6 +902,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.usableArea || ""}
               onChange={(e) => handleChange("usableArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -884,6 +913,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.balconyArea || ""}
               onChange={(e) => handleChange("balconyArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -894,6 +924,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
               value={formData.gardenArea || ""}
               onChange={(e) => handleChange("gardenArea", parseInt(e.target.value || "0"))}
               disabled={!isEditing}
+              className="bg-muted"
             />
           </div>
 
@@ -1054,6 +1085,270 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           </div>
 
 
+        </CardContent>
+      </Card>
+
+      {/* Auftrag */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Auftrag</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Auftragsart</Label>
+            <Select
+              value={formData.auftragsart || ""}
+              onValueChange={(value) => handleChange("auftragsart", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alleinauftrag">Alleinauftrag</SelectItem>
+                <SelectItem value="mehrfachauftrag">Mehrfachauftrag</SelectItem>
+                <SelectItem value="suchauftrag">Suchauftrag</SelectItem>
+                <SelectItem value="vermittlungsauftrag">Vermittlungsauftrag</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Laufzeit</Label>
+            <Select
+              value={formData.laufzeit || ""}
+              onValueChange={(value) => handleChange("laufzeit", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="befristet">befristet</SelectItem>
+                <SelectItem value="unbefristet">unbefristet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Auftrag von</Label>
+            <Input
+              type="date"
+              value={
+                formData.auftragVonDate instanceof Date
+                  ? formData.auftragVonDate.toISOString().split('T')[0]
+                  : (typeof formData.auftragVonDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragVonDate as string)
+                      ? (formData.auftragVonDate as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                handleChange("auftragVonDate", e.target.value || null);
+              }}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Auftrag bis</Label>
+            <Input
+              type="date"
+              value={
+                formData.auftragBisDate instanceof Date
+                  ? formData.auftragBisDate.toISOString().split('T')[0]
+                  : (typeof formData.auftragBisDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragBisDate as string)
+                      ? (formData.auftragBisDate as string).split('T')[0]
+                      : "")
+              }
+              onChange={(e) => {
+                handleChange("auftragBisDate", e.target.value || null);
+              }}
+              disabled={!isEditing}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Energieausweis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Energieausweis</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Energieausweis vorhanden</Label>
+            <Select
+              value={formData.energyCertificateAvailability || ""}
+              onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Auswählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nicht_vorhanden">nicht vorhanden</SelectItem>
+                <SelectItem value="vorhanden">vorhanden</SelectItem>
+                <SelectItem value="liegt_zur_besichtigung_vor">liegt zur Besichtigung vor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieausweistyp</Label>
+            <Select
+              value={formData.energyCertificateType || ""}
+              onValueChange={(value) => handleChange("energyCertificateType", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Typ wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Bedarfsausweis">Bedarfsausweis</SelectItem>
+                <SelectItem value="Verbrauchsausweis">Verbrauchsausweis</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energieeffizienzklasse</Label>
+            <Select
+              value={formData.energyClass || ""}
+              onValueChange={(value) => handleChange("energyClass", value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Klasse wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="B">B</SelectItem>
+                <SelectItem value="C">C</SelectItem>
+                <SelectItem value="D">D</SelectItem>
+                <SelectItem value="E">E</SelectItem>
+                <SelectItem value="F">F</SelectItem>
+                <SelectItem value="G">G</SelectItem>
+                <SelectItem value="H">H</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Endenergiebedarf (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumption || ""}
+              onChange={(e) => handleChange("energyConsumption", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+              placeholder="z.B. 120"
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Strom (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumptionElectricity || ""}
+              onChange={(e) => handleChange("energyConsumptionElectricity", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Energiekennwert Wärme (kWh/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.energyConsumptionHeat || ""}
+              onChange={(e) => handleChange("energyConsumptionHeat", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>CO2-Emissionen (kg/(m²*a))</Label>
+            <Input
+              type="number"
+              value={formData.co2Emissions || ""}
+              onChange={(e) => handleChange("co2Emissions", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Heizungsart</Label>
+            <Input
+              value={formData.heatingType || ""}
+              onChange={(e) => handleChange("heatingType", e.target.value)}
+              disabled={!isEditing}
+              placeholder="z.B. Zentralheizung"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Wesentlicher Energieträger</Label>
+            <Input
+              value={formData.mainEnergySource || ""}
+              onChange={(e) => handleChange("mainEnergySource", e.target.value)}
+              disabled={!isEditing}
+              placeholder="z.B. Gas, Öl, Fernwärme"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ausstellungsdatum</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateIssueDate || ""}
+              onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Gültig bis</Label>
+            <Input
+              type="date"
+              value={formData.energyCertificateValidUntil || ""}
+              onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Baujahr Anlagentechnik</Label>
+            <Input
+              type="number"
+              value={formData.heatingSystemYear || ""}
+              onChange={(e) => handleChange("heatingSystemYear", parseInt(e.target.value) || null)}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.includesWarmWater || false}
+                onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
+                disabled={!isEditing}
+              />
+              <Label>Energieverbrauch für Warmwasser enthalten</Label>
+            </div>
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.buildingYearUnknown || false}
+                onCheckedChange={(checked) => handleChange("buildingYearUnknown", checked)}
+                disabled={!isEditing}
+              />
+              <Label>Baujahr unbekannt</Label>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -1307,13 +1602,57 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Objektbeschreibung</Label>
+            <Label>📝 Objektbeschreibung</Label>
             <Textarea
               value={formData.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               disabled={!isEditing}
               rows={6}
-              placeholder="Detaillierte Beschreibung der Immobilie..."
+              placeholder="Willkommen in Ihrem neuen Zuhause! Diese gepflegte und 2023 modernisierte Doppelhaushälfte bietet..."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>⭐ Ausstattung & Highlights</Label>
+            <Textarea
+              value={formData.descriptionHighlights || ""}
+              onChange={(e) => handleChange("descriptionHighlights", e.target.value)}
+              disabled={!isEditing}
+              rows={8}
+              placeholder="Diese Immobilie wurde 2023 umfassend modernisiert und befindet sich in einem sehr gepflegten Zustand...\n\n✅ Letzte Modernisierung 2023: Elektrik, Malerarbeiten, Bodenbeläge & Badaufbereitung\n✅ Helle, freundliche Räume mit flexiblem Grundriss\n✅ Offener Wohn-/Essbereich mit Kamin für gemütliche Abende"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>📍 Lage</Label>
+            <Textarea
+              value={formData.descriptionLocation || ""}
+              onChange={(e) => handleChange("descriptionLocation", e.target.value)}
+              disabled={!isEditing}
+              rows={4}
+              placeholder="Diese Doppelhaushälfte liegt in einer ruhigen und familienfreundlichen Wohngegend von Geislingen. Einkaufsmöglichkeiten, Schulen, Kindergärten sowie der Anschluss an den ÖPNV sind in wenigen Minuten erreichbar."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>💚 Fazit</Label>
+            <Textarea
+              value={formData.descriptionFazit || ""}
+              onChange={(e) => handleChange("descriptionFazit", e.target.value)}
+              disabled={!isEditing}
+              rows={2}
+              placeholder="Dieses Haus ist ideal für Familien, die Wert auf eine moderne, gepflegte Immobilie mit Garten in ruhiger Lage legen und sich den Traum vom Eigenheim erfüllen möchten."
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>📞 Kontaktieren Sie uns direkt!</Label>
+            <Textarea
+              value={formData.descriptionCTA || ""}
+              onChange={(e) => handleChange("descriptionCTA", e.target.value)}
+              disabled={!isEditing}
+              rows={3}
+              placeholder="Überzeugen Sie sich selbst von der Qualität und dem Potenzial dieser Doppelhaushälfte und vereinbaren Sie noch heute einen Besichtigungstermin.\n\n📱 Gerne auch per WhatsApp: 07331 9460350\n\nWir freuen uns auf Ihre Anfrage und begleiten Sie zuverlässig auf dem Weg in Ihr neues Zuhause!"
             />
           </div>
         </CardContent>

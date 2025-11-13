@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "017ed145-dce5-4e3e-a699-d7fe32b9a4c3",
+  "id": "965d4052-fb7d-4bb4-b62f-89afab93b2f9",
   "prevId": "bd00dbcd-ebce-4f82-8edd-8f181d68e7e9",
   "tables": {
     "activities": {
@@ -1271,34 +1271,6 @@
         },
         "description": {
           "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "descriptionHighlights": {
-          "name": "descriptionHighlights",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "descriptionLocation": {
-          "name": "descriptionLocation",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "descriptionFazit": {
-          "name": "descriptionFazit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "descriptionCTA": {
-          "name": "descriptionCTA",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
