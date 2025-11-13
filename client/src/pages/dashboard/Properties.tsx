@@ -36,7 +36,6 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Properties() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const autocompleteRef = useRef<any>(null);
   const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
   const [homepageUrl, setHomepageUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,148 +128,6 @@ export default function Properties() {
   });
 
   const [, setLocation] = useLocation();
-
-  // Initialize PlaceAutocompleteElement when dialog opens
-  useEffect(() => {
-    if (!isCreateOpen) return;
-
-    const timer = setTimeout(() => {
-      const container = document.getElementById('autocomplete-container');
-      if (!container || !window.google?.maps?.places) {
-        console.warn('[Properties] Container or Google Maps not ready');
-        return;
-      }
-
-      console.log('[Properties] Initializing PlaceAutocompleteElement...');
-      
-      // Create PlaceAutocompleteElement
-      const placeAutocomplete = new (window.google.maps.places as any).PlaceAutocompleteElement({
-        componentRestrictions: { country: 'de' },
-      });
-      
-      // Clear container and append element
-      container.innerHTML = '';
-      container.appendChild(placeAutocomplete);
-
-      // Inject styles into Shadow DOM with MutationObserver
-      const injectStyles = () => {
-        try {
-          const shadowRoot = placeAutocomplete.shadowRoot;
-          if (shadowRoot) {
-            // Check if styles already injected
-            if (shadowRoot.querySelector('#custom-autocomplete-styles')) {
-              return true;
-            }
-
-            const style = document.createElement('style');
-            style.id = 'custom-autocomplete-styles';
-            style.textContent = `
-              input {
-                background-color: white !important;
-                background: white !important;
-                color: #333 !important;
-                border: 1px solid #e5e7eb !important;
-                border-radius: 0.375rem !important;
-                padding: 0.5rem 0.75rem !important;
-                font-size: 0.875rem !important;
-              }
-              input:focus {
-                outline: 2px solid #0066A1 !important;
-                outline-offset: 2px !important;
-                border-color: #0066A1 !important;
-              }
-            `;
-            shadowRoot.appendChild(style);
-            console.log('[Properties] Styles injected into PlaceAutocompleteElement Shadow DOM');
-            return true;
-          }
-          return false;
-        } catch (error) {
-          console.warn('[Properties] Failed to inject styles:', error);
-          return false;
-        }
-      };
-
-      // Try immediate injection
-      if (!injectStyles()) {
-        // If failed, use MutationObserver to wait for Shadow DOM
-        const observer = new MutationObserver(() => {
-          if (injectStyles()) {
-            observer.disconnect();
-          }
-        });
-        observer.observe(placeAutocomplete, { childList: true, subtree: true });
-
-        // Also try after delays
-        setTimeout(injectStyles, 500);
-        setTimeout(injectStyles, 1000);
-      }
-
-      // Add event listener for place selection
-      placeAutocomplete.addEventListener('gmp-placeselect', async (event: any) => {
-        console.log('[Properties] Place selected:', event);
-        const place = event.place;
-        
-        if (!place) return;
-
-        try {
-          // Fetch place details
-          await place.fetchFields({
-            fields: ['addressComponents', 'location', 'formattedAddress']
-          });
-
-          // Extract address components
-          const components = place.addressComponents || [];
-          let street = '';
-          let houseNumber = '';
-          let zipCode = '';
-          let city = '';
-
-          components.forEach((component: any) => {
-            const types = component.types;
-            if (types.includes('route')) {
-              street = component.longText;
-            }
-            if (types.includes('street_number')) {
-              houseNumber = component.longText;
-            }
-            if (types.includes('postal_code')) {
-              zipCode = component.longText;
-            }
-            if (types.includes('locality')) {
-              city = component.longText;
-            }
-          });
-
-          // Update form data
-          setFormData(prev => ({
-            ...prev,
-            street: street || prev.street,
-            houseNumber: houseNumber || prev.houseNumber,
-            zipCode: zipCode || prev.zipCode,
-            city: city || prev.city,
-          }));
-
-          toast.success('Adresse automatisch ausgefüllt');
-        } catch (error) {
-          console.error('[Properties] Error fetching place details:', error);
-          toast.error('Fehler beim Laden der Adressdetails');
-        }
-      });
-
-      autocompleteRef.current = placeAutocomplete;
-      console.log('[Properties] PlaceAutocompleteElement initialized');
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      // Cleanup: remove element from container
-      const container = document.getElementById('autocomplete-container');
-      if (container) {
-        container.innerHTML = '';
-      }
-    };
-  }, [isCreateOpen]);
 
   const handleGenerateExpose = (propertyId: number) => {
     generateExposeMutation.mutate({ propertyId });
@@ -572,11 +429,6 @@ export default function Properties() {
                   placeholder="Objektbeschreibung..."
                   rows={3}
                 />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Adresse (Google Maps Autocomplete)</Label>
-                <div id="autocomplete-container" className="w-full"></div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
