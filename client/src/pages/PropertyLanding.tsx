@@ -401,12 +401,7 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3 font-semibold">{formatPrice(property.price)}</td>
                   </tr>
                 )}
-                {property.buyerCommission && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
-                    <td className="px-4 py-3">{property.buyerCommission}</td>
-                  </tr>
-                )}
+
                 {property.rooms && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Zimmer</td>
@@ -594,12 +589,7 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{property.unitNumber}</td>
                   </tr>
                 )}
-                {property.buyerCommission && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
-                    <td className="px-4 py-3">{property.buyerCommission}</td>
-                  </tr>
-                )}
+
                 {property.floors && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Etagenzahl</td>
