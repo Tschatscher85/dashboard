@@ -7,9 +7,7 @@ declare global {
   }
 }
 
-const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
-const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
-const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 interface PlaceAutocompleteElementProps {
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
@@ -42,58 +40,47 @@ export function PlaceAutocompleteElement({
         return;
       }
 
-      try {
-        const scriptUrl = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&libraries=places`;
-        
-        console.log('[PlaceAutocomplete] Loading Google Maps from:', scriptUrl);
-        
-        const response = await fetch(scriptUrl, {
-          method: 'GET',
-          headers: { 
-            'Origin': window.location.origin,
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch Google Maps script: ${response.status}`);
+      // Check if API key is available
+      if (!GOOGLE_MAPS_API_KEY) {
+        console.error('[PlaceAutocomplete] VITE_GOOGLE_MAPS_API_KEY not set');
+        if (mounted) {
+          setError('Google Maps API Key fehlt');
+          setIsLoading(false);
         }
+        return;
+      }
+
+      try {
+        console.log('[PlaceAutocomplete] Loading Google Maps with API key...');
         
-        const scriptContent = await response.text();
+        // Load Google Maps script directly
         const script = document.createElement('script');
-        script.textContent = scriptContent;
-        document.head.appendChild(script);
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&language=de&region=DE`;
+        script.async = true;
+        script.defer = true;
         
-        console.log('[PlaceAutocomplete] Script injected, waiting for Google Maps...');
-        
-        // Poll for Google Maps availability
-        let attempts = 0;
-        const maxAttempts = 100; // 10 seconds
-        
-        const checkInterval = setInterval(() => {
-          attempts++;
-          
-          if (window.google?.maps?.places) {
-            clearInterval(checkInterval);
-            console.log('[PlaceAutocomplete] Google Maps loaded successfully');
-            if (mounted) {
-              setIsLoading(false);
-              initAutocomplete();
-            }
-          } else if (attempts >= maxAttempts) {
-            clearInterval(checkInterval);
-            const errorMsg = 'Google Maps failed to load after 10 seconds';
-            console.error('[PlaceAutocomplete]', errorMsg);
-            if (mounted) {
-              setError(errorMsg);
-              setIsLoading(false);
-            }
+        script.onload = () => {
+          console.log('[PlaceAutocomplete] Google Maps loaded successfully');
+          if (mounted) {
+            setIsLoading(false);
+            initAutocomplete();
           }
-        }, 100);
+        };
+        
+        script.onerror = () => {
+          console.error('[PlaceAutocomplete] Failed to load Google Maps script');
+          if (mounted) {
+            setError('Google Maps konnte nicht geladen werden');
+            setIsLoading(false);
+          }
+        };
+        
+        document.head.appendChild(script);
         
       } catch (err) {
         console.error('[PlaceAutocomplete] Failed to load Google Maps:', err);
         if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load Google Maps');
+          setError(err instanceof Error ? err.message : 'Fehler beim Laden');
           setIsLoading(false);
         }
       }
@@ -134,7 +121,7 @@ export function PlaceAutocompleteElement({
       } catch (err) {
         console.error('[PlaceAutocomplete] Failed to initialize autocomplete:', err);
         if (mounted) {
-          setError('Failed to initialize autocomplete');
+          setError('Initialisierung fehlgeschlagen');
         }
       }
     };

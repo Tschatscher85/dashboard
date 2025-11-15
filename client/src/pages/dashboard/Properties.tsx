@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown, RefreshCw } from "lucide-react";
-// import { PlaceAutocompleteElement } from "@/components/PlaceAutocompleteElement";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,6 +65,7 @@ export default function Properties() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [statusChangePropertyId, setStatusChangePropertyId] = useState<number | null>(null);
   const [newStatus, setNewStatus] = useState("");
+  const [addressSearchValue, setAddressSearchValue] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -500,14 +501,18 @@ export default function Properties() {
                 />
               </div>
 
-              {/* Google Address Autocomplete - Disabled due to API key issues */}
-              {/* <div className="grid gap-2">
+              {/* Google Address Autocomplete */}
+              <div className="grid gap-2">
                 <Label>Adresse suchen (Google Maps)</Label>
-                <PlaceAutocompleteElement
+                <AddressAutocomplete
+                  value={addressSearchValue}
+                  onChange={setAddressSearchValue}
                   onPlaceSelect={handlePlaceSelected}
                   placeholder="Adresse eingeben..."
+                  apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 />
-              </div> */}
+              </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
