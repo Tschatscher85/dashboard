@@ -125,10 +125,24 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     // Filter out null/undefined/empty string values to avoid validation errors
     // BUT keep numeric zeros (important for energy values)
     const cleanedData: any = {};
+    
+    // List of fields that should be numbers
+    const numberFields = [
+      'latitude', 'longitude', 'price', 'coldRent', 'warmRent', 'heatingCosts', 'additionalCosts',
+      'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome',
+      'livingSpace', 'plotSize', 'usableSpace', 'balconyArea', 'gardenArea', 'rooms', 'bedrooms', 'bathrooms',
+      'floor', 'totalFloors', 'parkingCount', 'yearBuilt', 'lastModernization', 'heatingSystemYear',
+      'energyConsumption', 'energyConsumptionElectricity', 'energyConsumptionHeat', 'co2Emissions',
+      'walkingTimeToPublicTransport', 'distanceToPublicTransport', 'drivingTimeToHighway', 'distanceToHighway',
+      'drivingTimeToMainStation', 'distanceToMainStation', 'drivingTimeToAirport', 'distanceToAirport',
+      'supervisorId', 'ownerId', 'buyerId', 'notaryId', 'propertyManagementId', 'tenantId', 'totalCommission',
+      'headlineScore'
+    ];
+    
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && (value !== '' || value === 0)) {
-        // Convert latitude/longitude strings to numbers
-        if ((key === 'latitude' || key === 'longitude') && typeof value === 'string') {
+        // Convert number fields from string to number
+        if (numberFields.includes(key) && typeof value === 'string') {
           const numValue = parseFloat(value);
           if (!isNaN(numValue)) {
             cleanedData[key] = numValue;
