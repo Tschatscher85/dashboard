@@ -718,10 +718,10 @@ export default function Properties() {
                         <SelectItem value="acquisition">Akquise</SelectItem>
                         <SelectItem value="preparation">Vorbereitung</SelectItem>
                         <SelectItem value="marketing">Vermarktung</SelectItem>
-                        <SelectItem value="negotiation">Verhandlung</SelectItem>
+                        <SelectItem value="reserved">Reserviert</SelectItem>
+                        <SelectItem value="notary">Notartermin</SelectItem>
                         <SelectItem value="sold">Verkauft</SelectItem>
-                        <SelectItem value="rented">Vermietet</SelectItem>
-                        <SelectItem value="inactive">Inaktiv</SelectItem>
+                        <SelectItem value="completed">Abgeschlossen</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

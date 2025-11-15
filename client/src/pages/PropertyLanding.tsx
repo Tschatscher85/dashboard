@@ -26,6 +26,15 @@ export default function PropertyLanding() {
     { propertyId },
     { enabled: !!propertyId }
   );
+  
+  // Fetch property links for landing page
+  const { data: propertyLinks } = trpc.propertyLinks.getByProperty.useQuery(
+    { propertyId },
+    { enabled: !!propertyId }
+  );
+  
+  // Filter links that should be shown on landing page
+  const visibleLinks = propertyLinks?.filter(link => link.showOnLandingPage) || [];
 
   // Convert NAS URLs to proxy URLs (server-side authentication)
   const convertToProxyUrl = (url: string | undefined): string => {
@@ -756,28 +765,7 @@ export default function PropertyLanding() {
           </section>
         )}
 
-        {/* Lage Section */}
-        <section ref={lageRef} className="mb-12 scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Lage</h2>
-          <div className="prose max-w-none mb-6">
-            <p className="text-gray-700">
-              Entdecken Sie die ideale Lage dieser Immobilie in{" "}
-              {[property.city, property.zipCode].filter(Boolean).join(" ")}.
-            </p>
-          </div>
-          {property.latitude && property.longitude && (
-            <div className="w-full h-[400px] bg-gray-100 rounded-lg border overflow-hidden">
-              <iframe
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0 }}
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(property.longitude) - 0.01},${Number(property.latitude) - 0.01},${Number(property.longitude) + 0.01},${Number(property.latitude) + 0.01}&layer=mapnik&marker=${property.latitude},${property.longitude}`}
-                allowFullScreen
-              ></iframe>
-            </div>
-          )}
-        </section>
+        {/* Lage Section removed - now only in description above */}
 
         {/* Other Section - Contact Info */}
         {settings?.companyPhone && (
@@ -840,6 +828,29 @@ export default function PropertyLanding() {
                     </svg>
                   </a>
                 ))}
+            </div>
+          </section>
+        )}
+
+        {/* Links Section */}
+        {visibleLinks.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Weitere Informationen</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {visibleLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-[#0066A1] hover:bg-blue-50 transition-all group"
+                >
+                  <svg className="w-6 h-6 text-[#0066A1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  <span className="font-medium text-gray-900 group-hover:text-[#0066A1] transition-colors">{link.name}</span>
+                </a>
+              ))}
             </div>
           </section>
         )}

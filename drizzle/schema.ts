@@ -1,51 +1,29 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, json } from "drizzle-orm/mysql-core";
+import { mysqlTable, int, varchar, text, timestamp, decimal, mysqlEnum, boolean, float, date } from "drizzle-orm/mysql-core";
 
 /**
- * Core user table backing auth flow.
- */
-export const users = mysqlTable("users", {
-  id: int("id").autoincrement().primaryKey(),
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
-});
-
-export type User = typeof users.$inferSelect;
-export type InsertUser = typeof users.$inferInsert;
-
-/**
- * Properties/Immobilien table
+ * Properties - Real estate properties managed in the system
  */
 export const properties = mysqlTable("properties", {
-  id: int("id").autoincrement().primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Basic info
   title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"), // Hauptbeschreibung (Objektbeschreibung)
-  descriptionHighlights: text("descriptionHighlights"), // Ausstattung & Highlights
-  descriptionLocation: text("descriptionLocation"), // Lage
-  descriptionFazit: text("descriptionFazit"), // Fazit
-  descriptionCTA: text("descriptionCTA"), // Call-to-Action
+  headline: varchar("headline", { length: 255 }), // Landing page headline
+  description: text("description"),
+  descriptionObject: text("descriptionObject"), // 📝 Objektbeschreibung
+  descriptionHighlights: text("descriptionHighlights"), // ⭐ Ausstattung & Highlights
+  descriptionLocation: text("descriptionLocation"), // 📍 Lage
+  descriptionFazit: text("descriptionFazit"), // 💚 Fazit
+  descriptionCTA: text("descriptionCTA"), // 📞 Kontaktieren Sie uns direkt!
   
-  // Stammdaten
-  unitNumber: varchar("unitNumber", { length: 100 }), // Einheitennummer
-  apartmentNumber: varchar("apartmentNumber", { length: 50 }), // Wohnungsnummer
-  parkingNumber: varchar("parkingNumber", { length: 50 }), // Stellplatz Nr.
-  headline: varchar("headline", { length: 500 }), // Überschrift
-  headlineScore: int("headlineScore"), // 99/100 Bewertung
-  project: varchar("project", { length: 255 }), // Projekt
-  features: text("features"), // Merkmale (JSON or comma-separated)
-  warning: text("warning"), // Warnhinweis
-  archived: boolean("archived").default(false), // Archiviert
-  internalNotes: text("internalNotes"), // Interne Notiz
-  
-  // Property type and status
-  category: varchar("category", { length: 100 }), // Kategorie (Kauf, Miete)
+  // Property type
   propertyType: mysqlEnum("propertyType", [
-    "apartment", "house", "commercial", "land", "parking", "other"
+    "apartment",
+    "house",
+    "commercial",
+    "land",
+    "parking",
+    "other",
   ]).notNull(),
   subType: varchar("subType", { length: 100 }), // Wohnung, Etagenwohnung, etc.
   marketingType: mysqlEnum("marketingType", ["sale", "rent", "lease"]).notNull(),
@@ -56,212 +34,186 @@ export const properties = mysqlTable("properties", {
   houseNumber: varchar("houseNumber", { length: 50 }),
   zipCode: varchar("zipCode", { length: 20 }),
   city: varchar("city", { length: 100 }),
-  region: varchar("region", { length: 100 }), // Region / Land
+  region: varchar("region", { length: 100 }),
   country: varchar("country", { length: 100 }).default("Deutschland"),
-  latitude: varchar("latitude", { length: 50 }), // Koordinaten
-  longitude: varchar("longitude", { length: 50 }),
-  hideStreetOnPortals: boolean("hideStreetOnPortals").default(false),
-  
-  // Grundbuch
-  districtCourt: varchar("districtCourt", { length: 255 }), // Amtsgericht
-  landRegisterSheet: varchar("landRegisterSheet", { length: 100 }), // Grundbuchblatt
-  landRegisterOf: varchar("landRegisterOf", { length: 255 }), // Grundbuch von
-  cadastralDistrict: varchar("cadastralDistrict", { length: 100 }), // Gemarkung
-  corridor: varchar("corridor", { length: 100 }), // Flur
-  parcel: varchar("parcel", { length: 100 }), // Flurstück
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
   
   // Property details
-  livingArea: int("livingArea"), // in sqm
-  plotArea: int("plotArea"), // in sqm
-  usableArea: int("usableArea"), // Nutzfläche (Wohnen)
-  balconyArea: int("balconyArea"), // Balkon/Terrasse Fläche
-  gardenArea: int("gardenArea"), // Gartenfläche
-  rooms: int("rooms"),
+  livingArea: decimal("livingArea", { precision: 10, scale: 2 }),
+  usableArea: decimal("usableArea", { precision: 10, scale: 2 }),
+  plotArea: decimal("plotArea", { precision: 10, scale: 2 }),
+  rooms: decimal("rooms", { precision: 4, scale: 1 }),
   bedrooms: int("bedrooms"),
   bathrooms: int("bathrooms"),
+  floors: int("floors"),
   floor: int("floor"),
-  floorLevel: varchar("floorLevel", { length: 100 }), // Etagenlage
-  totalFloors: int("totalFloors"),
   
-  // Financial
-  price: int("price"), // in cents
-  priceOnRequest: boolean("priceOnRequest").default(false), // Preis auf Anfrage
-  priceByNegotiation: boolean("priceByNegotiation").default(false), // Preis gegen Gebot
-  coldRent: int("coldRent"), // Kaltmiete in cents
-  warmRent: int("warmRent"), // Warmmiete in cents
-  pricePerSqm: int("pricePerSqm"), // calculated, in cents
-  additionalCosts: int("additionalCosts"), // Nebenkosten in cents
-  heatingCosts: int("heatingCosts"), // in cents
-  heatingIncludedInAdditional: boolean("heatingIncludedInAdditional").default(false),
-  nonRecoverableCosts: int("nonRecoverableCosts"), // Nicht umlegbare Kosten
-  houseMoney: int("houseMoney"), // Hausgeld/Monat
-  maintenanceReserve: int("maintenanceReserve"), // Instandhaltungsrücklage
-  parkingPrice: int("parkingPrice"), // Stellplatz-Preis
-  monthlyRentalIncome: int("monthlyRentalIncome"), // Mtl. Mieteinnahmen
-  deposit: int("deposit"), // Kaution in cents
-  
-  // Ausstattung / Features
-  hasElevator: boolean("hasElevator").default(false), // Aufzug
-  isBarrierFree: boolean("isBarrierFree").default(false), // Barrierefrei
-  hasBasement: boolean("hasBasement").default(false), // Keller
-  hasGuestToilet: boolean("hasGuestToilet").default(false), // Gäste-WC
-  hasBuiltInKitchen: boolean("hasBuiltInKitchen").default(false), // Einbauküche
-  hasBalcony: boolean("hasBalcony").default(false), // Balkon/Terrasse
-  hasTerrace: boolean("hasTerrace").default(false),
-  hasLoggia: boolean("hasLoggia").default(false), // Loggia
-  hasGarden: boolean("hasGarden").default(false), // Garten
-  isMonument: boolean("isMonument").default(false), // Denkmalschutz
-  suitableAsHoliday: boolean("suitableAsHoliday").default(false), // Als Ferienwohnung geeignet
-  hasStorageRoom: boolean("hasStorageRoom").default(false), // Abstellraum
-  hasFireplace: boolean("hasFireplace").default(false), // Kamin
-  hasPool: boolean("hasPool").default(false), // Pool
-  hasSauna: boolean("hasSauna").default(false), // Sauna
-  hasAlarm: boolean("hasAlarm").default(false), // Alarmanlage
-  hasWinterGarden: boolean("hasWinterGarden").default(false), // Wintergarten
-  hasAirConditioning: boolean("hasAirConditioning").default(false), // Klimaanlage
-  hasParking: boolean("hasParking").default(false),
-  parkingCount: int("parkingCount"), // Anzahl Parkplätze
-  parkingType: varchar("parkingType", { length: 100 }), // Stellplatztyp (Garage, etc.)
-  
-  // Bad (Multi-select: Dusche, Wanne, Fenster, Bidet, Urinal)
-  // Stored as comma-separated values
-  bathroomFeatures: text("bathroomFeatures"),
-  
-  // Bodenbelag (Multi-select)
-  // Stored as comma-separated values
-  flooringTypes: text("flooringTypes"),
-  
-  // Energy certificate (Energieausweis)
-  energyCertificateAvailability: varchar("energyCertificateAvailability", { length: 100 }), // wird nicht benötigt, liegt vor, liegt zur Besichtigung vor
-  energyCertificateCreationDate: varchar("energyCertificateCreationDate", { length: 50 }), // ab 1. Mai 2014, bis 30. April 2014
-  energyCertificateIssueDate: varchar("energyCertificateIssueDate", { length: 20 }), // Date as string
-  energyCertificateValidUntil: varchar("energyCertificateValidUntil", { length: 20 }), // Date as string
-  energyCertificateType: varchar("energyCertificateType", { length: 50 }), // Bedarfsausweis, Verbrauchsausweis
-  energyClass: varchar("energyClass", { length: 10 }), // A+, A, B, C, D, E, F, G, H
-  energyConsumption: int("energyConsumption"), // Energiekennwert kWh/(m²*a)
-  energyConsumptionElectricity: int("energyConsumptionElectricity"), // Energiekennwert Strom
-  energyConsumptionHeat: int("energyConsumptionHeat"), // Energiekennwert Wärme
-  co2Emissions: int("co2Emissions"), // CO2-Emissionen
-  includesWarmWater: boolean("includesWarmWater").default(false), // Energieverbrauch für Warmwasser enthalten
-  heatingType: varchar("heatingType", { length: 100 }), // Heizungsart
-  mainEnergySource: varchar("mainEnergySource", { length: 100 }), // Wesentlicher Energieträger
-  buildingYearUnknown: boolean("buildingYearUnknown").default(false), // Baujahr unbekannt
-  heatingSystemYear: int("heatingSystemYear"), // Baujahr Anlagentechnik
-  
-  // Construction
-  yearBuilt: int("yearBuilt"),
-  lastModernization: int("lastModernization"), // Letzte Modernisierung (Jahr)
+  // Condition & features
   condition: mysqlEnum("condition", [
-    "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
-    "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
-    "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
+    "first_time_use",
+    "first_time_use_after_refurbishment",
+    "mint_condition",
+    "refurbished",
+    "in_need_of_renovation",
+    "by_arrangement",
   ]),
-  buildingPhase: varchar("buildingPhase", { length: 100 }), // Bauphase
-  equipmentQuality: varchar("equipmentQuality", { length: 100 }), // Qualität der Ausstattung
+  yearBuilt: int("yearBuilt"),
+  lastModernization: int("lastModernization"),
   
-  // Contact and availability
-  isRented: boolean("isRented").default(false), // Vermietet
-  availableFrom: timestamp("availableFrom"),
-  contactPersonId: int("contactPersonId"), // reference to users or contacts
+  hasBalcony: boolean("hasBalcony").default(false),
+  hasTerrace: boolean("hasTerrace").default(false),
+  hasGarden: boolean("hasGarden").default(false),
+  hasElevator: boolean("hasElevator").default(false),
+  hasBasement: boolean("hasBasement").default(false),
+  hasGarage: boolean("hasGarage").default(false),
+  hasGuestToilet: boolean("hasGuestToilet").default(false),
+  hasBuiltInKitchen: boolean("hasBuiltInKitchen").default(false),
   
-  // Ansprechpartner (Contact Persons)
-  supervisorId: int("supervisorId"), // Betreuer (user)
-  ownerId: int("ownerId"), // Eigentümer (contact)
-  ownerType: varchar("ownerType", { length: 100 }), // Typ (optional)
-  buyerId: int("buyerId"), // Käufer (contact)
-  notaryId: int("notaryId"), // Notar (contact)
-  propertyManagementId: int("propertyManagementId"), // Hausverwaltung (contact)
-  tenantId: int("tenantId"), // Mieter (contact)
-  linkedContactIds: text("linkedContactIds"), // Verknüpfte Kontakte (JSON array)
+  balconyTerraceArea: decimal("balconyTerraceArea", { precision: 10, scale: 2 }),
+  gardenArea: decimal("gardenArea", { precision: 10, scale: 2 }),
   
-  // Portale (Portal Export)
-  portalExports: text("portalExports"), // JSON array of portal exports
-  is24ContactPerson: varchar("is24ContactPerson", { length: 255 }), // IS24-Ansprechpartner
-  is24Id: varchar("is24Id", { length: 100 }), // IS24-ID (deprecated, use is24ExternalId)
-  is24GroupNumber: varchar("is24GroupNumber", { length: 100 }), // IS24-Gruppen-Nr
-  translations: text("translations"), // Übersetzungen (JSON)
+  // Parking
+  parkingSpaces: int("parkingSpaces"),
+  parkingType: varchar("parkingType", { length: 255 }), // JSON array of parking types
+  parkingPrice: decimal("parkingPrice", { precision: 10, scale: 2 }),
   
-  // ImmoScout24 API Integration Fields
-  is24ExternalId: varchar("is24ExternalId", { length: 100 }), // IS24 real estate object ID
-  is24PublishStatus: mysqlEnum("is24PublishStatus", [
-    "draft",      // Not yet published
-    "published",  // Active on IS24
-    "unpublished",// Removed from IS24
-    "error"       // Sync error occurred
-  ]).default("draft"),
-  is24LastSyncedAt: timestamp("is24LastSyncedAt"), // Last successful sync to IS24
-  is24ContactId: varchar("is24ContactId", { length: 100 }), // Contact person ID in IS24 system
-  is24ErrorMessage: text("is24ErrorMessage"), // Last error message if sync failed
+  // Furnishing
+  furnishingQuality: mysqlEnum("furnishingQuality", ["simple", "normal", "upscale", "luxurious"]),
+  flooring: varchar("flooring", { length: 255 }), // JSON array of flooring types
+  hasStorageRoom: boolean("hasStorageRoom").default(false),
   
-  // Additional IS24-required fields
-  interiorQuality: mysqlEnum("interiorQuality", [
-    "simple",        // Einfach
-    "normal",        // Normal
-    "sophisticated", // Gehoben
-    "luxury"         // Luxus
+  // Rental details
+  baseRent: decimal("baseRent", { precision: 10, scale: 2 }),
+  additionalCosts: decimal("additionalCosts", { precision: 10, scale: 2 }),
+  heatingCosts: decimal("heatingCosts", { precision: 10, scale: 2 }),
+  totalRent: decimal("totalRent", { precision: 10, scale: 2 }),
+  deposit: decimal("deposit", { precision: 10, scale: 2 }),
+  heatingCostsInServiceCharge: boolean("heatingCostsInServiceCharge").default(false),
+  
+  // Purchase details
+  purchasePrice: decimal("purchasePrice", { precision: 12, scale: 2 }),
+  priceOnRequest: boolean("priceOnRequest").default(false),
+  priceByNegotiation: boolean("priceByNegotiation").default(false),
+  
+  // Commission
+  buyerCommission: varchar("buyerCommission", { length: 50 }),
+  
+  // Investment
+  rentalIncome: decimal("rentalIncome", { precision: 10, scale: 2 }),
+  isRented: boolean("isRented").default(false),
+  
+  // Energy certificate
+  energyCertificateAvailability: mysqlEnum("energyCertificateAvailability", [
+    "available",
+    "not_available",
+    "not_required",
   ]),
-  numberOfBathrooms: int("numberOfBathrooms"), // Anzahl Badezimmer (for IS24)
-  numberOfBedrooms: int("numberOfBedrooms"),   // Anzahl Schlafzimmer (for IS24)
-  freeFrom: timestamp("freeFrom"), // Verfügbar ab (for IS24)
+  energyCertificateCreationDate: date("energyCertificateCreationDate"),
+  energyCertificateType: mysqlEnum("energyCertificateType", [
+    "bedarfsausweis",
+    "verbrauchsausweis",
+  ]),
+  energyConsumption: int("energyConsumption"),
+  energyConsumptionElectricity: int("energyConsumptionElectricity"),
+  energyConsumptionHeat: int("energyConsumptionHeat"),
+  co2Emissions: int("co2Emissions"),
+  energyClass: mysqlEnum("energyClass", [
+    "a_plus",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+  ]),
+  energyCertificateIssueDate: date("energyCertificateIssueDate"),
+  energyCertificateValidUntil: date("energyCertificateValidUntil"),
+  includesWarmWater: boolean("includesWarmWater").default(false),
+  heatingType: mysqlEnum("heatingType", [
+    "zentralheizung",
+    "etagenheizung",
+    "fernwaerme",
+    "ofenheizung",
+    "fussboden",
+  ]),
+  mainEnergySource: mysqlEnum("mainEnergySource", [
+    "gas",
+    "oel",
+    "strom",
+    "solar",
+    "erdwaerme",
+    "pellets",
+    "holz",
+    "fernwaerme",
+  ]),
+  buildingYearUnknown: boolean("buildingYearUnknown").default(false),
   
-  // Auftrag (Assignment)
-  assignmentType: varchar("assignmentType", { length: 100 }), // Auftragsart (Alleinauftrag, etc.)
-  assignmentDuration: varchar("assignmentDuration", { length: 100 }), // Laufzeit (Unbefristet, Befristet)
-  assignmentFrom: timestamp("assignmentFrom"), // Auftrag von
-  assignmentTo: timestamp("assignmentTo"), // Auftrag bis
+  // Contacts & Partners
+  supervisorId: int("supervisorId"), // Betreuer
+  ownerId: int("ownerId"), // Eigentümer
+  buyerId: int("buyerId"), // Käufer
+  notaryId: int("notaryId"), // Notar
+  propertyManagementId: int("propertyManagementId"), // Hausverwaltung
+  tenantId: int("tenantId"), // Mieter
+  linkedContactIds: text("linkedContactIds"), // JSON array of contact IDs for "Verknüpfte Kontakte"
   
-  // Verkauf (Sale)
-  saleInfo: text("saleInfo"), // JSON for sale information
+  // Court & Land Registry
+  courtName: varchar("courtName", { length: 255 }),
+  courtCity: varchar("courtCity", { length: 100 }),
+  landRegisterNumber: varchar("landRegisterNumber", { length: 100 }),
+  landRegisterSheet: varchar("landRegisterSheet", { length: 100 }),
+  parcelNumber: varchar("parcelNumber", { length: 100 }),
   
-  // Provision Intern (Internal Commission)
-  internalCommissionPercent: varchar("internalCommissionPercent", { length: 50 }), // Innenprovision (intern)
-  internalCommissionType: mysqlEnum("internalCommissionType", ["percent", "euro"]).default("percent"), // % or €
-  externalCommissionInternalPercent: varchar("externalCommissionInternalPercent", { length: 50 }), // Außenprovision (intern)
-  externalCommissionInternalType: mysqlEnum("externalCommissionInternalType", ["percent", "euro"]).default("percent"),
-  totalCommission: int("totalCommission"), // Gesamtprovision (calculated, in cents)
+  // Plot details
+  plotNumber: varchar("plotNumber", { length: 100 }),
+  developmentStatus: mysqlEnum("developmentStatus", [
+    "fully_developed",
+    "partially_developed",
+    "undeveloped",
+    "raw_building_land",
+  ]),
+  siteArea: decimal("siteArea", { precision: 10, scale: 2 }),
   
-  // Provision Extern (External Commission)
-  externalCommissionForExpose: varchar("externalCommissionForExpose", { length: 255 }), // Außenprovision für Exposé
-  commissionNote: text("commissionNote"), // Provisionshinweis
+  // Assignment
+  assignmentType: mysqlEnum("assignmentType", [
+    "alleinauftrag",
+    "qualifizierter_alleinauftrag",
+    "einfacher_auftrag",
+  ]),
+  assignmentDuration: mysqlEnum("assignmentDuration", [
+    "unbefristet",
+    "befristet",
+  ]),
+  assignmentFrom: date("assignmentFrom"),
+  assignmentTo: date("assignmentTo"),
   
-  // Verrechnung (Billing)
-  billingInfo: text("billingInfo"), // JSON for billing information
+  // Commission (Internal)
+  internalCommissionPercent: varchar("internalCommissionPercent", { length: 50 }),
+  internalCommissionType: mysqlEnum("internalCommissionType", ["percent", "euro"]),
+  externalCommissionInternalPercent: varchar("externalCommissionInternalPercent", { length: 50 }),
+  externalCommissionInternalType: mysqlEnum("externalCommissionInternalType", ["percent", "euro"]),
+  totalCommission: decimal("totalCommission", { precision: 10, scale: 2 }),
   
-  // Fahrzeiten (Travel Times)
-  walkingTimeToPublicTransport: int("walkingTimeToPublicTransport"), // in minutes
-  distanceToPublicTransport: int("distanceToPublicTransport"), // in meters
-  drivingTimeToHighway: int("drivingTimeToHighway"), // in minutes
-  distanceToHighway: int("distanceToHighway"), // in meters
-  drivingTimeToMainStation: int("drivingTimeToMainStation"), // in minutes
-  distanceToMainStation: int("distanceToMainStation"), // in meters
-  drivingTimeToAirport: int("drivingTimeToAirport"), // in minutes
-  distanceToAirport: int("distanceToAirport"), // in meters
+  // Commission (External/Expose)
+  externalCommissionForExpose: varchar("externalCommissionForExpose", { length: 255 }),
+  commissionNote: text("commissionNote"),
   
-  // Sync fields (for API integrations)
-  externalId: varchar("externalId", { length: 255 }).unique(), // Unique ID from external system
-  syncSource: varchar("syncSource", { length: 100 }), // Source of sync (e.g., "homepage", "immoscout24")
-  lastSyncedAt: timestamp("lastSyncedAt"), // Last sync timestamp
+  // Portal settings
+  autoSendToPortals: boolean("autoSendToPortals").default(false),
   
-  // Rental-specific fields
-  petsAllowed: boolean("petsAllowed").default(false), // Haustiere erlaubt
+  // Warning/Notes
+  warningNote: text("warningNote"),
   
-  // Auto-export settings
-  autoExpose: boolean("autoExpose").default(true), // kein automatischer Exposéversand
+  // Archive
+  isArchived: boolean("isArchived").default(false),
   
-  // Auftrag (Contract/Assignment)
-  auftragsart: varchar("auftragsart", { length: 100 }), // Auftragsart (z.B. Alleinauftrag, Mehrfachauftrag)
-  laufzeit: varchar("laufzeit", { length: 100 }), // Laufzeit (z.B. befristet, unbefristet)
-  auftragVonDate: timestamp("auftragVonDate"), // Auftrag von (Startdatum)
-  auftragBisDate: timestamp("auftragBisDate"), // Auftrag bis (Enddatum)
-  
-  // Landing page
-  hasLandingPage: boolean("hasLandingPage").default(false),
-  landingPageSlug: varchar("landingPageSlug", { length: 255 }).unique(),
-  landingPagePublished: boolean("landingPagePublished").default(false),
+  // Internal notes
+  internalNotes: text("internalNotes"),
   
   // Metadata
-  viewCount: int("viewCount").default(0),
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -270,24 +222,62 @@ export type Property = typeof properties.$inferSelect;
 export type InsertProperty = typeof properties.$inferInsert;
 
 /**
- * Contacts/Customers table
+ * Property Images - Images associated with properties
+ */
+export const propertyImages = mysqlTable("propertyImages", {
+  id: int("id").primaryKey().autoincrement(),
+  propertyId: int("propertyId").notNull(),
+  imageUrl: varchar("imageUrl", { length: 500 }).notNull(),
+  title: varchar("title", { length: 255 }),
+  description: text("description"),
+  sortOrder: int("sortOrder").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PropertyImage = typeof propertyImages.$inferSelect;
+export type InsertPropertyImage = typeof propertyImages.$inferInsert;
+
+/**
+ * Property Links - Custom links for properties (virtual tours, business cards, etc.)
+ */
+export const propertyLinks = mysqlTable("propertyLinks", {
+  id: int("id").primaryKey().autoincrement(),
+  propertyId: int("propertyId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // e.g., "360° Rundgang", "Visitenkarte"
+  url: varchar("url", { length: 500 }).notNull(),
+  showOnLandingPage: boolean("showOnLandingPage").default(true),
+  sortOrder: int("sortOrder").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PropertyLink = typeof propertyLinks.$inferSelect;
+export type InsertPropertyLink = typeof propertyLinks.$inferInsert;
+
+/**
+ * Contacts - People and companies in the system
  */
 export const contacts = mysqlTable("contacts", {
-  id: int("id").autoincrement().primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   
-  // Type of contact
-  contactType: mysqlEnum("contactType", ["buyer", "seller", "tenant", "landlord", "interested", "other"]).notNull(),
+  // Type
+  type: mysqlEnum("type", ["person", "company"]).notNull(),
   
-  // Personal information
-  salutation: mysqlEnum("salutation", ["mr", "ms", "diverse"]),
+  // Basic info (Person)
+  salutation: mysqlEnum("salutation", ["herr", "frau", "divers"]),
+  title: varchar("title", { length: 50 }),
   firstName: varchar("firstName", { length: 100 }),
-  lastName: varchar("lastName", { length: 100 }).notNull(),
-  company: varchar("company", { length: 255 }),
+  lastName: varchar("lastName", { length: 100 }),
+  
+  // Basic info (Company)
+  companyName: varchar("companyName", { length: 255 }),
   
   // Contact details
-  email: varchar("email", { length: 320 }),
+  email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
   mobile: varchar("mobile", { length: 50 }),
+  fax: varchar("fax", { length: 50 }),
+  website: varchar("website", { length: 255 }),
   
   // Address
   street: varchar("street", { length: 255 }),
@@ -305,14 +295,9 @@ export const contacts = mysqlTable("contacts", {
   // Brevo sync
   brevoContactId: varchar("brevoContactId", { length: 100 }),
   brevoSyncStatus: mysqlEnum("brevoSyncStatus", ["not_synced", "synced", "error"]).default("not_synced"),
-  brevoLastSyncedAt: timestamp("brevoLastSyncedAt"),
-  brevoListId: int("brevoListId"),
-  brevoErrorMessage: text("brevoErrorMessage"),
-  inquiryType: mysqlEnum("inquiryType", ["property_inquiry", "owner_inquiry", "insurance", "property_management"]),
-  lastSyncedToBrevo: timestamp("lastSyncedToBrevo"), // deprecated, keep for backwards compatibility
+  brevoLastSyncAt: timestamp("brevoLastSyncAt"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -321,99 +306,92 @@ export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = typeof contacts.$inferInsert;
 
 /**
- * Property Images
- */
-export const propertyImages = mysqlTable("propertyImages", {
-  id: int("id").autoincrement().primaryKey(),
-  propertyId: int("propertyId").notNull(),
-  
-  // Image storage (NAS path or S3 URL)
-  imageUrl: text("imageUrl").notNull(),
-  nasPath: text("nasPath"), // original path on NAS
-  
-  // Image details
-  title: varchar("title", { length: 255 }),
-  description: text("description"),
-  imageType: mysqlEnum("imageType", [
-    "hausansicht", "kueche", "bad", "wohnzimmer", "schlafzimmer", 
-    "garten", "balkon", "keller", "dachboden", "garage", 
-    "grundrisse", "sonstiges",
-    // Legacy values (will be migrated)
-    "main", "exterior", "interior", "floorplan", "map", "other"
-  ]).default("sonstiges"),
-  sortOrder: int("sortOrder").default(0),
-  
-  // Enhanced media management
-  category: varchar("category", { length: 100 }), // Custom category like "Kinderzimmer 2", "Energieausweis"
-  displayName: varchar("displayName", { length: 255 }), // Custom display name
-  showOnLandingPage: int("showOnLandingPage").default(1), // 1 = show, 0 = hide
-  isFeatured: int("isFeatured").default(0), // 1 = featured/title image, 0 = normal
-  
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type PropertyImage = typeof propertyImages.$inferSelect;
-export type InsertPropertyImage = typeof propertyImages.$inferInsert;
-
-/**
- * Documents table
+ * Documents - Files associated with properties
  */
 export const documents = mysqlTable("documents", {
-  id: int("id").autoincrement().primaryKey(),
-  
-  // Document info
-  title: varchar("title", { length: 255 }).notNull(),
+  id: int("id").primaryKey().autoincrement(),
+  propertyId: int("propertyId").notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 500 }).notNull(),
+  fileType: varchar("fileType", { length: 50 }),
+  fileSize: int("fileSize"),
+  category: varchar("category", { length: 100 }),
   description: text("description"),
-  documentType: mysqlEnum("documentType", [
-    "contract", "expose", "floorplan", "energy_certificate", "other"
-  ]).default("other"),
-  
-  // Storage
-  fileUrl: text("fileUrl"), // S3 URL
-  nasPath: text("nasPath"), // NAS path
-  fileName: varchar("fileName", { length: 255 }),
-  fileSize: int("fileSize"), // in bytes
-  mimeType: varchar("mimeType", { length: 100 }),
-  
-  // Relations
-  propertyId: int("propertyId"), // can be null for general documents
-  contactId: int("contactId"), // can be null
-  
-  // Enhanced media management
-  category: varchar("category", { length: 100 }), // Custom category like "Objektunterlagen", "Sensible Daten"
-  tags: text("tags"), // JSON array of tags
-  showOnLandingPage: int("showOnLandingPage").default(0), // 1 = show, 0 = hide
-  isFloorPlan: int("isFloorPlan").default(0), // 1 = is floorplan, 0 = not
-  useInExpose: int("useInExpose").default(0), // 1 = use in expose, 0 = don't use
-  sortOrder: int("sortOrder").default(0),
-  
-  // Metadata
-  uploadedBy: int("uploadedBy").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  uploadedAt: timestamp("uploadedAt").defaultNow().notNull(),
 });
 
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = typeof documents.$inferInsert;
 
 /**
- * Appointments/Viewings table
+ * Users - System users with authentication
+ */
+export const users = mysqlTable("users", {
+  id: int("id").primaryKey().autoincrement(),
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  role: mysqlEnum("role", ["admin", "agent", "viewer"]).default("agent").notNull(),
+  firstName: varchar("firstName", { length: 100 }),
+  lastName: varchar("lastName", { length: 100 }),
+  phone: varchar("phone", { length: 50 }),
+  isActive: boolean("isActive").default(true),
+  lastLogin: timestamp("lastLogin"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+/**
+ * Settings - Application-wide settings
+ */
+export const settings = mysqlTable("settings", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Company branding
+  companyName: varchar("companyName", { length: 255 }),
+  companyLogo: varchar("companyLogo", { length: 500 }),
+  companyAddress: text("companyAddress"),
+  companyPhone: varchar("companyPhone", { length: 50 }),
+  companyEmail: varchar("companyEmail", { length: 255 }),
+  companyWebsite: varchar("companyWebsite", { length: 255 }),
+  
+  // Legal texts
+  imprintText: text("imprintText"),
+  privacyPolicyText: text("privacyPolicyText"),
+  termsText: text("termsText"),
+  
+  // Portal credentials (encrypted)
+  immoscout24ApiKey: text("immoscout24ApiKey"),
+  immobilienscout24Username: varchar("immobilienscout24Username", { length: 255 }),
+  immobilienscout24Password: text("immobilienscout24Password"),
+  
+  // Other settings
+  defaultCommission: varchar("defaultCommission", { length: 50 }),
+  
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Settings = typeof settings.$inferSelect;
+export type InsertSettings = typeof settings.$inferInsert;
+
+/**
+ * Appointments - Scheduled property viewings and meetings
  */
 export const appointments = mysqlTable("appointments", {
-  id: int("id").autoincrement().primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   
-  // Appointment details
+  // Basic info
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  appointmentType: mysqlEnum("appointmentType", [
-    "viewing", "meeting", "phone_call", "other"
-  ]).default("viewing"),
   
   // Timing
   startTime: timestamp("startTime").notNull(),
   endTime: timestamp("endTime").notNull(),
   
-  // Relations
+  // Associations
   propertyId: int("propertyId"),
   contactId: int("contactId"),
   
@@ -425,11 +403,10 @@ export const appointments = mysqlTable("appointments", {
   
   // Google Calendar integration
   googleCalendarEventId: varchar("googleCalendarEventId", { length: 255 }),
-  googleCalendarLink: text("googleCalendarLink"),
-  lastSyncedToGoogleCalendar: timestamp("lastSyncedToGoogleCalendar"),
+  googleCalendarSyncStatus: mysqlEnum("googleCalendarSyncStatus", ["not_synced", "synced", "error"]).default("not_synced"),
+  googleCalendarLastSyncAt: timestamp("googleCalendarLastSyncAt"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -438,47 +415,20 @@ export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = typeof appointments.$inferInsert;
 
 /**
- * Activities/Notes table - interaction history
- */
-export const activities = mysqlTable("activities", {
-  id: int("id").autoincrement().primaryKey(),
-  
-  activityType: mysqlEnum("activityType", [
-    "note", "email", "call", "meeting", "viewing", "other"
-  ]).notNull(),
-  
-  subject: varchar("subject", { length: 255 }),
-  content: text("content"),
-  
-  // Relations
-  propertyId: int("propertyId"),
-  contactId: int("contactId"),
-  
-  // Metadata
-  createdBy: int("createdBy").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type Activity = typeof activities.$inferSelect;
-export type InsertActivity = typeof activities.$inferInsert;
-
-/**
- * Lead inquiries from public forms
+ * Leads - Potential customers from contact forms
  */
 export const leads = mysqlTable("leads", {
-  id: int("id").autoincrement().primaryKey(),
-  
-  // Lead source
-  propertyId: int("propertyId"),
-  source: varchar("source", { length: 100 }), // "landing_page", "public_listing", etc.
+  id: int("id").primaryKey().autoincrement(),
   
   // Contact info
-  firstName: varchar("firstName", { length: 100 }),
-  lastName: varchar("lastName", { length: 100 }),
-  email: varchar("email", { length: 320 }).notNull(),
+  firstName: varchar("firstName", { length: 100 }).notNull(),
+  lastName: varchar("lastName", { length: 100 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 50 }),
   
-  // Message
+  // Lead details
+  source: varchar("source", { length: 255 }), // where did they come from
+  propertyId: int("propertyId"), // which property are they interested in
   message: text("message"),
   
   // Status
@@ -494,34 +444,17 @@ export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
 
 /**
- * Insurance Policies - for future Versicherungen module
- * Tracks insurance contracts linked to properties and contacts
+ * Property Management - Contracts for managing properties
  */
-export const insurancePolicies = mysqlTable("insurancePolicies", {
-  id: int("id").autoincrement().primaryKey(),
+export const propertyManagementContracts = mysqlTable("propertyManagementContracts", {
+  id: int("id").primaryKey().autoincrement(),
   
-  // Policy details
-  policyNumber: varchar("policyNumber", { length: 100 }),
-  insuranceType: mysqlEnum("insuranceType", [
-    "building", // Gebäudeversicherung
-    "liability", // Haftpflicht
-    "legal", // Rechtsschutz
-    "household", // Hausrat
-    "elemental", // Elementarschaden
-    "glass", // Glasversicherung
-    "other"
-  ]).notNull(),
-  provider: varchar("provider", { length: 255 }), // Allianz, etc.
+  // Associations
+  propertyId: int("propertyId").notNull(),
+  ownerId: int("ownerId"), // Contact ID of property owner
   
-  // Relations
-  contactId: int("contactId"), // policy holder
-  propertyId: int("propertyId"), // insured property
-  
-  // Financial
-  premium: int("premium").notNull(), // in cents
-  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "quarterly", "yearly"]).notNull(),
-  
-  // Dates
+  // Contract details
+  contractNumber: varchar("contractNumber", { length: 100 }),
   startDate: timestamp("startDate").notNull(),
   endDate: timestamp("endDate"),
   
@@ -532,39 +465,25 @@ export const insurancePolicies = mysqlTable("insurancePolicies", {
   notes: text("notes"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type InsurancePolicy = typeof insurancePolicies.$inferSelect;
-export type InsertInsurancePolicy = typeof insurancePolicies.$inferInsert;
+export type PropertyManagementContract = typeof propertyManagementContracts.$inferSelect;
+export type InsertPropertyManagementContract = typeof propertyManagementContracts.$inferInsert;
 
 /**
- * Broker Contracts - for future Makler module
- * Tracks broker contracts and commissions
+ * Rental Contracts - Rental agreements for properties
  */
-export const brokerContracts = mysqlTable("brokerContracts", {
-  id: int("id").autoincrement().primaryKey(),
+export const rentalContracts = mysqlTable("rentalContracts", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Associations
+  propertyId: int("propertyId").notNull(),
+  tenantId: int("tenantId").notNull(), // Contact ID of tenant
   
   // Contract details
   contractNumber: varchar("contractNumber", { length: 100 }),
-  contractType: mysqlEnum("contractType", [
-    "exclusive", // Alleinauftrag
-    "simple", // Einfacher Auftrag
-    "qualified_exclusive" // Qualifizierter Alleinauftrag
-  ]).notNull(),
-  
-  // Relations
-  contactId: int("contactId").notNull(), // client
-  propertyId: int("propertyId").notNull(), // property being brokered
-  
-  // Commission
-  commissionRate: int("commissionRate"), // percentage * 100 (e.g., 350 = 3.5%)
-  commissionAmount: int("commissionAmount"), // fixed amount in cents
-  commissionType: mysqlEnum("commissionType", ["percentage", "fixed"]),
-  
-  // Dates
   startDate: timestamp("startDate").notNull(),
   endDate: timestamp("endDate"),
   
@@ -575,32 +494,26 @@ export const brokerContracts = mysqlTable("brokerContracts", {
   notes: text("notes"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type BrokerContract = typeof brokerContracts.$inferSelect;
-export type InsertBrokerContract = typeof brokerContracts.$inferInsert;
+export type RentalContract = typeof rentalContracts.$inferSelect;
+export type InsertRentalContract = typeof rentalContracts.$inferInsert;
 
 /**
- * Property Management Contracts - for future Hausverwaltung module
+ * Insurance Policies - Insurance contracts for properties
  */
-export const propertyManagementContracts = mysqlTable("propertyManagementContracts", {
-  id: int("id").autoincrement().primaryKey(),
+export const insurancePolicies = mysqlTable("insurancePolicies", {
+  id: int("id").primaryKey().autoincrement(),
   
-  // Contract details
-  contractNumber: varchar("contractNumber", { length: 100 }),
-  
-  // Relations
+  // Associations
   propertyId: int("propertyId").notNull(),
-  managerId: int("managerId").notNull(), // contactId of property manager
+  insuranceCompanyId: int("insuranceCompanyId"), // Contact ID of insurance company
   
-  // Financial
-  monthlyFee: int("monthlyFee"), // in cents
-  services: text("services"), // JSON array of services included
-  
-  // Dates
+  // Policy details
+  policyNumber: varchar("policyNumber", { length: 100 }),
+  policyType: varchar("policyType", { length: 100 }), // e.g., "Gebäudeversicherung", "Haftpflicht"
   startDate: timestamp("startDate").notNull(),
   endDate: timestamp("endDate"),
   
@@ -611,36 +524,28 @@ export const propertyManagementContracts = mysqlTable("propertyManagementContrac
   notes: text("notes"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type PropertyManagementContract = typeof propertyManagementContracts.$inferSelect;
-export type InsertPropertyManagementContract = typeof propertyManagementContracts.$inferInsert;
+export type InsurancePolicy = typeof insurancePolicies.$inferSelect;
+export type InsertInsurancePolicy = typeof insurancePolicies.$inferInsert;
 
 /**
- * Maintenance Records - for Hausverwaltung module
+ * Maintenance Records - Maintenance and repair work on properties
  */
 export const maintenanceRecords = mysqlTable("maintenanceRecords", {
-  id: int("id").autoincrement().primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   
-  // Relations
+  // Associations
   propertyId: int("propertyId").notNull(),
   
   // Maintenance details
-  date: timestamp("date").notNull(),
-  description: text("description").notNull(),
-  category: mysqlEnum("category", [
-    "repair", // Reparatur
-    "inspection", // Inspektion
-    "cleaning", // Reinigung
-    "renovation", // Renovierung
-    "other"
-  ]).notNull(),
-  
-  // Financial
-  cost: int("cost"), // in cents
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  scheduledDate: timestamp("scheduledDate"),
+  completedDate: timestamp("completedDate"),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
   vendor: varchar("vendor", { length: 255 }), // company/person who did the work
   
   // Status
@@ -650,7 +555,6 @@ export const maintenanceRecords = mysqlTable("maintenanceRecords", {
   notes: text("notes"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -659,32 +563,19 @@ export type MaintenanceRecord = typeof maintenanceRecords.$inferSelect;
 export type InsertMaintenanceRecord = typeof maintenanceRecords.$inferInsert;
 
 /**
- * Utility Bills - for Nebenkostenabrechnung in Hausverwaltung module
+ * Utility Bills - Utility bills for properties
  */
 export const utilityBills = mysqlTable("utilityBills", {
-  id: int("id").autoincrement().primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   
-  // Relations
+  // Associations
   propertyId: int("propertyId").notNull(),
   
   // Bill details
-  year: int("year").notNull(),
-  month: int("month"), // optional, for monthly bills
-  type: mysqlEnum("type", [
-    "heating", // Heizung
-    "water", // Wasser
-    "electricity", // Strom
-    "gas", // Gas
-    "waste", // Müll
-    "cleaning", // Reinigung
-    "maintenance", // Instandhaltung
-    "insurance", // Versicherung
-    "property_tax", // Grundsteuer
-    "other"
-  ]).notNull(),
-  
-  // Financial
-  amount: int("amount").notNull(), // in cents
+  utilityType: varchar("utilityType", { length: 100 }), // e.g., "Strom", "Wasser", "Gas"
+  billDate: timestamp("billDate").notNull(),
+  dueDate: timestamp("dueDate"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paidBy: mysqlEnum("paidBy", ["owner", "tenant", "management"]),
   
   // Status
@@ -694,7 +585,6 @@ export const utilityBills = mysqlTable("utilityBills", {
   notes: text("notes"),
   
   // Metadata
-  createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -703,33 +593,20 @@ export type UtilityBill = typeof utilityBills.$inferSelect;
 export type InsertUtilityBill = typeof utilityBills.$inferInsert;
 
 /**
- * Inquiries - Contact inquiries from various channels (Superchat, forms, etc.)
- * Tracks all incoming messages and inquiries about properties
+ * Portal Inquiries - Inquiries from external portals (ImmoScout24, etc.)
  */
-export const inquiries = mysqlTable("inquiries", {
-  id: int("id").autoincrement().primaryKey(),
+export const portalInquiries = mysqlTable("portalInquiries", {
+  id: int("id").primaryKey().autoincrement(),
   
-  // Relations
-  propertyId: int("propertyId"), // can be null for general inquiries
-  contactId: int("contactId"), // linked contact if exists
+  // Portal info
+  portalName: varchar("portalName", { length: 100 }), // e.g., "ImmoScout24"
+  portalInquiryId: varchar("portalInquiryId", { length: 255 }), // ID from the portal
   
-  // Channel information
-  channel: mysqlEnum("channel", [
-    "whatsapp", "facebook", "instagram", "telegram", "email", "phone", "form", "other"
-  ]).notNull(),
-  
-  // Superchat integration
-  superchatContactId: varchar("superchatContactId", { length: 255 }), // Superchat contact ID
-  superchatConversationId: varchar("superchatConversationId", { length: 255 }), // Superchat conversation ID
-  superchatMessageId: varchar("superchatMessageId", { length: 255 }), // Superchat message ID
-  
-  // Contact information
-  contactName: varchar("contactName", { length: 255 }),
-  contactPhone: varchar("contactPhone", { length: 50 }),
-  contactEmail: varchar("contactEmail", { length: 320 }),
-  
-  // Message content
-  subject: varchar("subject", { length: 500 }),
+  // Inquiry details
+  propertyId: int("propertyId"),
+  inquirerName: varchar("inquirerName", { length: 255 }),
+  inquirerEmail: varchar("inquirerEmail", { length: 255 }),
+  inquirerPhone: varchar("inquirerPhone", { length: 50 }),
   messageText: text("messageText"),
   
   // Status and assignment
@@ -739,15 +616,14 @@ export const inquiries = mysqlTable("inquiries", {
   // Response tracking
   firstResponseAt: timestamp("firstResponseAt"),
   lastResponseAt: timestamp("lastResponseAt"),
-  responseCount: int("responseCount").default(0),
   
   // Metadata
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Inquiry = typeof inquiries.$inferSelect;
-export type InsertInquiry = typeof inquiries.$inferInsert;
+export type PortalInquiry = typeof portalInquiries.$inferSelect;
+export type InsertPortalInquiry = typeof portalInquiries.$inferInsert;
 
 /**
  * App Configuration - Persistent application settings

@@ -2875,6 +2875,45 @@ Die Beschreibung soll:
       }),
    }),
 
+  // ============ PROPERTY LINKS ============
+  propertyLinks: router({
+    getByProperty: publicProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getPropertyLinksByProperty(input.propertyId);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        name: z.string(),
+        url: z.string(),
+        showOnLandingPage: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createPropertyLink(input);
+      }),
+
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        url: z.string().optional(),
+        showOnLandingPage: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.updatePropertyLink(input.id, input);
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deletePropertyLink(input.id);
+      }),
+  }),
+
   // ============ DASHBOARD ============
   dashboard: router({
     stats: publicProcedure.query(async () => {

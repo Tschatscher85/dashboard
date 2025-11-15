@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2, RefreshCw } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Link as LinkIcon, X, Loader2, ArrowLeft, Pencil, TestTube2, CheckCircle2, XCircle, LayoutGrid, Grid3x3, Grid2x2, RefreshCw, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import DraggableImageGallery from "@/components/DraggableImageGallery";
@@ -135,8 +136,52 @@ export default function PropertyMedia() {
   });
   
   // Links state
-  const [virtualTourLink, setVirtualTourLink] = useState("");
-  const [businessCardLink, setBusinessCardLink] = useState("");
+  const [newLinkDialogOpen, setNewLinkDialogOpen] = useState(false);
+  const [editLinkDialogOpen, setEditLinkDialogOpen] = useState(false);
+  const [editingLink, setEditingLink] = useState<any>(null);
+  const [newLinkName, setNewLinkName] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  
+  // Fetch property links
+  const { data: propertyLinks, refetch: refetchLinks } = trpc.propertyLinks.getByProperty.useQuery(
+    { propertyId },
+    { enabled: !!propertyId }
+  );
+  
+  // Property links mutations
+  const createLinkMutation = trpc.propertyLinks.create.useMutation({
+    onSuccess: () => {
+      toast.success("Link erstellt");
+      refetchLinks();
+      setNewLinkDialogOpen(false);
+      setNewLinkName("");
+      setNewLinkUrl("");
+    },
+    onError: (error) => {
+      toast.error(`Fehler: ${error.message}`);
+    },
+  });
+  
+  const updateLinkMutation = trpc.propertyLinks.update.useMutation({
+    onSuccess: () => {
+      toast.success("Link aktualisiert");
+      refetchLinks();
+      setEditLinkDialogOpen(false);
+    },
+    onError: (error) => {
+      toast.error(`Fehler: ${error.message}`);
+    },
+  });
+  
+  const deleteLinkMutation = trpc.propertyLinks.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Link gelöscht");
+      refetchLinks();
+    },
+    onError: (error) => {
+      toast.error(`Fehler: ${error.message}`);
+    },
+  });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -279,10 +324,7 @@ export default function PropertyMedia() {
     }
   };
 
-  const saveLinks = () => {
-    // TODO: Save links to database
-    toast.success("Links gespeichert");
-  };
+
 
   if (isLoading) {
     return (
@@ -930,41 +972,63 @@ export default function PropertyMedia() {
         <TabsContent value="links" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Virtueller Rundgang</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="virtual-tour">URL zum virtuellen Rundgang</Label>
-                <Input
-                  id="virtual-tour"
-                  placeholder="https://..."
-                  value={virtualTourLink}
-                  onChange={(e) => setVirtualTourLink(e.target.value)}
-                />
+              <div className="flex items-center justify-between">
+                <CardTitle>Links</CardTitle>
+                <Button onClick={() => setNewLinkDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Neuer Link
+                </Button>
               </div>
+            </CardHeader>
+            <CardContent>
+              {propertyLinks && propertyLinks.length > 0 ? (
+                <div className="space-y-3">
+                  {propertyLinks.map((link) => (
+                    <div key={link.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Checkbox
+                        checked={link.showOnLandingPage}
+                        onCheckedChange={(checked) => {
+                          updateLinkMutation.mutate({
+                            id: link.id,
+                            showOnLandingPage: checked as boolean,
+                          });
+                        }}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium">{link.name}</div>
+                        <div className="text-sm text-muted-foreground truncate">{link.url}</div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditingLink(link);
+                          setEditLinkDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm('Link wirklich löschen?')) {
+                            deleteLinkMutation.mutate({ id: link.id });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Noch keine Links vorhanden. Klicken Sie auf "Neuer Link" um einen hinzuzufügen.
+                </div>
+              )}
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Visitenkarte</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="business-card">URL zur digitalen Visitenkarte</Label>
-                <Input
-                  id="business-card"
-                  placeholder="https://..."
-                  value={businessCardLink}
-                  onChange={(e) => setBusinessCardLink(e.target.value)}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end">
-            <Button onClick={saveLinks}>Links speichern</Button>
-          </div>
         </TabsContent>
       </Tabs>
       
@@ -1075,6 +1139,102 @@ export default function PropertyMedia() {
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
       />
+      
+      {/* New Link Dialog */}
+      <Dialog open={newLinkDialogOpen} onOpenChange={setNewLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Neuer Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="new-link-name">Name</Label>
+              <Input
+                id="new-link-name"
+                placeholder="z.B. 360° Rundgang, Visitenkarte, Grundriss..."
+                value={newLinkName}
+                onChange={(e) => setNewLinkName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-link-url">URL</Label>
+              <Input
+                id="new-link-url"
+                placeholder="https://..."
+                value={newLinkUrl}
+                onChange={(e) => setNewLinkUrl(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setNewLinkDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!newLinkName || !newLinkUrl) {
+                    toast.error('Bitte Name und URL eingeben');
+                    return;
+                  }
+                  createLinkMutation.mutate({
+                    propertyId,
+                    name: newLinkName,
+                    url: newLinkUrl,
+                  });
+                }}
+              >
+                Erstellen
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Link Dialog */}
+      <Dialog open={editLinkDialogOpen} onOpenChange={setEditLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link bearbeiten</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-link-name">Name</Label>
+              <Input
+                id="edit-link-name"
+                value={editingLink?.name || ''}
+                onChange={(e) => setEditingLink({ ...editingLink, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-link-url">URL</Label>
+              <Input
+                id="edit-link-url"
+                value={editingLink?.url || ''}
+                onChange={(e) => setEditingLink({ ...editingLink, url: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditLinkDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!editingLink?.name || !editingLink?.url) {
+                    toast.error('Bitte Name und URL eingeben');
+                    return;
+                  }
+                  updateLinkMutation.mutate({
+                    id: editingLink.id,
+                    name: editingLink.name,
+                    url: editingLink.url,
+                  });
+                }}
+              >
+                Speichern
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

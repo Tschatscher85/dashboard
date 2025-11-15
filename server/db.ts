@@ -1027,3 +1027,70 @@ export async function getNASConfig(): Promise<Record<string, string>> {
     return {};
   }
 }
+
+// ============ PROPERTY LINKS ============
+
+export async function getPropertyLinksByProperty(propertyId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { propertyLinks } = await import('../drizzle/schema');
+  return await db
+    .select()
+    .from(propertyLinks)
+    .where(eq(propertyLinks.propertyId, propertyId))
+    .orderBy(propertyLinks.sortOrder);
+}
+
+export async function createPropertyLink(data: {
+  propertyId: number;
+  name: string;
+  url: string;
+  showOnLandingPage?: boolean;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { propertyLinks } = await import('../drizzle/schema');
+  const result = await db.insert(propertyLinks).values({
+    propertyId: data.propertyId,
+    name: data.name,
+    url: data.url,
+    showOnLandingPage: data.showOnLandingPage ?? true,
+    sortOrder: data.sortOrder ?? 0,
+  });
+  
+  return { id: result[0].insertId };
+}
+
+export async function updatePropertyLink(
+  id: number,
+  data: {
+    name?: string;
+    url?: string;
+    showOnLandingPage?: boolean;
+    sortOrder?: number;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { propertyLinks } = await import('../drizzle/schema');
+  await db
+    .update(propertyLinks)
+    .set(data)
+    .where(eq(propertyLinks.id, id));
+  
+  return { success: true };
+}
+
+export async function deletePropertyLink(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { propertyLinks } = await import('../drizzle/schema');
+  await db.delete(propertyLinks).where(eq(propertyLinks.id, id));
+  
+  return { success: true };
+}
