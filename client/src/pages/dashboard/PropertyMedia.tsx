@@ -988,7 +988,7 @@ export default function PropertyMedia() {
             {selectedImage && (
               <div className="flex justify-center">
                 <img
-                  src={selectedImage.imageUrl}
+                  src={convertToProxyUrl(selectedImage.imageUrl)}
                   alt={selectedImage.title}
                   className="max-h-64 rounded-lg border"
                 />
@@ -1070,7 +1070,7 @@ export default function PropertyMedia() {
 
       {/* Image Lightbox */}
       <ImageLightbox
-        images={lightboxImages.map(img => ({ url: img.imageUrl, title: img.title }))}
+        images={lightboxImages.map(img => ({ url: convertToProxyUrl(img.imageUrl), title: img.title }))}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
