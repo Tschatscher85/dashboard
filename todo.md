@@ -1251,3 +1251,9 @@
 - [x] Fix commission validation error - internalCommissionPercent and externalCommissionInternalPercent expect string but receive number (FIXED: Changed schema from z.string() to z.number())
 - [x] Fix Titelbild display - featured image not showing in property header (shows gray icon instead of actual image) (FIXED: Fallback to first image if no featured image exists)
 - [x] Verify automatic title generation from address (Titelüberschrift should auto-generate from street, houseNumber, zipCode, city) (FIXED: Added useEffect to auto-generate title from address when property is first loaded)
+
+
+## CRITICAL BUGS (Nov 15, 2025 - VM Deployment Issues)
+
+- [x] Fix PropertyDetail crash - ReferenceError: Cannot access 'property' before initialization (FIXED: Moved useEffect AFTER useQuery declaration)
+- [x] Remove Google Maps autocomplete - 401 error on VM (FIXED: Replaced with simple text note, manual address entry)

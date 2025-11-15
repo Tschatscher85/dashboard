@@ -65,6 +65,10 @@ export default function PropertyDetail() {
       setActiveTab('media');
     }
   }, []);
+
+  const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
+    id: propertyId,
+  });
   
   // Auto-generate title from address if title is empty or default
   useEffect(() => {
@@ -101,10 +105,6 @@ export default function PropertyDetail() {
     setEditedTitle("");
     setIsEditing(false);
   };
-
-  const { data: property, isLoading, refetch } = trpc.properties.getById.useQuery({
-    id: propertyId,
-  });
 
   // Load NAS images (Bilder category)
   const { data: nasImages } = trpc.properties.listNASFiles.useQuery(
