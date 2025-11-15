@@ -119,6 +119,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
   };
 
   const handleSave = () => {
+    console.log('[Frontend] handleSave called with formData:', formData);
+    console.log('[Frontend] headline value:', formData.headline);
+    
     // Filter out null/undefined/empty string values to avoid validation errors
     // BUT keep numeric zeros (important for energy values)
     const cleanedData: any = {};
@@ -135,6 +138,8 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         }
       }
     });
+    console.log('[Frontend] cleanedData being sent:', cleanedData);
+    console.log('[Frontend] headline in cleanedData:', cleanedData.headline);
     onSave(cleanedData);
   };
 
