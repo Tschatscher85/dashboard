@@ -721,7 +721,11 @@ export function PropertyRightColumn({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Energieausweis</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.energyCertificateAvailability || ""}
+                  onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
@@ -735,7 +739,11 @@ export function PropertyRightColumn({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Erstellungsdatum</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.energyCertificateCreationDate || ""}
+                  onValueChange={(value) => handleChange("energyCertificateCreationDate", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
@@ -750,12 +758,24 @@ export function PropertyRightColumn({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Ausstellungsdatum</Label>
-                <Input type="date" disabled={!isEditing} className="h-10" />
+                <Input 
+                  type="date" 
+                  value={formData.energyCertificateIssueDate || ""}
+                  onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
+                  disabled={!isEditing} 
+                  className="h-10" 
+                />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Gültig bis</Label>
-                <Input type="date" disabled={!isEditing} className="h-10" />
+                <Input 
+                  type="date" 
+                  value={formData.energyCertificateValidUntil || ""}
+                  onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
+                  disabled={!isEditing} 
+                  className="h-10" 
+                />
               </div>
             </div>
           </div>
@@ -767,7 +787,11 @@ export function PropertyRightColumn({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Energieausweistyp</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.energyCertificateType || ""}
+                  onValueChange={(value) => handleChange("energyCertificateType", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
@@ -780,7 +804,11 @@ export function PropertyRightColumn({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Energieeffizienzklasse</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.energyClass || ""}
+                  onValueChange={(value) => handleChange("energyClass", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
@@ -911,7 +939,11 @@ export function PropertyRightColumn({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Heizungsart</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.heatingType || ""}
+                  onValueChange={(value) => handleChange("heatingType", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
@@ -933,7 +965,11 @@ export function PropertyRightColumn({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Wesentlicher Energieträger</Label>
-                <Select disabled={!isEditing}>
+                <Select 
+                  value={formData.mainEnergySource || ""}
+                  onValueChange={(value) => handleChange("mainEnergySource", value)}
+                  disabled={!isEditing}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
