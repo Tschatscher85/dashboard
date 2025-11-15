@@ -669,6 +669,10 @@ export function PropertyRightColumn({
               onBlur={() => {
                 if (isEditing) {
                   const value = parseFloat(totalCommissionInput.replace(/[^0-9.]/g, ""));
+                  if (value && value > 9999999) {
+                    toast.error("Gesamtprovision darf nicht größer als 9.999.999 € sein");
+                    return;
+                  }
                   handleChange("totalCommission", value ? Math.round(value * 100) : null);
                 }
               }}
@@ -807,8 +811,13 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    max="9999"
                     value={formData.energyConsumption || ""}
-                    onChange={(e) => handleChange("energyConsumption", e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value) : null;
+                      if (val && val > 9999) return;
+                      handleChange("energyConsumption", val);
+                    }}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -824,8 +833,13 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    max="9999"
                     value={formData.energyConsumptionElectricity || ""}
-                    onChange={(e) => handleChange("energyConsumptionElectricity", e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value) : null;
+                      if (val && val > 9999) return;
+                      handleChange("energyConsumptionElectricity", val);
+                    }}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -841,8 +855,13 @@ export function PropertyRightColumn({
                   <Input
                     type="number"
                     placeholder="0"
+                    max="9999"
                     value={formData.energyConsumptionHeat || ""}
-                    onChange={(e) => handleChange("energyConsumptionHeat", e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value) : null;
+                      if (val && val > 9999) return;
+                      handleChange("energyConsumptionHeat", val);
+                    }}
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
@@ -859,8 +878,13 @@ export function PropertyRightColumn({
                 <Input
                   type="number"
                   placeholder="0"
+                  max="9999"
                   value={formData.co2Emissions || ""}
-                  onChange={(e) => handleChange("co2Emissions", e.target.value ? parseInt(e.target.value) : null)}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value) : null;
+                    if (val && val > 9999) return;
+                    handleChange("co2Emissions", val);
+                  }}
                   disabled={!isEditing}
                   className="h-10 pr-20"
                 />

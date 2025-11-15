@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown, RefreshCw } from "lucide-react";
-import { PlaceAutocompleteElement } from "@/components/PlaceAutocompleteElement";
+// import { PlaceAutocompleteElement } from "@/components/PlaceAutocompleteElement";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -500,14 +500,14 @@ export default function Properties() {
                 />
               </div>
 
-              {/* Google Address Autocomplete */}
-              <div className="grid gap-2">
+              {/* Google Address Autocomplete - Disabled due to API key issues */}
+              {/* <div className="grid gap-2">
                 <Label>Adresse suchen (Google Maps)</Label>
                 <PlaceAutocompleteElement
                   onPlaceSelect={handlePlaceSelected}
                   placeholder="Adresse eingeben..."
                 />
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
