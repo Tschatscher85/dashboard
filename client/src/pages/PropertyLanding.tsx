@@ -40,7 +40,7 @@ export default function PropertyLanding() {
     if (url.includes('ugreen.tschatscher.eu')) {
       // Extract path after domain
       // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
-      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      const match = url.match(/ugreen\.tschatscher\.eu(?::\d+)?(\/.*)/i);
       if (match && match[1]) {
         const nasPath = match[1];
         // Remove leading slash for proxy endpoint
