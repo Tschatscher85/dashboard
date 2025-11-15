@@ -120,9 +120,10 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
 
   const handleSave = () => {
     // Filter out null/undefined/empty string values to avoid validation errors
+    // BUT keep numeric zeros (important for energy values)
     const cleanedData: any = {};
     Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
+      if (value !== null && value !== undefined && (value !== '' || value === 0)) {
         // Convert latitude/longitude strings to numbers
         if ((key === 'latitude' || key === 'longitude') && typeof value === 'string') {
           const numValue = parseFloat(value);
