@@ -51,9 +51,13 @@ declare global {
   }
 }
 
-const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+// Use user's Google Maps API key if available, otherwise fall back to Manus Forge proxy
+const USER_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
 const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
 const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+
+const USE_USER_KEY = !!USER_API_KEY;
 
 interface MapViewProps {
   center?: { lat: number; lng: number };
@@ -73,12 +77,20 @@ export function MapView({
 
   useEffect(() => {
     if (!window.google) {
-      const scriptUrl = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&libraries=places,drawing,geometry,visualization,marker`;
+      // Use direct Google Maps API if user provided their own key
+      const scriptUrl = USE_USER_KEY
+        ? `https://maps.googleapis.com/maps/api/js?key=${USER_API_KEY}&libraries=places,drawing,geometry,visualization,marker`
+        : `${MAPS_PROXY_URL}/maps/api/js?key=${FORGE_API_KEY}&libraries=places,drawing,geometry,visualization,marker`;
       
-      fetch(scriptUrl, {
-        method: 'GET',
-        headers: { 'Origin': window.location.origin },
-      })
+      // Direct script loading for user's API key, fetch for proxy
+      const loadScript = USE_USER_KEY
+        ? fetch(scriptUrl)
+        : fetch(scriptUrl, {
+            method: 'GET',
+            headers: { 'Origin': window.location.origin },
+          });
+      
+      loadScript
         .then(response => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           return response.text();

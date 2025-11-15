@@ -1257,3 +1257,11 @@
 
 - [x] Fix PropertyDetail crash - ReferenceError: Cannot access 'property' before initialization (FIXED: Moved useEffect AFTER useQuery declaration)
 - [x] Remove Google Maps autocomplete - 401 error on VM (FIXED: Replaced with simple text note, manual address entry)
+
+
+## Google Maps Integration (Nov 15, 2025)
+
+- [x] Add user's Google Maps API key to environment variables (VITE_GOOGLE_MAPS_API_KEY)
+- [x] Restore Google Maps autocomplete in Properties dialog (PlaceAutocompleteElement)
+- [x] Update Map component to use user's API key instead of Manus Forge proxy (fallback logic)
+- [ ] Test autocomplete and distance calculation (requires user testing)

@@ -500,11 +500,13 @@ export default function Properties() {
                 />
               </div>
 
-              {/* Address Note - Google Maps removed due to API key requirement */}
+              {/* Google Address Autocomplete */}
               <div className="grid gap-2">
-                <p className="text-sm text-muted-foreground">
-                  Geben Sie die Adresse manuell in die Felder unten ein.
-                </p>
+                <Label>Adresse suchen (Google Maps)</Label>
+                <PlaceAutocompleteElement
+                  onPlaceSelect={handlePlaceSelected}
+                  placeholder="Adresse eingeben..."
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
