@@ -684,6 +684,12 @@ export const appRouter = router({
           distanceToAirport: z.number().optional(),
           landingPageSlug: z.string().optional(),
           landingPagePublished: z.boolean().optional(),
+          headline: z.string().optional(),
+          descriptionHighlights: z.string().optional(),
+          descriptionLocation: z.string().optional(),
+          descriptionFazit: z.string().optional(),
+          descriptionCTA: z.string().optional(),
+          linkedContactIds: z.string().optional(),
         }),
       }))
       .mutation(async ({ input }) => {
