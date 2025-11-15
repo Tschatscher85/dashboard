@@ -693,6 +693,8 @@ export const appRouter = router({
         }),
       }))
       .mutation(async ({ input }) => {
+        console.log('[tRPC] properties.update called with:', JSON.stringify(input, null, 2));
+        
         // Convert string dates to Date objects before saving
         const processedData: any = { ...input.data };
         if (input.data.availableFrom && typeof input.data.availableFrom === 'string') {
