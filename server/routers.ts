@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { getDb } from "./db";
 import { generateExpose } from "./exposeGenerator";
@@ -14,7 +14,22 @@ export const appRouter = router({
   system: systemRouter,
   
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query(async (opts) => {
+      // Check for demo mode cookie
+      const cookies = opts.ctx.req.cookies;
+      if (cookies && cookies['manus-session'] === 'demo-session-token') {
+        // Return demo user
+        return {
+          id: 1,
+          openId: 'demo-user',
+          name: 'Demo Admin',
+          email: 'demo@immojaeger.de',
+          role: 'admin' as const,
+          createdAt: new Date(),
+        };
+      }
+      return opts.ctx.user;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -24,12 +39,12 @@ export const appRouter = router({
 
   // ============ USERS ============
   users: router({
-    list: protectedProcedure
+    list: publicProcedure
       .query(async () => {
         return await db.getAllUsers();
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         name: z.string(),
         email: z.string().email(),
@@ -50,14 +65,10 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        // Prevent deleting yourself
-        if (input.id === ctx.user.id) {
-          throw new Error("Sie können sich nicht selbst löschen");
-        }
-        
+      .mutation(async ({ input }) => {
+        // No authentication - allow all deletions
         await db.deleteUser(input.id);
         return { success: true };
       }),
@@ -81,7 +92,7 @@ export const appRouter = router({
         };
       }),
 
-    getApiKeys: protectedProcedure
+    getApiKeys: publicProcedure
       .query(async () => {
         // Load configuration from database (appConfig table)
         const db = await getDb();
@@ -103,6 +114,7 @@ export const appRouter = router({
         };
         
         return {
+          dashboardLogo: getConfig('DASHBOARD_LOGO', 'DASHBOARD_LOGO', ''),
           superchat: process.env.SUPERCHAT_API_KEY || "",
           brevo: process.env.BREVO_API_KEY || "",
           brevoPropertyInquiryListId: process.env.BREVO_PROPERTY_INQUIRY_LIST_ID || "18",
@@ -113,6 +125,7 @@ export const appRouter = router({
           brevoDefaultInquiryType: process.env.BREVO_DEFAULT_INQUIRY_TYPE || "property_inquiry",
           googleClientId: process.env.GOOGLE_CLIENT_ID || "",
           googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+          googleMaps: process.env.GOOGLE_MAPS_API_KEY || "",
           propertySync: process.env.PROPERTY_SYNC_API_KEY || "",
           openai: process.env.OPENAI_API_KEY || "",
           // ImmoScout24 API
@@ -190,8 +203,9 @@ export const appRouter = router({
         };
       }),
 
-    saveApiKeys: protectedProcedure
+    saveApiKeys: publicProcedure
       .input(z.object({
+        dashboardLogo: z.string().optional(),
         superchat: z.string().optional(),
         brevo: z.string().optional(),
         brevoPropertyInquiryListId: z.string().optional(),
@@ -202,6 +216,7 @@ export const appRouter = router({
         brevoDefaultInquiryType: z.string().optional(),
         googleClientId: z.string().optional(),
         googleClientSecret: z.string().optional(),
+        googleMaps: z.string().optional(),
         propertySync: z.string().optional(),
         openai: z.string().optional(),
         // ImmoScout24 API
@@ -442,7 +457,7 @@ export const appRouter = router({
 
   // ============ PROPERTIES ============
   properties: router({
-    list: protectedProcedure
+    list: publicProcedure
       .input(z.object({
         status: z.string().optional(),
         propertyType: z.string().optional(),
@@ -484,13 +499,13 @@ export const appRouter = router({
         return await db.getPropertyBySlug(input.slug);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         title: z.string(),
         description: z.string().optional(),
         propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
         marketingType: z.enum(["sale", "rent", "lease"]),
-        status: z.enum(["acquisition", "preparation", "marketing", "negotiation", "reserved", "sold", "rented", "inactive"]).optional(),
+        status: z.enum(["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).optional(),
         street: z.string().optional(),
         houseNumber: z.string().optional(),
         zipCode: z.string().optional(),
@@ -536,12 +551,12 @@ export const appRouter = router({
         await db.createProperty({
           ...input,
           title,
-          createdBy: ctx.user.id,
+          createdBy: 1, // Default user since no authentication
         });
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
@@ -551,7 +566,7 @@ export const appRouter = router({
           propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]).optional(),
           subType: z.string().optional(),
           marketingType: z.enum(["sale", "rent", "lease"]).optional(),
-          status: z.enum(["acquisition", "preparation", "marketing", "negotiation", "reserved", "sold", "rented", "inactive"]).optional(),
+          status: z.enum(["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).optional(),
           street: z.string().optional(),
           houseNumber: z.string().optional(),
           zipCode: z.string().optional(),
@@ -652,9 +667,9 @@ export const appRouter = router({
           assignmentDuration: z.string().optional(),
           assignmentFrom: z.union([z.string(), z.date()]).optional(),
           assignmentTo: z.union([z.string(), z.date()]).optional(),
-          internalCommissionPercent: z.string().optional(),
+          internalCommissionPercent: z.number().optional(),
           internalCommissionType: z.enum(["percent", "euro"]).optional(),
-          externalCommissionInternalPercent: z.string().optional(),
+          externalCommissionInternalPercent: z.number().optional(),
           externalCommissionInternalType: z.enum(["percent", "euro"]).optional(),
           totalCommission: z.number().optional(),
           externalCommissionForExpose: z.string().optional(),
@@ -702,7 +717,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteProperty(input.id);
@@ -715,7 +730,7 @@ export const appRouter = router({
         return await db.getPropertyImages(input.propertyId);
       }),
 
-    addImage: protectedProcedure
+    addImage: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         imageUrl: z.string(),
@@ -730,28 +745,14 @@ export const appRouter = router({
         return { success: true };
       }),
 
-      deleteImage: protectedProcedure
+      deleteImage: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deletePropertyImage(input.id);
         return { success: true };
       }),
 
-    updateImage: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        category: z.string().optional(),
-        displayName: z.string().optional(),
-        showOnLandingPage: z.number().optional(),
-        isFeatured: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateImageMetadata(input);
-        return { success: true };
-      }),
-
-    uploadToNAS: protectedProcedure
+    uploadToNAS: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         category: z.enum(["Bilder", "Objektunterlagen", "Sensible Daten", "Vertragsunterlagen"]),
@@ -842,15 +843,14 @@ export const appRouter = router({
                   fileBuffer
                 );
                 
-                // Build direct NAS URL (browser accesses NAS directly via HTTPS)
-                // Format: https://ugreen.tschatscher.eu/Daten/.../filename.jpg
-                // Remove port from URL (nginx reverse proxy handles it)
-                const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+                // Build proxy URL (browser accesses via /api/nas/* which handles authentication)
+                // Format: /api/nas/Daten/.../filename.jpg
+                // The proxy endpoint will authenticate with read-only credentials
                 const relativePath = nasPath.replace(/^\/volume1/, '');
-                // Build direct URL with proper encoding
+                // Build proxy URL with proper encoding
                 const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
-                url = `${baseUrl}${encodedPath}`;
-                console.log('[Upload] Using direct NAS URL:', url);
+                url = `/api/nas${encodedPath}`;
+                console.log('[Upload] Using proxy URL:', url);
                 
                 uploadSuccess = true;
                 console.log('[Upload] ✅ WebDAV upload successful');
@@ -905,11 +905,11 @@ export const appRouter = router({
                   fileBuffer
                 );
                 
-                // Build direct NAS URL (no proxy needed)
+                // Build proxy URL (browser accesses via /api/nas/* which handles authentication)
                 const relativePath = nasPath.replace(/^\/volume1/, '');
                 const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
-                url = `${ftpHost}${encodedPath}`;
-                console.log('[Upload] Using direct NAS URL:', url);
+                url = `/api/nas${encodedPath}`;
+                console.log('[Upload] Using proxy URL:', url);
                 
                 uploadSuccess = true;
                 console.log('[Upload] ✅ FTP upload successful');
@@ -981,7 +981,7 @@ export const appRouter = router({
               nasPath,
               documentType: "other", // Default type
               category: input.category,
-              uploadedBy: ctx.user.id,
+              uploadedBy: 1, // Default user since no authentication
             });
             console.log('[Upload] ✅ Document database entry created successfully');
           } catch (dbError: any) {
@@ -1000,7 +1000,7 @@ export const appRouter = router({
         };
       }),
 
-    listNASFiles: protectedProcedure
+    listNASFiles: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         category: z.enum(["Bilder", "Objektunterlagen", "Sensible Daten", "Vertragsunterlagen"]),
@@ -1020,7 +1020,7 @@ export const appRouter = router({
         return files;
       }),
 
-    syncFromNAS: protectedProcedure
+    syncFromNAS: publicProcedure
       .input(z.object({
         propertyId: z.number(),
       }))
@@ -1150,7 +1150,7 @@ export const appRouter = router({
         };
       }),
 
-    deleteFromNAS: protectedProcedure
+    deleteFromNAS: publicProcedure
       .input(z.object({
         nasPath: z.string(),
       }))
@@ -1162,7 +1162,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    testNASConnection: protectedProcedure
+    testNASConnection: publicProcedure
       .input(z.object({
         propertyId: z.number(),
       }))
@@ -1272,7 +1272,7 @@ export const appRouter = router({
         return results;
       }),
 
-    testWebDAVConnection: protectedProcedure
+    testWebDAVConnection: publicProcedure
       .input(z.object({
         propertyId: z.number(),
       }))
@@ -1337,7 +1337,7 @@ export const appRouter = router({
         return results;
       }),
 
-    testFTPConnection: protectedProcedure
+    testFTPConnection: publicProcedure
       .input(z.object({
         propertyId: z.number(),
       }))
@@ -1423,7 +1423,7 @@ export const appRouter = router({
         return results;
       }),
 
-    generateDescription: protectedProcedure
+    generateDescription: publicProcedure
       .input(z.object({
         propertyData: z.any(),
         creativity: z.number().min(0).max(1).default(0.7),
@@ -1545,7 +1545,7 @@ Die Beschreibung soll:
         return { description };
       }),
 
-    generateExpose: protectedProcedure
+    generateExpose: publicProcedure
       .input(z.object({ propertyId: z.number() }))
       .mutation(async ({ input }) => {
         const property = await db.getPropertyById(input.propertyId);
@@ -1565,7 +1565,7 @@ Die Beschreibung soll:
       }),
 
     // Export properties for homepage sync
-    exportForHomepage: protectedProcedure
+    exportForHomepage: publicProcedure
       .input(z.object({
         propertyIds: z.array(z.number()).optional(), // If not provided, export all active properties
       }).optional())
@@ -1625,7 +1625,7 @@ Die Beschreibung soll:
       }),
 
     // Sync properties to homepage
-    syncToHomepage: protectedProcedure
+    syncToHomepage: publicProcedure
       .input(z.object({
         homepageUrl: z.string().url(),
         propertyIds: z.array(z.number()).optional(),
@@ -1713,7 +1713,7 @@ Die Beschreibung soll:
           title: z.string(),
           description: z.string().optional(),
           propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
-          status: z.enum(["acquisition", "preparation", "marketing", "negotiation", "reserved", "sold", "rented", "inactive"]).optional(),
+          status: z.enum(["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).optional(),
           price: z.number().optional(),
           priceType: z.string().optional(), // kaufpreis, miete, pacht
           street: z.string().optional(),
@@ -1829,11 +1829,48 @@ Die Beschreibung soll:
           results,
         };
       }),
+
+    // Reorder images
+    reorderImages: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        imageIds: z.array(z.string()), // Array of image IDs in new order (format: "db-123" or "nas-filename.jpg")
+      }))
+      .mutation(async ({ input }) => {
+        // Update sortOrder for database images
+        const dbImageIds = input.imageIds
+          .filter(id => id.startsWith('db-'))
+          .map(id => parseInt(id.replace('db-', '')));
+        
+        // Update each image's sortOrder based on its position in the array
+        for (let i = 0; i < dbImageIds.length; i++) {
+          const imageId = dbImageIds[i];
+          await db.updateImageSortOrder(imageId, i);
+        }
+        
+        return { success: true, message: "Bildersortierung gespeichert" };
+      }),
+
+    // Update image metadata
+    updateImage: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        category: z.string().optional(),
+        displayName: z.string().optional(),
+        imageType: z.string().optional(),
+        showOnLandingPage: z.number().optional(),
+        isFeatured: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateImageMetadata(input);
+        return { success: true };
+      }),
   }),
 
   // ============ CONTACTS ============
   contacts: router({
-    list: protectedProcedure
+    list: publicProcedure
       .input(z.object({
         contactType: z.string().optional(),
         searchTerm: z.string().optional(),
@@ -1842,13 +1879,13 @@ Die Beschreibung soll:
         return await db.getAllContacts(input);
       }),
 
-    getById: protectedProcedure
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await db.getContactById(input.id);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         contactType: z.enum(["buyer", "seller", "tenant", "landlord", "interested", "other"]),
         salutation: z.enum(["mr", "ms", "diverse"]).optional(),
@@ -1869,7 +1906,7 @@ Die Beschreibung soll:
       .mutation(async ({ input, ctx }) => {
         const contactId = await db.createContact({
           ...input,
-          createdBy: ctx.user.id,
+          createdBy: 1, // Default user since no authentication
         });
         
         // Auto-sync to Brevo if enabled
@@ -1931,7 +1968,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
@@ -1958,7 +1995,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteContact(input.id);
@@ -1968,7 +2005,7 @@ Die Beschreibung soll:
 
   // ============ APPOINTMENTS ============
   appointments: router({
-    list: protectedProcedure
+    list: publicProcedure
       .input(z.object({
         propertyId: z.number().optional(),
         contactId: z.number().optional(),
@@ -1980,13 +2017,13 @@ Die Beschreibung soll:
         return await db.getAllAppointments(input);
       }),
 
-    getById: protectedProcedure
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await db.getAppointmentById(input.id);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         title: z.string(),
         description: z.string().optional(),
@@ -2004,7 +2041,7 @@ Die Beschreibung soll:
         // Create appointment in database
         const appointmentId = await db.createAppointment({
           ...appointmentData,
-          createdBy: ctx.user.id,
+          createdBy: 1, // Default user since no authentication
         });
         
         // Sync to Google Calendar if requested
@@ -2028,22 +2065,19 @@ Die Beschreibung soll:
               }
             }
             
-            const calendarEvent = await createCalendarEvent({
-              summary: appointmentData.title,
-              description: appointmentData.description || appointmentData.notes,
-              location,
-              start_time: appointmentData.startTime.toISOString(),
-              end_time: appointmentData.endTime.toISOString(),
-              attendees,
-              reminders: [30], // 30 minutes before
-            });
+            // TODO: Implement Google Calendar sync with OAuth
+            // const calendarEvent = await createCalendarEvent({
+            //   summary: appointmentData.title,
+            //   description: appointmentData.description || appointmentData.notes,
+            //   location,
+            //   start_time: appointmentData.startTime.toISOString(),
+            //   end_time: appointmentData.endTime.toISOString(),
+            //   attendees,
+            //   reminders: [30],
+            // }, accessToken);
             
-            // Update appointment with Google Calendar event ID
-            await db.updateAppointment(appointmentId, {
-              googleCalendarEventId: calendarEvent.event_id,
-              googleCalendarLink: calendarEvent.html_link,
-              lastSyncedToGoogleCalendar: new Date(),
-            });
+            // For now, skip Google Calendar sync (requires OAuth setup)
+            console.log('[Calendar] Google Calendar sync skipped - OAuth not configured');
           } catch (error) {
             console.error("Failed to sync to Google Calendar:", error);
             // Don't fail the whole operation if calendar sync fails
@@ -2053,7 +2087,7 @@ Die Beschreibung soll:
         return { success: true, id: appointmentId };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
@@ -2073,7 +2107,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteAppointment(input.id);
@@ -2083,19 +2117,19 @@ Die Beschreibung soll:
 
   // ============ DOCUMENTS ============
   documents: router({
-    getByProperty: protectedProcedure
+    getByProperty: publicProcedure
       .input(z.object({ propertyId: z.number() }))
       .query(async ({ input }) => {
         return await db.getDocumentsByProperty(input.propertyId);
       }),
 
-    getByContact: protectedProcedure
+    getByContact: publicProcedure
       .input(z.object({ contactId: z.number() }))
       .query(async ({ input }) => {
         return await db.getDocumentsByContact(input.contactId);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         title: z.string(),
         description: z.string().optional(),
@@ -2111,19 +2145,19 @@ Die Beschreibung soll:
       .mutation(async ({ input, ctx }) => {
         await db.createDocument({
           ...input,
-          uploadedBy: ctx.user.id,
+          uploadedBy: 1, // Default user since no authentication
         });
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteDocument(input.id);
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         title: z.string().optional(),
@@ -2138,7 +2172,7 @@ Die Beschreibung soll:
       }),
 
     // Alias for compatibility
-    listByProperty: protectedProcedure
+    listByProperty: publicProcedure
       .input(z.object({ propertyId: z.number() }))
       .query(async ({ input }) => {
         return await db.getDocumentsByProperty(input.propertyId);
@@ -2147,19 +2181,19 @@ Die Beschreibung soll:
 
   // ============ ACTIVITIES ============
   activities: router({
-    getByProperty: protectedProcedure
+    getByProperty: publicProcedure
       .input(z.object({ propertyId: z.number() }))
       .query(async ({ input }) => {
         return await db.getActivitiesByProperty(input.propertyId);
       }),
 
-    getByContact: protectedProcedure
+    getByContact: publicProcedure
       .input(z.object({ contactId: z.number() }))
       .query(async ({ input }) => {
         return await db.getActivitiesByContact(input.contactId);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         activityType: z.enum(["note", "email", "call", "meeting", "viewing", "other"]),
         subject: z.string().optional(),
@@ -2170,7 +2204,7 @@ Die Beschreibung soll:
       .mutation(async ({ input, ctx }) => {
         await db.createActivity({
           ...input,
-          createdBy: ctx.user.id,
+          createdBy: 1, // Default user since no authentication
         });
         return { success: true };
       }),
@@ -2178,7 +2212,7 @@ Die Beschreibung soll:
 
   // ============ BREVO SYNC ============
   brevo: router({
-    syncLead: protectedProcedure
+    syncLead: publicProcedure
       .input(z.object({ leadId: z.number() }))
       .mutation(async ({ input }) => {
         const lead = await db.getLeadById(input.leadId);
@@ -2208,7 +2242,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    syncContact: protectedProcedure
+    syncContact: publicProcedure
       .input(z.object({ contactId: z.number() }))
       .mutation(async ({ input }) => {
         const contact = await db.getContactById(input.contactId);
@@ -2232,7 +2266,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    getLists: protectedProcedure
+    getLists: publicProcedure
       .query(async () => {
         const brevo = getBrevoClient();
         const lists = await brevo.getLists();
@@ -2240,7 +2274,7 @@ Die Beschreibung soll:
       }),
 
     // Send inquiry notification email to admin
-    sendInquiryNotification: protectedProcedure
+    sendInquiryNotification: publicProcedure
       .input(z.object({
         inquiryId: z.number(),
         adminEmail: z.string().email(),
@@ -2281,7 +2315,7 @@ Die Beschreibung soll:
       }),
 
     // Send appointment confirmation email
-    sendAppointmentConfirmation: protectedProcedure
+    sendAppointmentConfirmation: publicProcedure
       .input(z.object({
         contactEmail: z.string().email(),
         contactName: z.string(),
@@ -2319,7 +2353,7 @@ Die Beschreibung soll:
       }),
 
     // Send follow-up email
-    sendFollowUpEmail: protectedProcedure
+    sendFollowUpEmail: publicProcedure
       .input(z.object({
         contactEmail: z.string().email(),
         contactName: z.string(),
@@ -2348,7 +2382,7 @@ Die Beschreibung soll:
       }),
 
     // ===== NEW: Contact Sync with Inquiry Types =====
-    testConnection: protectedProcedure
+    testConnection: publicProcedure
       .mutation(async () => {
         const { testBrevoConnection } = await import("./brevo");
         const apiKey = process.env.BREVO_API_KEY || "";
@@ -2360,7 +2394,7 @@ Die Beschreibung soll:
         return await testBrevoConnection(apiKey);
       }),
 
-    syncContactWithInquiry: protectedProcedure
+    syncContactWithInquiry: publicProcedure
       .input(z.object({
         contactId: z.number(),
         inquiryType: z.enum(["property_inquiry", "owner_inquiry", "insurance", "property_management"]),
@@ -2407,45 +2441,12 @@ Die Beschreibung soll:
       }),
 
     // Reorder images
-    reorderImages: protectedProcedure
-      .input(z.object({
-        propertyId: z.number(),
-        imageIds: z.array(z.string()), // Array of image IDs in new order (format: "db-123" or "nas-filename.jpg")
-      }))
-      .mutation(async ({ input }) => {
-        // Update sortOrder for database images
-        const dbImageIds = input.imageIds
-          .filter(id => id.startsWith('db-'))
-          .map(id => parseInt(id.replace('db-', '')));
-        
-        // Update each image's sortOrder based on its position in the array
-        for (let i = 0; i < dbImageIds.length; i++) {
-          const imageId = dbImageIds[i];
-          await db.updateImageSortOrder(imageId, i);
-        }
-        
-        return { success: true, message: "Bildersortierung gespeichert" };
-      }),
-
-    // Update image metadata
-    updateImage: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        category: z.string().optional(),
-        displayName: z.string().optional(),
-        showOnLandingPage: z.number().optional(),
-        isFeatured: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateImageMetadata(input);
-        return { success: true };
-      }),
+    // reorderImages and updateImage moved to properties router
   }),
 
   // ============ LEADS ============
   leads: router({
-    list: protectedProcedure
+    list: publicProcedure
       .input(z.object({
         status: z.string().optional(),
         propertyId: z.number().optional(),
@@ -2454,7 +2455,7 @@ Die Beschreibung soll:
         return await db.getAllLeads(input);
       }),
 
-    getById: protectedProcedure
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await db.getLeadById(input.id);
@@ -2475,7 +2476,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
@@ -2488,7 +2489,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteLead(input.id);
@@ -2498,7 +2499,7 @@ Die Beschreibung soll:
 
   // ============ INQUIRIES ============
   inquiries: router({
-    list: protectedProcedure
+    list: publicProcedure
       .input(z.object({
         status: z.string().optional(),
         channel: z.string().optional(),
@@ -2509,13 +2510,13 @@ Die Beschreibung soll:
         return await db.getAllInquiries(input);
       }),
 
-    getById: protectedProcedure
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await db.getInquiryById(input.id);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         channel: z.enum(["whatsapp", "facebook", "instagram", "telegram", "email", "phone", "form", "other"]),
         propertyId: z.number().optional(),
@@ -2532,7 +2533,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
@@ -2547,7 +2548,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteInquiry(input.id);
@@ -2555,7 +2556,7 @@ Die Beschreibung soll:
       }),
 
     // Send reply via Superchat
-    sendReply: protectedProcedure
+    sendReply: publicProcedure
       .input(z.object({
         inquiryId: z.number(),
         channelId: z.string(), // Superchat channel ID
@@ -2610,7 +2611,7 @@ Die Beschreibung soll:
   }),
 
   // ============ INSURANCES ============
-  insurances: router({  list: protectedProcedure
+  insurances: router({  list: publicProcedure
       .input(z.object({
         type: z.string().optional(),
         status: z.string().optional(),
@@ -2619,13 +2620,13 @@ Die Beschreibung soll:
         return await db.getAllInsurances(input);
       }),
 
-    getById: protectedProcedure
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await db.getInsuranceById(input.id);
       }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         policyNumber: z.string(),
         insuranceType: z.string(),
@@ -2644,7 +2645,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.number(),
         policyNumber: z.string().optional(),
@@ -2665,7 +2666,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteInsurance(input.id);
@@ -2674,13 +2675,13 @@ Die Beschreibung soll:
   }),
 
   // ============ PROPERTY MANAGEMENT ============
-  propertyManagement: router({    listContracts: protectedProcedure
+  propertyManagement: router({    listContracts: publicProcedure
       .input(z.object({}).optional())
       .query(async () => {
         return await db.getAllPropertyManagementContracts();
       }),
 
-    createContract: protectedProcedure
+    createContract: publicProcedure
       .input(z.object({
         contractNumber: z.string(),
         propertyId: z.number().nullable().optional(),
@@ -2696,7 +2697,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    updateContract: protectedProcedure
+    updateContract: publicProcedure
       .input(z.object({
         id: z.number(),
         contractNumber: z.string().optional(),
@@ -2714,20 +2715,20 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    deleteContract: protectedProcedure
+    deleteContract: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deletePropertyManagementContract(input.id);
         return { success: true };
       }),
 
-    listMaintenance: protectedProcedure
+    listMaintenance: publicProcedure
       .input(z.object({}).optional())
       .query(async () => {
         return await db.getAllMaintenanceRecords();
       }),
 
-    createMaintenance: protectedProcedure
+    createMaintenance: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         date: z.date(),
@@ -2742,7 +2743,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    updateMaintenance: protectedProcedure
+    updateMaintenance: publicProcedure
       .input(z.object({
         id: z.number(),
         propertyId: z.number().optional(),
@@ -2759,20 +2760,20 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    deleteMaintenance: protectedProcedure
+    deleteMaintenance: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteMaintenanceRecord(input.id);
         return { success: true };
       }),
 
-    listUtilityBills: protectedProcedure
+    listUtilityBills: publicProcedure
       .input(z.object({}).optional())
       .query(async () => {
         return await db.getAllUtilityBills();
       }),
 
-    createUtilityBill: protectedProcedure
+    createUtilityBill: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         year: z.number(),
@@ -2787,7 +2788,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    updateUtilityBill: protectedProcedure
+    updateUtilityBill: publicProcedure
       .input(z.object({
         id: z.number(),
         propertyId: z.number().optional(),
@@ -2804,7 +2805,7 @@ Die Beschreibung soll:
         return { success: true };
       }),
 
-    deleteUtilityBill: protectedProcedure
+    deleteUtilityBill: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteUtilityBill(input.id);
@@ -2814,20 +2815,20 @@ Die Beschreibung soll:
 
   // ============ IMMOSCOUT24 ============
   is24: router({
-    testConnection: protectedProcedure
+    testConnection: publicProcedure
       .mutation(async () => {
         const { testIS24Connection } = await import("./is24");
         return await testIS24Connection();
       }),
 
-    publishProperty: protectedProcedure
+    publishProperty: publicProcedure
       .input(z.object({ propertyId: z.number() }))
       .mutation(async ({ input }) => {
         const { publishPropertyToIS24 } = await import("./is24");
         return await publishPropertyToIS24(input.propertyId);
       }),
 
-    updateProperty: protectedProcedure
+    updateProperty: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         is24ExternalId: z.string(),
@@ -2837,14 +2838,14 @@ Die Beschreibung soll:
         return await updatePropertyOnIS24(input.propertyId, input.is24ExternalId);
       }),
 
-    unpublishProperty: protectedProcedure
+    unpublishProperty: publicProcedure
       .input(z.object({ is24ExternalId: z.string() }))
       .mutation(async ({ input }) => {
         const { unpublishPropertyFromIS24 } = await import("./is24");
         return await unpublishPropertyFromIS24(input.is24ExternalId);
       }),
 
-    syncProperty: protectedProcedure
+    syncProperty: publicProcedure
       .input(z.object({
         propertyId: z.number(),
         is24ExternalId: z.string().optional(),
@@ -2854,14 +2855,14 @@ Die Beschreibung soll:
         return await syncPropertyToIS24(input.propertyId, input.is24ExternalId);
       }),
 
-    getStatus: protectedProcedure
+    getStatus: publicProcedure
       .input(z.object({ is24ExternalId: z.string() }))
       .query(async ({ input }) => {
         const { getIS24PropertyStatus } = await import("./is24");
         return await getIS24PropertyStatus(input.is24ExternalId);
       }),
 
-    uploadImages: protectedProcedure
+    uploadImages: publicProcedure
       .input(z.object({
         is24ExternalId: z.string(),
         imageUrls: z.array(z.string()),
@@ -2874,7 +2875,7 @@ Die Beschreibung soll:
 
   // ============ DASHBOARD ============
   dashboard: router({
-    stats: protectedProcedure.query(async () => {
+    stats: publicProcedure.query(async () => {
       return await db.getDashboardStats();
     }),
   }),

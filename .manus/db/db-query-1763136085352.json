@@ -1,0 +1,30 @@
+{
+  "query": "SHOW CREATE TABLE propertyImages;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute SHOW CREATE TABLE propertyImages;",
+  "rows": [
+    {
+      "Table": "propertyImages",
+      "Create Table": "CREATE TABLE `propertyImages` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `propertyId` int(11) NOT NULL,",
+    "  `imageUrl` text COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `nasPath` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `imageType` enum('hausansicht','kueche','bad','wohnzimmer','schlafzimmer','garten','balkon','keller','dachboden','garage','grundrisse','sonstiges','main','exterior','interior','floorplan','map','other') COLLATE utf8mb4_unicode_ci DEFAULT 'sonstiges',",
+    "  `sortOrder` int(11) DEFAULT '0',",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `displayName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `showOnLandingPage` int(11) DEFAULT '1',",
+    "  `isFeatured` int(11) DEFAULT '0',",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=540001"
+  ],
+  "stdout": "Table\tCreate Table\npropertyImages\tCREATE TABLE `propertyImages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `propertyId` int(11) NOT NULL,\n  `imageUrl` text COLLATE utf8mb4_unicode_ci NOT NULL,\n  `nasPath` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `imageType` enum('hausansicht','kueche','bad','wohnzimmer','schlafzimmer','garten','balkon','keller','dachboden','garage','grundrisse','sonstiges','main','exterior','interior','floorplan','map','other') COLLATE utf8mb4_unicode_ci DEFAULT 'sonstiges',\n  `sortOrder` int(11) DEFAULT '0',\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `displayName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `showOnLandingPage` int(11) DEFAULT '1',\n  `isFeatured` int(11) DEFAULT '0',\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=540001\n",
+  "stderr": "",
+  "execution_time_ms": 1614
+}

@@ -21,6 +21,7 @@ export default function Settings() {
     brevo: false,
     propertySync: false,
     openai: false,
+    googleMaps: false,
     is24ConsumerKey: false,
     is24ConsumerSecret: false,
     is24AccessToken: false,
@@ -37,6 +38,7 @@ export default function Settings() {
 
   // API keys state
   const [apiKeys, setApiKeys] = useState({
+    dashboardLogo: "",
     superchat: "",
     brevo: "",
     brevoPropertyInquiryListId: "",
@@ -47,6 +49,7 @@ export default function Settings() {
     brevoDefaultInquiryType: "property_inquiry",
     googleClientId: "",
     googleClientSecret: "",
+    googleMaps: "",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -161,6 +164,7 @@ export default function Settings() {
   React.useEffect(() => {
     if (currentApiKeys) {
       setApiKeys({
+        dashboardLogo: currentApiKeys.dashboardLogo || "",
         superchat: currentApiKeys.superchat || "",
         brevo: currentApiKeys.brevo || "",
         brevoPropertyInquiryListId: currentApiKeys.brevoPropertyInquiryListId || "",
@@ -171,6 +175,7 @@ export default function Settings() {
         brevoDefaultInquiryType: currentApiKeys.brevoDefaultInquiryType || "property_inquiry",
         googleClientId: currentApiKeys.googleClientId || "",
         googleClientSecret: currentApiKeys.googleClientSecret || "",
+        googleMaps: currentApiKeys.googleMaps || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -420,6 +425,90 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Dashboard Logo */}
+                <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Dashboard-Logo</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Dieses Logo wird in der Sidebar des Dashboards angezeigt (links oben)
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="dashboardLogo">Logo hochladen</Label>
+                    <div className="flex items-center gap-4">
+                      {apiKeys.dashboardLogo && (
+                        <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+                          <img 
+                            src={apiKeys.dashboardLogo} 
+                            alt="Dashboard Logo" 
+                            className="max-w-full max-h-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement!.innerHTML = '<div class="text-gray-400"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <Input
+                          id="dashboardLogo"
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error("Datei zu groß. Maximal 5MB erlaubt.");
+                              return;
+                            }
+                            
+                            toast.info("Logo wird hochgeladen...");
+                            
+                            try {
+                              const reader = new FileReader();
+                              reader.onload = async (event) => {
+                                const base64 = event.target?.result as string;
+                                
+                                const response = await fetch('/api/trpc/properties.uploadImage', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    image: base64,
+                                    propertyId: 0,
+                                    filename: file.name,
+                                  }),
+                                });
+                                
+                                if (!response.ok) throw new Error('Upload fehlgeschlagen');
+                                
+                                const responseData = await response.json();
+                                const imageUrl = responseData.result?.data?.url;
+                                
+                                if (imageUrl) {
+                                  setApiKeys({ ...apiKeys, dashboardLogo: imageUrl });
+                                  toast.success("Logo erfolgreich hochgeladen!");
+                                } else {
+                                  throw new Error('Keine URL erhalten');
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            } catch (error) {
+                              console.error('Logo upload error:', error);
+                              toast.error("Fehler beim Hochladen des Logos");
+                            }
+                          }}
+                          className="cursor-pointer"
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Empfohlen: Quadratisches Bild (z.B. 512x512px), max. 5MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Superchat API Key */}
                 <div className="space-y-2">
                   <Label htmlFor="superchat">Superchat API Key</Label>
@@ -682,6 +771,30 @@ export default function Settings() {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Für KI-gestützte Immobilienbeschreibungen
+                  </p>
+                </div>
+
+                {/* Google Maps API Key */}
+                <div className="space-y-2">
+                  <Label htmlFor="googleMaps">Google Maps API Key</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="googleMaps"
+                      type={showApiKeys.googleMaps ? "text" : "password"}
+                      value={apiKeys.googleMaps}
+                      onChange={(e) => setApiKeys({ ...apiKeys, googleMaps: e.target.value })}
+                      placeholder="Google Maps API Key eingeben"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => toggleShowApiKey("googleMaps")}
+                    >
+                      {showApiKeys.googleMaps ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Für Adress-Autocomplete und Entfernungsberechnung
                   </p>
                 </div>
 

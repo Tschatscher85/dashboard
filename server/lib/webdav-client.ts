@@ -30,19 +30,63 @@ function normalizeUrl(url: string): string {
   return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
-export function getWebDAVClient(config?: WebDAVConfig): WebDAVClient {
-  const rawUrl = config?.url || process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002';
+export async function getWebDAVClient(config?: WebDAVConfig): Promise<WebDAVClient> {
+  // Load config from database if not provided
+  let finalConfig = config;
+  
+  if (!finalConfig) {
+    try {
+      const { getNASConfig } = await import('../db');
+      const dbConfig = await getNASConfig();
+      
+      if (dbConfig.WEBDAV_URL && dbConfig.WEBDAV_USERNAME && dbConfig.WEBDAV_PASSWORD) {
+        let webdavUrl = dbConfig.WEBDAV_URL;
+        const webdavPort = dbConfig.WEBDAV_PORT || process.env.WEBDAV_PORT || '2002';
+        
+        // Build full URL with port if not already included
+        // Check if URL already has a port (e.g., https://example.com:2002)
+        const hasPort = /:\d+$/.test(webdavUrl.replace(/^https?:\/\//, ''));
+        const fullUrl = hasPort ? webdavUrl : `${webdavUrl}:${webdavPort}`;
+        
+        finalConfig = {
+          url: fullUrl,
+          username: dbConfig.WEBDAV_USERNAME,
+          password: dbConfig.WEBDAV_PASSWORD,
+        };
+        
+        console.log('[WebDAV] Loaded config from database:', {
+          url: fullUrl,
+          username: finalConfig.username,
+          hasPassword: !!finalConfig.password,
+        });
+      }
+    } catch (error) {
+      console.error('[WebDAV] Failed to load config from database:', error);
+    }
+  }
+  
+  // Fallback to environment variables
+  if (!finalConfig) {
+    finalConfig = {
+      url: process.env.NAS_WEBDAV_URL || 'https://ugreen.tschatscher.eu:2002',
+      username: process.env.NAS_USERNAME || 'tschatscher',
+      password: process.env.NAS_PASSWORD || '',
+    };
+    console.log('[WebDAV] Using environment variables (fallback)');
+  }
+  
+  const rawUrl = finalConfig.url;
   const url = normalizeUrl(rawUrl);
   
   // Reset client if URL changed (to pick up new config)
-  if (webdavClient && config?.url && normalizeUrl(config.url) !== normalizeUrl(process.env.NAS_WEBDAV_URL || '')) {
+  if (webdavClient && normalizeUrl(rawUrl) !== normalizeUrl(process.env.NAS_WEBDAV_URL || '')) {
     console.log('[WebDAV] URL changed, resetting client');
     webdavClient = null;
   }
   
   if (!webdavClient) {
-    const username = config?.username || process.env.NAS_USERNAME || 'tschatscher';
-    const password = config?.password || process.env.NAS_PASSWORD || '';
+    const username = finalConfig.username;
+    const password = finalConfig.password;
 
     console.log('[WebDAV] Initializing client with config:', {
       url,
@@ -124,7 +168,7 @@ export const PROPERTY_CATEGORIES = [
  * Ensure property folder structure exists on NAS
  */
 export async function ensurePropertyFolders(propertyFolderName: string): Promise<void> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
   const propertyPath = getPropertyPath(propertyFolderName);
 
   console.log('[WebDAV] Ensuring folders for property:', propertyFolderName);
@@ -176,7 +220,7 @@ export async function uploadFile(
   fileName: string,
   fileBuffer: Buffer
 ): Promise<string> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
 
   try {
     // Test connection first
@@ -218,7 +262,7 @@ export async function uploadFile(
  * Delete file from NAS
  */
 export async function deleteFile(filePath: string): Promise<void> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
 
   try {
     const exists = await client.exists(filePath);
@@ -239,7 +283,7 @@ export async function listFiles(
   propertyFolderName: string,
   category: string
 ): Promise<Array<{ filename: string; basename: string; size: number; type: string }>> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
   const categoryPath = getCategoryPath(propertyFolderName, category);
 
   try {
@@ -265,7 +309,7 @@ export async function listFiles(
  * Get file content from NAS
  */
 export async function getFileContent(filePath: string): Promise<Buffer> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
 
   try {
     const content = await client.getFileContents(filePath);
@@ -280,7 +324,7 @@ export async function getFileContent(filePath: string): Promise<Buffer> {
  * Check if WebDAV connection is working
  */
 export async function testConnection(): Promise<boolean> {
-  const client = getWebDAVClient();
+  const client = await getWebDAVClient();
 
   console.log('[WebDAV] Testing connection to:', BASE_PATH);
   

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAS Bild Test - Immo-Jaeger</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .test-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .test-result {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        .image-container {
+            text-align: center;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .url-test {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 ImmoJaeger - NAS Integration Test</h1>
+    
+    <div class="test-container">
+        <h2>✅ Test 1: NAS-Proxy Bild-Anzeige</h2>
+        <div class="info test-result">
+            <strong>Test-Bild vom NAS:</strong><br>
+            Dieses Bild wird über den Backend-Proxy <code>/api/nas/*</code> vom NAS geladen.
+        </div>
+        
+        <div class="image-container">
+            <img 
+                src="/api/nas/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Teststraße 123, 12345 Teststadt/bilder/test_hausansicht.jpg" 
+                alt="Test Hausansicht"
+                onload="imageLoaded()"
+                onerror="imageFailed()"
+            />
+        </div>
+        
+        <div id="imageStatus" class="test-result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📋 Test-Details</h2>
+        
+        <div class="url-test">
+            <strong>NAS-Pfad:</strong><br>
+            <code>/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Teststraße 123, 12345 Teststadt/bilder/test_hausansicht.jpg</code>
+        </div>
+        
+        <div class="url-test">
+            <strong>Proxy-URL:</strong><br>
+            <code>/api/nas/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Teststraße 123, 12345 Teststadt/bilder/test_hausansicht.jpg</code>
+        </div>
+        
+        <div class="url-test">
+            <strong>WebDAV-URL (intern):</strong><br>
+            <code>https://ugreen.tschatscher.eu:2002/Daten/.../test_hausansicht.jpg</code>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔧 System-Status</h2>
+        <div id="systemStatus" class="info test-result">
+            Lade System-Status...
+        </div>
+    </div>
+
+    <script>
+        function imageLoaded() {
+            const status = document.getElementById('imageStatus');
+            status.className = 'test-result success';
+            status.style.display = 'block';
+            status.innerHTML = '<strong>✅ Erfolg!</strong> Das Bild wurde erfolgreich vom NAS über den Proxy geladen.';
+        }
+
+        function imageFailed() {
+            const status = document.getElementById('imageStatus');
+            status.className = 'test-result error';
+            status.style.display = 'block';
+            status.innerHTML = '<strong>❌ Fehler!</strong> Das Bild konnte nicht geladen werden. Überprüfen Sie die NAS-Konfiguration.';
+        }
+
+        // Test API connectivity
+        fetch('/api/nas/Daten/Allianz/Agentur Jaeger/Beratung/Immobilienmakler/Verkauf/Teststraße 123, 12345 Teststadt/bilder/test_hausansicht.jpg', {
+            method: 'HEAD'
+        })
+        .then(response => {
+            const status = document.getElementById('systemStatus');
+            if (response.ok) {
+                status.className = 'test-result success';
+                status.innerHTML = `
+                    <strong>✅ NAS-Proxy funktioniert!</strong><br>
+                    HTTP Status: ${response.status} ${response.statusText}<br>
+                    Content-Type: ${response.headers.get('content-type')}<br>
+                    Content-Length: ${response.headers.get('content-length')} bytes
+                `;
+            } else {
+                status.className = 'test-result error';
+                status.innerHTML = `
+                    <strong>❌ NAS-Proxy Fehler</strong><br>
+                    HTTP Status: ${response.status} ${response.statusText}
+                `;
+            }
+        })
+        .catch(error => {
+            const status = document.getElementById('systemStatus');
+            status.className = 'test-result error';
+            status.innerHTML = `<strong>❌ Verbindungsfehler:</strong> ${error.message}`;
+        });
+    </script>
+</body>
+</html>

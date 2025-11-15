@@ -18,6 +18,27 @@ export default function PropertyMedia() {
   const { id } = useParams();
   const propertyId = parseInt(id || "0");
   
+  // Convert NAS URLs to proxy URLs to avoid authentication popup
+  const convertToProxyUrl = (url: string | undefined): string => {
+    if (!url) return '';
+    
+    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
+    if (url.includes('ugreen.tschatscher.eu')) {
+      // Extract path after domain
+      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
+      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      if (match && match[1]) {
+        const nasPath = match[1];
+        // Remove leading slash for proxy endpoint
+        const proxyUrl = `/api/nas${nasPath}`;
+        return proxyUrl;
+      }
+    }
+    
+    // For S3/Cloud URLs or other sources, return as-is
+    return url;
+  };
+  
   const [renamingImage, setRenamingImage] = useState<{ id?: number; nasPath?: string; currentName: string } | null>(null);
   const [newName, setNewName] = useState("");
   const [showNASTest, setShowNASTest] = useState(false);
@@ -108,7 +129,7 @@ export default function PropertyMedia() {
     onSuccess: () => {
       toast.success("Bildersortierung gespeichert");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Fehler beim Speichern: ${error.message}`);
     },
   });
@@ -139,20 +160,16 @@ export default function PropertyMedia() {
     await uploadFiles(files, category, docCategory);
   };
 
+  const utils = trpc.useUtils();
+
   const uploadMutation = trpc.properties.uploadToNAS.useMutation({
     onSuccess: (data, variables) => {
-      // Show appropriate message based on whether fallback was used
-      if (data.usedFallback) {
-        toast.warning(data.message || "Datei in Cloud gespeichert (NAS nicht erreichbar)");
-      } else {
-        toast.success(data.message || "Datei erfolgreich hochgeladen");
-      }
+      // Show success message
+      toast.success(data.message || "Datei erfolgreich hochgeladen");
       
-      // Refetch the appropriate category
-      if (variables.category === "Bilder") refetchImages();
-      else if (variables.category === "Objektunterlagen") refetchObjektunterlagen();
-      else if (variables.category === "Sensible Daten") refetchSensibleDaten();
-      else if (variables.category === "Vertragsunterlagen") refetchVertragsunterlagen();
+      // Invalidate queries to force refetch
+      utils.properties.listNASFiles.invalidate({ propertyId, category: variables.category });
+      utils.properties.getPropertyImages.invalidate({ propertyId });
     },
     onError: (error) => {
       toast.error(`Fehler beim Hochladen: ${error.message}`);
@@ -162,11 +179,9 @@ export default function PropertyMedia() {
   const deleteMutation = trpc.properties.deleteFromNAS.useMutation({
     onSuccess: () => {
       toast.success("Datei gelöscht");
-      // Refetch all categories to be safe
-      refetchImages();
-      refetchObjektunterlagen();
-      refetchSensibleDaten();
-      refetchVertragsunterlagen();
+      // Invalidate all queries to force refetch
+      utils.properties.listNASFiles.invalidate({ propertyId });
+      utils.properties.getPropertyImages.invalidate({ propertyId });
       refetchDocuments();
     },
     onError: (error) => {
@@ -614,7 +629,7 @@ export default function PropertyMedia() {
                               className="absolute top-2 left-2 w-5 h-5 z-10 cursor-pointer"
                             />
                             <img
-                              src={image.imageUrl}
+                              src={convertToProxyUrl(image.imageUrl)}
                               alt={image.title || `Bild ${index + 1}`}
                               className={`w-full object-cover rounded-lg pointer-events-none ${
                                 viewSize === "small" ? "h-32" :
@@ -707,7 +722,7 @@ export default function PropertyMedia() {
                         })}
                         
                         {/* NAS images - REMOVED: All images are now in database */}
-                        {false && nasImages && nasImages.map((file: any, index: number) => {
+                        {false && nasImages && nasImages?.map((file: any, index: number) => {
                           const imageId = `nas-${file.filename}`;
                           const isSelected = selectedImages.has(imageId);
                           return (

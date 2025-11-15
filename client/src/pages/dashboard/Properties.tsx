@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,12 +29,34 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Eye, Building2, FileText, ExternalLink, Search, Filter, ArrowUpDown, ChevronDown, RefreshCw } from "lucide-react";
+import { PlaceAutocompleteElement } from "@/components/PlaceAutocompleteElement";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 export default function Properties() {
+  // Convert NAS URLs to proxy URLs to avoid authentication popup
+  const convertToProxyUrl = (url: string | undefined): string => {
+    if (!url) return '';
+    
+    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
+    if (url.includes('ugreen.tschatscher.eu')) {
+      // Extract path after domain
+      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
+      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      if (match && match[1]) {
+        const nasPath = match[1];
+        // Remove leading slash for proxy endpoint
+        const proxyUrl = `/api/nas${nasPath}`;
+        return proxyUrl;
+      }
+    }
+    
+    // For S3/Cloud URLs or other sources, return as-is
+    return url;
+  };
+  
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
   const [homepageUrl, setHomepageUrl] = useState("");
@@ -56,6 +78,53 @@ export default function Properties() {
     rooms: "",
     price: "",
   });
+
+  // Auto-generate title from address
+  useEffect(() => {
+    const { street, houseNumber, zipCode, city } = formData;
+    if (street && houseNumber && zipCode && city) {
+      const autoTitle = `${street} ${houseNumber}, ${zipCode} ${city}`;
+      setFormData(prev => ({ ...prev, title: autoTitle }));
+    }
+  }, [formData.street, formData.houseNumber, formData.zipCode, formData.city]);
+
+  // Handle Google Places autocomplete
+  const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
+    console.log('[PlaceAutocomplete] Place selected:', place);
+    
+    let street = '';
+    let houseNumber = '';
+    let zipCode = '';
+    let city = '';
+    
+    if (place.address_components) {
+      place.address_components.forEach((component) => {
+        const types = component.types;
+        if (types.includes('route')) {
+          street = component.long_name;
+        }
+        if (types.includes('street_number')) {
+          houseNumber = component.long_name;
+        }
+        if (types.includes('postal_code')) {
+          zipCode = component.long_name;
+        }
+        if (types.includes('locality')) {
+          city = component.long_name;
+        }
+      });
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      street,
+      houseNumber,
+      zipCode,
+      city,
+    }));
+    
+    toast.success('Adresse automatisch ausgefüllt');
+  };
 
   const { data: properties, isLoading, refetch } = trpc.properties.list.useQuery();
   const createMutation = trpc.properties.create.useMutation({
@@ -236,7 +305,7 @@ export default function Properties() {
       // Get properties to sync (selected or all active)
       const propertiesToSync = selectedProperties.length > 0
         ? properties?.filter(p => selectedProperties.includes(p.id))
-        : properties?.filter(p => p.status !== 'inactive');
+        : properties; // Sync all properties if none selected
 
       if (!propertiesToSync || propertiesToSync.length === 0) {
         toast.error("Keine Immobilien zum Synchronisieren gefunden");
@@ -431,6 +500,15 @@ export default function Properties() {
                 />
               </div>
 
+              {/* Google Address Autocomplete */}
+              <div className="grid gap-2">
+                <Label>Adresse suchen (Google Maps)</Label>
+                <PlaceAutocompleteElement
+                  onPlaceSelect={handlePlaceSelected}
+                  placeholder="Adresse eingeben..."
+                />
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="street">Straße</Label>
@@ -591,7 +669,7 @@ export default function Properties() {
                     <div className="w-16 h-12 bg-muted rounded overflow-hidden flex items-center justify-center">
                       {property.images && property.images.length > 0 ? (
                         <img 
-                          src={property.images.find(img => img.isFeatured)?.imageUrl || property.images[0]?.imageUrl} 
+                          src={convertToProxyUrl(property.images.find(img => img.isFeatured)?.imageUrl || property.images[0]?.imageUrl)} 
                           alt={property.title}
                           className="w-full h-full object-cover"
                         />

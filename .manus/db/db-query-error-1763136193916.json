@@ -1,0 +1,8 @@
+{
+  "query": "FLUSH TABLES propertyImages;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3ENfriyoSGWoaZs.09227e390d16 --database nkYygABVVZPo6zrqu4mzvA --execute FLUSH TABLES propertyImages;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1227 (42000) at line 1: Access denied; you need (at least one of) the RELOAD privilege(s) for this operation"
+  ]
+}

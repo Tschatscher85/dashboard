@@ -21,6 +21,7 @@ import { AIDescriptionDialog } from "./AIDescriptionDialog";
 import { Separator } from "./ui/separator";
 import { PropertyDetailFormLayout } from "./PropertyDetailFormLayout";
 import { PropertyRightColumn } from "./PropertyRightColumn";
+import { PlaceAutocompleteElement } from "./PlaceAutocompleteElement";
 
 // Helper function to format price with thousand separators and € symbol
 const formatPrice = (cents: number | null | undefined): string => {
@@ -54,115 +55,47 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     propertyWithoutTitle.availableFrom = propertyWithoutTitle.availableFrom.toISOString().split('T')[0];
   }
   const [formData, setFormData] = useState<Partial<Property>>(propertyWithoutTitle);
-  const streetInputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<any>(null);
+  // Handle Google Places autocomplete
+  const handlePlaceSelected = (place: any) => {
+    if (!place.address_components) return;
 
-  // Initialize Google Places Autocomplete
-  useEffect(() => {
-    if (!isEditing || !streetInputRef.current) return;
+    let street = '';
+    let houseNumber = '';
+    let zipCode = '';
+    let city = '';
+    let country = 'Deutschland';
 
-    const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
-    const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
-    const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
-
-    const loadGoogleMaps = async () => {
-      if (window.google?.maps?.places) {
-        initAutocomplete();
-        return;
+    place.address_components.forEach((component: any) => {
+      const types = component.types;
+      if (types.includes('route')) {
+        street = component.long_name;
       }
-
-      try {
-        const scriptUrl = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&libraries=places`;
-        const response = await fetch(scriptUrl, {
-          method: 'GET',
-          headers: { 'Origin': window.location.origin },
-        });
-        const content = await response.text();
-        const script = document.createElement('script');
-        script.textContent = content;
-        document.head.appendChild(script);
-
-        // Poll for Google Maps availability
-        let attempts = 0;
-        const checkGoogle = setInterval(() => {
-          attempts++;
-          if (window.google?.maps?.places) {
-            clearInterval(checkGoogle);
-            initAutocomplete();
-          } else if (attempts > 50) {
-            clearInterval(checkGoogle);
-            console.error('Google Maps failed to load');
-          }
-        }, 100);
-      } catch (error) {
-        console.error('Failed to load Google Maps:', error);
+      if (types.includes('street_number')) {
+        houseNumber = component.long_name;
       }
-    };
-
-    const initAutocomplete = () => {
-      if (!streetInputRef.current || !window.google?.maps?.places) return;
-
-      const autocomplete = new window.google.maps.places.Autocomplete(
-        streetInputRef.current,
-        {
-          types: ['address'],
-          componentRestrictions: { country: 'de' },
-        }
-      );
-
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (!place.address_components) return;
-
-        let street = '';
-        let houseNumber = '';
-        let zipCode = '';
-        let city = '';
-        let country = 'Deutschland';
-
-        place.address_components.forEach((component: any) => {
-          const types = component.types;
-          if (types.includes('route')) {
-            street = component.long_name;
-          }
-          if (types.includes('street_number')) {
-            houseNumber = component.long_name;
-          }
-          if (types.includes('postal_code')) {
-            zipCode = component.long_name;
-          }
-          if (types.includes('locality')) {
-            city = component.long_name;
-          }
-          if (types.includes('country')) {
-            country = component.long_name;
-          }
-        });
-
-        // Update form data with parsed address
-        setFormData((prev) => ({
-          ...prev,
-          street: street || prev.street,
-          houseNumber: houseNumber || prev.houseNumber,
-          zipCode: zipCode || prev.zipCode,
-          city: city || prev.city,
-          country: country || prev.country,
-          latitude: place.geometry?.location?.lat() || prev.latitude,
-          longitude: place.geometry?.location?.lng() || prev.longitude,
-        }));
-      });
-
-      autocompleteRef.current = autocomplete;
-    };
-
-    loadGoogleMaps();
-
-    return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
+      if (types.includes('postal_code')) {
+        zipCode = component.long_name;
       }
-    };
-  }, [isEditing]);
+      if (types.includes('locality')) {
+        city = component.long_name;
+      }
+      if (types.includes('country')) {
+        country = component.long_name;
+      }
+    });
+
+    // Update form data with parsed address
+    setFormData((prev) => ({
+      ...prev,
+      street: street || prev.street,
+      houseNumber: houseNumber || prev.houseNumber,
+      zipCode: zipCode || prev.zipCode,
+      city: city || prev.city,
+      country: country || prev.country,
+      latitude: place.geometry?.location?.lat()?.toString() || prev.latitude,
+      longitude: place.geometry?.location?.lng()?.toString() || prev.longitude,
+    }));
+  };
 
   const handleChange = (field: keyof Property, value: any) => {
     setFormData((prev) => {
@@ -252,7 +185,6 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectItem value="commercial">Gewerbe</SelectItem>
                 <SelectItem value="land">Grundstück</SelectItem>
                 <SelectItem value="parking">Garage</SelectItem>
-                <SelectItem value="temporary_living">Wohnen auf Zeit</SelectItem>
                 <SelectItem value="other">Sonstiges</SelectItem>
               </SelectContent>
             </Select>
@@ -316,15 +248,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                     <SelectItem value="doppelgarage">Doppelgarage</SelectItem>
                   </>
                 )}
-                {formData.propertyType === "temporary_living" && (
-                  <>
-                    <SelectItem value="apartment_temp">Apartment</SelectItem>
-                    <SelectItem value="zimmer">Zimmer</SelectItem>
-                    <SelectItem value="haus_temp">Haus</SelectItem>
-                    <SelectItem value="wohnung_temp">Wohnung</SelectItem>
-                  </>
-                )}
-                {formData.propertyType !== "apartment" && formData.propertyType !== "house" && formData.propertyType !== "parking" && formData.propertyType !== "temporary_living" && (
+                {formData.propertyType !== "apartment" && formData.propertyType !== "house" && formData.propertyType !== "parking" && (
                   <SelectItem value="sonstiges">Sonstiges</SelectItem>
                 )}
               </SelectContent>
@@ -512,14 +436,21 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           <CardTitle>Adresse</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
+          {/* Google Address Autocomplete */}
+          <div className="col-span-2 space-y-2">
+            <Label>Adresse suchen (Google Maps)</Label>
+            <PlaceAutocompleteElement
+              onPlaceSelect={handlePlaceSelected}
+              placeholder="Adresse eingeben..."
+            />
+          </div>
+
           <div className="space-y-2">
             <Label>Straße</Label>
             <Input
-              ref={streetInputRef}
               value={formData.street || ""}
               onChange={(e) => handleChange("street", e.target.value)}
               disabled={!isEditing}
-              placeholder="Adresse eingeben für Autocomplete..."
             />
           </div>
 
@@ -1088,269 +1019,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         </CardContent>
       </Card>
 
-      {/* Auftrag */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Auftrag</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Auftragsart</Label>
-            <Select
-              value={formData.auftragsart || ""}
-              onValueChange={(value) => handleChange("auftragsart", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alleinauftrag">Alleinauftrag</SelectItem>
-                <SelectItem value="mehrfachauftrag">Mehrfachauftrag</SelectItem>
-                <SelectItem value="suchauftrag">Suchauftrag</SelectItem>
-                <SelectItem value="vermittlungsauftrag">Vermittlungsauftrag</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Laufzeit</Label>
-            <Select
-              value={formData.laufzeit || ""}
-              onValueChange={(value) => handleChange("laufzeit", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="befristet">befristet</SelectItem>
-                <SelectItem value="unbefristet">unbefristet</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Auftrag von</Label>
-            <Input
-              type="date"
-              value={
-                formData.auftragVonDate instanceof Date
-                  ? formData.auftragVonDate.toISOString().split('T')[0]
-                  : (typeof formData.auftragVonDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragVonDate as string)
-                      ? (formData.auftragVonDate as string).split('T')[0]
-                      : "")
-              }
-              onChange={(e) => {
-                handleChange("auftragVonDate", e.target.value || null);
-              }}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Auftrag bis</Label>
-            <Input
-              type="date"
-              value={
-                formData.auftragBisDate instanceof Date
-                  ? formData.auftragBisDate.toISOString().split('T')[0]
-                  : (typeof formData.auftragBisDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(formData.auftragBisDate as string)
-                      ? (formData.auftragBisDate as string).split('T')[0]
-                      : "")
-              }
-              onChange={(e) => {
-                handleChange("auftragBisDate", e.target.value || null);
-              }}
-              disabled={!isEditing}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Energieausweis */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Energieausweis</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Energieausweis vorhanden</Label>
-            <Select
-              value={formData.energyCertificateAvailability || ""}
-              onValueChange={(value) => handleChange("energyCertificateAvailability", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="nicht_vorhanden">nicht vorhanden</SelectItem>
-                <SelectItem value="vorhanden">vorhanden</SelectItem>
-                <SelectItem value="liegt_zur_besichtigung_vor">liegt zur Besichtigung vor</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energieausweistyp</Label>
-            <Select
-              value={formData.energyCertificateType || ""}
-              onValueChange={(value) => handleChange("energyCertificateType", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Typ wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Bedarfsausweis">Bedarfsausweis</SelectItem>
-                <SelectItem value="Verbrauchsausweis">Verbrauchsausweis</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energieeffizienzklasse</Label>
-            <Select
-              value={formData.energyClass || ""}
-              onValueChange={(value) => handleChange("energyClass", value)}
-              disabled={!isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Klasse wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="A+">A+</SelectItem>
-                <SelectItem value="A">A</SelectItem>
-                <SelectItem value="B">B</SelectItem>
-                <SelectItem value="C">C</SelectItem>
-                <SelectItem value="D">D</SelectItem>
-                <SelectItem value="E">E</SelectItem>
-                <SelectItem value="F">F</SelectItem>
-                <SelectItem value="G">G</SelectItem>
-                <SelectItem value="H">H</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Endenergiebedarf (kWh/(m²*a))</Label>
-            <Input
-              type="number"
-              value={formData.energyConsumption || ""}
-              onChange={(e) => handleChange("energyConsumption", parseInt(e.target.value) || null)}
-              disabled={!isEditing}
-              placeholder="z.B. 120"
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energiekennwert Strom (kWh/(m²*a))</Label>
-            <Input
-              type="number"
-              value={formData.energyConsumptionElectricity || ""}
-              onChange={(e) => handleChange("energyConsumptionElectricity", parseInt(e.target.value) || null)}
-              disabled={!isEditing}
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Energiekennwert Wärme (kWh/(m²*a))</Label>
-            <Input
-              type="number"
-              value={formData.energyConsumptionHeat || ""}
-              onChange={(e) => handleChange("energyConsumptionHeat", parseInt(e.target.value) || null)}
-              disabled={!isEditing}
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>CO2-Emissionen (kg/(m²*a))</Label>
-            <Input
-              type="number"
-              value={formData.co2Emissions || ""}
-              onChange={(e) => handleChange("co2Emissions", parseInt(e.target.value) || null)}
-              disabled={!isEditing}
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Heizungsart</Label>
-            <Input
-              value={formData.heatingType || ""}
-              onChange={(e) => handleChange("heatingType", e.target.value)}
-              disabled={!isEditing}
-              placeholder="z.B. Zentralheizung"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Wesentlicher Energieträger</Label>
-            <Input
-              value={formData.mainEnergySource || ""}
-              onChange={(e) => handleChange("mainEnergySource", e.target.value)}
-              disabled={!isEditing}
-              placeholder="z.B. Gas, Öl, Fernwärme"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Ausstellungsdatum</Label>
-            <Input
-              type="date"
-              value={formData.energyCertificateIssueDate || ""}
-              onChange={(e) => handleChange("energyCertificateIssueDate", e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Gültig bis</Label>
-            <Input
-              type="date"
-              value={formData.energyCertificateValidUntil || ""}
-              onChange={(e) => handleChange("energyCertificateValidUntil", e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Baujahr Anlagentechnik</Label>
-            <Input
-              type="number"
-              value={formData.heatingSystemYear || ""}
-              onChange={(e) => handleChange("heatingSystemYear", parseInt(e.target.value) || null)}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div className="col-span-2 space-y-2">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.includesWarmWater || false}
-                onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
-                disabled={!isEditing}
-              />
-              <Label>Energieverbrauch für Warmwasser enthalten</Label>
-            </div>
-          </div>
-
-          <div className="col-span-2 space-y-2">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.buildingYearUnknown || false}
-                onCheckedChange={(checked) => handleChange("buildingYearUnknown", checked)}
-                disabled={!isEditing}
-              />
-              <Label>Baujahr unbekannt</Label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Auftrag and Energieausweis sections removed - now only in right sidebar */}
 
       {/* ImmoScout24 Integration */}
       <Card>

@@ -32,6 +32,27 @@ export default function PropertyDetail() {
   const [, params] = useRoute("/dashboard/properties/:id");
   const [, setLocation] = useLocation();
   const propertyId = params?.id ? parseInt(params.id) : 0;
+  
+  // Convert NAS URLs to proxy URLs to avoid authentication popup
+  const convertToProxyUrl = (url: string | undefined): string => {
+    if (!url) return '';
+    
+    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
+    if (url.includes('ugreen.tschatscher.eu')) {
+      // Extract path after domain
+      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
+      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      if (match && match[1]) {
+        const nasPath = match[1];
+        // Remove leading slash for proxy endpoint
+        const proxyUrl = `/api/nas${nasPath}`;
+        return proxyUrl;
+      }
+    }
+    
+    // For S3/Cloud URLs or other sources, return as-is
+    return url;
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const formRef = useRef<PropertyDetailFormHandle>(null);
@@ -44,6 +65,30 @@ export default function PropertyDetail() {
       setActiveTab('media');
     }
   }, []);
+  
+  // Auto-generate title from address if title is empty or default
+  useEffect(() => {
+    if (property && (!property.title || property.title === 'Immobilientitel')) {
+      const parts = [];
+      if (property.street) parts.push(property.street);
+      if (property.houseNumber) parts.push(property.houseNumber);
+      
+      const addressPart1 = parts.join(' ');
+      const addressPart2 = [];
+      if (property.zipCode) addressPart2.push(property.zipCode);
+      if (property.city) addressPart2.push(property.city);
+      
+      const fullAddress = [addressPart1, addressPart2.join(' ')].filter(Boolean).join(', ');
+      
+      if (fullAddress && fullAddress !== property.title) {
+        // Update the title in the database
+        updateMutation.mutate({
+          id: propertyId,
+          data: { title: fullAddress } as any,
+        });
+      }
+    }
+  }, [property?.street, property?.houseNumber, property?.zipCode, property?.city, property?.title]);
 
   // Initialize editedTitle when entering edit mode
   const handleEditClick = () => {
@@ -193,11 +238,15 @@ export default function PropertyDetail() {
           {/* Property Image */}
           <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
             {(() => {
+              // Try to find featured image first, fallback to first image
               const featuredImage = property.images?.find((img: any) => img.isFeatured === 1);
-              if (featuredImage?.imageUrl) {
+              const firstImage = property.images?.[0];
+              const displayImage = featuredImage || firstImage;
+              
+              if (displayImage?.imageUrl) {
                 return (
                   <img
-                    src={featuredImage.imageUrl}
+                    src={convertToProxyUrl(displayImage.imageUrl)}
                     alt={property.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {

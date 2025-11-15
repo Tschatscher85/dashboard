@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: immojaeger-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: immojaeger
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - immojaeger-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ImmoJaeger Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: immojaeger-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/immojaeger
+      
+      # OAuth Configuration
+      VITE_APP_ID: ${VITE_APP_ID}
+      VITE_OAUTH_PORTAL_URL: ${VITE_OAUTH_PORTAL_URL}
+      OAUTH_SERVER_URL: ${OAUTH_SERVER_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      OWNER_OPEN_ID: ${OWNER_OPEN_ID}
+      
+      # NAS Configuration (loaded from database, but can be set here as fallback)
+      NAS_PROTOCOL: ${NAS_PROTOCOL:-ftp}
+      NAS_FTP_HOST: ${NAS_FTP_HOST}
+      NAS_FTP_PORT: ${NAS_FTP_PORT:-21}
+      NAS_USERNAME: ${NAS_USERNAME}
+      NAS_PASSWORD: ${NAS_PASSWORD}
+      NAS_BASE_PATH: ${NAS_BASE_PATH}
+      NAS_WEBDAV_URL: ${NAS_WEBDAV_URL}
+      NAS_PUBLIC_USERNAME: ${NAS_PUBLIC_USERNAME}
+      NAS_PUBLIC_PASSWORD: ${NAS_PUBLIC_PASSWORD}
+      WEBDAV_URL: ${WEBDAV_URL}
+      WEBDAV_PORT: ${WEBDAV_PORT:-2002}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - immojaeger-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/test-nas.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  immojaeger-network:
+    driver: bridge

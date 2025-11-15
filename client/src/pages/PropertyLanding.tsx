@@ -383,12 +383,7 @@ export default function PropertyLanding() {
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
               <tbody className="divide-y">
-                {property.unit && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Einheit</td>
-                    <td className="px-4 py-3">{property.unit}</td>
-                  </tr>
-                )}
+                {/* unit field removed - not in schema */}
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-gray-600 font-medium">Kategorie</td>
                   <td className="px-4 py-3">
@@ -401,7 +396,12 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3 font-semibold">{formatPrice(property.price)}</td>
                   </tr>
                 )}
-
+                {property.externalCommissionForExpose && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
+                    <td className="px-4 py-3">{property.externalCommissionForExpose}</td>
+                  </tr>
+                )}
                 {property.rooms && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Zimmer</td>
@@ -589,19 +589,19 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{property.unitNumber}</td>
                   </tr>
                 )}
-
-                {property.floors && (
+                {property.externalCommissionForExpose && (
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600 font-medium">Käuferprovision</td>
+                    <td className="px-4 py-3">{property.externalCommissionForExpose}</td>
+                  </tr>
+                )}
+                {property.totalFloors && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Etagenzahl</td>
-                    <td className="px-4 py-3">{property.floors}</td>
+                    <td className="px-4 py-3">{property.totalFloors}</td>
                   </tr>
                 )}
-                {property.parkingSpaces && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Anzahl Parkplätze</td>
-                    <td className="px-4 py-3">{property.parkingSpaces}</td>
-                  </tr>
-                )}
+                {/* parkingSpaces field removed - not in schema */}
                 {property.parkingPrice && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Stellplatz-Preis</td>
@@ -638,24 +638,14 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{(property.additionalCosts / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</td>
                   </tr>
                 )}
-                {property.heatingCostsIncluded !== null && property.heatingCostsIncluded !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Heizkosten in Nebenkosten enthalten</td>
-                    <td className="px-4 py-3">{property.heatingCostsIncluded ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
+                {/* heatingCostsIncluded field removed - not in schema */}
                 {property.equipmentQuality && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Qualität der Ausstattung</td>
                     <td className="px-4 py-3">{property.equipmentQuality}</td>
                   </tr>
                 )}
-                {property.constructionPhase && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Bauphase</td>
-                    <td className="px-4 py-3">{property.constructionPhase}</td>
-                  </tr>
-                )}
+                {/* constructionPhase field removed - not in schema */}
                 {property.monthlyRentalIncome && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Mtl. Mieteinnahmen</td>
@@ -674,18 +664,8 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{property.flooringTypes}</td>
                   </tr>
                 )}
-                {property.bathroomEquipment && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Bad</td>
-                    <td className="px-4 py-3">{property.bathroomEquipment}</td>
-                  </tr>
-                )}
-                {property.suitableForVacation !== null && property.suitableForVacation !== undefined && (
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 font-medium">Als Ferienwohnung geeignet</td>
-                    <td className="px-4 py-3">{property.suitableForVacation ? 'Ja' : 'Nein'}</td>
-                  </tr>
-                )}
+                {/* bathroomEquipment field removed - not in schema */}
+                {/* suitableForVacation field removed - not in schema */}
                 {property.hasStorageRoom !== null && property.hasStorageRoom !== undefined && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Abstellraum</td>
@@ -704,22 +684,22 @@ export default function PropertyLanding() {
                     <td className="px-4 py-3">{property.distanceToAirport} Min.</td>
                   </tr>
                 )}
-                {property.distanceToPublicTransportKm && (
+                {property.distanceToPublicTransport && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Entfernung zu öffentl. Verkehrsmitteln</td>
-                    <td className="px-4 py-3">{property.distanceToPublicTransportKm} km</td>
+                    <td className="px-4 py-3">{property.distanceToPublicTransport} km</td>
                   </tr>
                 )}
-                {property.distanceToMainStationKm && (
+                {property.distanceToMainStation && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Hauptbahnhof</td>
-                    <td className="px-4 py-3">{property.distanceToMainStationKm} km</td>
+                    <td className="px-4 py-3">{property.distanceToMainStation} km</td>
                   </tr>
                 )}
-                {property.distanceToAirportKm && (
+                {property.distanceToAirport && (
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-600 font-medium">Entfernung nächster Flughafen</td>
-                    <td className="px-4 py-3">{property.distanceToAirportKm} km</td>
+                    <td className="px-4 py-3">{property.distanceToAirport} km</td>
                   </tr>
                 )}
                 {property.heatingSystemYear && (
@@ -759,11 +739,11 @@ export default function PropertyLanding() {
         )}
 
         {/* Floorplans Section */}
-        {property.floorPlans && property.floorPlans.length > 0 && (
+        {property.images?.filter((img: any) => img.imageType === 'floorplan').length > 0 && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6 text-[#0066A1]">Grundrisse</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {property.floorPlans.map((plan: any, index: number) => (
+              {property.images.filter((img: any) => img.imageType === 'floorplan').map((plan: any, index: number) => (
                 <div key={index} className="border rounded-lg overflow-hidden">
                   <img
                     src={convertToProxyUrl(plan.imageUrl || plan)}
@@ -1047,7 +1027,11 @@ export default function PropertyLanding() {
             {property?.images && property.images.length > 0 && (
               <>
                 <img
-                  src={convertToProxyUrl(property.images[lightboxIndex]?.imageUrl || property.images[lightboxIndex])}
+                  src={convertToProxyUrl(
+                    typeof property.images[lightboxIndex] === 'string' 
+                      ? property.images[lightboxIndex] 
+                      : property.images[lightboxIndex]?.imageUrl || ''
+                  )}
                   alt={`${property.headline || property.title} - Bild ${lightboxIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />

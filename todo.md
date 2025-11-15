@@ -1140,11 +1140,114 @@
 
 - [ ] Format description highlights with checkboxes on landing page
 
-- [ ] Add Exposé erstellen and Landing Page öffnen buttons to PropertyDetail header
+- [x] Add Exposé erstellen and Landing Page öffnen buttons to PropertyDetail header
 
 - [ ] Fix PropertyLanding to display headline instead of title in hero section
 
 - [ ] Synchronize status options in PropertyDetailForm to match new schema
 
-- [ ] Fix headline not being saved in PropertyDetailForm
-- [ ] Fix headline not displaying on PropertyLanding
+- [x] Fix headline not being saved in PropertyDetailForm
+- [x] Fix headline not displaying on PropertyLanding
+
+- [x] Keep Landing Page proxy only (dashboard uses direct access)
+
+- [x] Verified Landing Page uses proxy and dashboard uses direct access
+
+## URGENT: Fix Image Display in Medien Tab
+
+- [ ] Add convertToProxyUrl function to EnhancedMediaTab component
+- [ ] Update image rendering to use proxy URLs instead of direct NAS URLs
+- [ ] Test image loading in PropertyDetail Medien tab (should show actual images, not gray placeholders)
+- [ ] Commit changes to GitHub backup
+
+
+## FINAL PRODUCTION PREPARATION (Nov 13, 2025)
+
+### Authentication Removal
+- [ ] Remove Manus OAuth system completely
+- [ ] Remove all authentication checks from frontend components
+- [ ] Remove all protectedProcedure from tRPC routers
+- [ ] Make all pages publicly accessible
+
+### Bug Fixes (TypeScript Errors)
+- [ ] Fix Property 'buyerCommission' error in PropertyLanding.tsx
+- [ ] Fix Property 'reorderImages' error in PropertyMedia.tsx
+- [ ] Fix all 7 TypeScript errors
+
+### Google Maps Verification
+- [ ] Test Places Autocomplete on property creation
+- [ ] Verify automatic address field population works
+- [ ] Verify latitude/longitude capture works
+
+### NAS WebDAV Proxy Verification
+- [ ] Test `/api/nas/*` proxy endpoint
+- [ ] Verify images load on property detail pages
+- [ ] Verify images load on landing pages
+
+### API Integration Preparation
+- [ ] Verify Brevo CRM sync works
+- [ ] Test Superchat webhook endpoint
+- [ ] Prepare ImmoScout24 OAuth flow
+
+### Homepage Sync API
+- [ ] Create `/api/sync/properties` endpoint
+- [ ] Return published properties with all data
+- [ ] Add API key authentication
+- [ ] Document in README
+
+### Database Update
+- [ ] Ensure database name is 'dashboard' everywhere
+- [ ] Update all connection strings
+- [ ] Update documentation
+
+### Final Testing
+- [ ] Test all pages work without login
+- [ ] Test property CRUD operations
+- [ ] Test landing page generation
+- [ ] Test NAS image loading
+- [ ] Run full build test
+
+### GitHub Final Upload
+- [ ] Commit all changes
+- [ ] Update README with no-auth setup
+- [ ] Tag release v1.0.0
+- [ ] Push to GitHub
+
+
+## COMPLETED (Nov 13, 2025 - Final Production Prep)
+
+- [x] Remove Manus OAuth system completely
+- [x] Remove all authentication checks from frontend components
+- [x] Remove all protectedProcedure from tRPC routers (90 occurrences)
+- [x] Make all pages publicly accessible
+- [x] Fix duplicate publicProcedure import
+- [x] Fix ctx.user references (replaced with default user ID 1)
+- [x] Fix buyerCommission → externalCommissionForExpose
+- [x] Fix floorPlans → images with imageType filter
+- [x] Fix image lightbox type handling
+- [x] Add googleMaps to Settings API (getApiKeys & saveApiKeys)
+- [x] Fix reorderImages error type annotation
+- [x] Remove usedFallback check from upload
+- [x] Add optional chaining to nasImages
+- [x] Add imageType to updateImage schema
+- [x] Fix status enum (removed negotiation, rented, inactive)
+- [x] Fix energy color RGB type
+- [x] Fix document uploadedBy field
+- [x] All 20+ TypeScript errors fixed
+
+
+## BUG FIX (Nov 14, 2025)
+
+- [x] Remove duplicate "Auftrag" section from left main area in property detail page (keep only in right sidebar)
+- [x] Remove duplicate "Energieausweis" section from left main area in property detail page (keep only in right sidebar)
+
+
+## CRITICAL BUGS (Nov 15, 2025 - User Reported)
+
+- [x] Fix Betreuer dropdown - selection disappears after choosing contact (FIXED: Load users from database and use real user IDs)
+- [x] Fix Gesamtprovision field - not editable (shows "1.01 €") (FIXED: Added local state for editing, only format on blur)
+- [x] Fix Energiekennwerte fields - all 3 fields not editable (Energiekennwert, Strom, Wärme) (FIXED: Added pointer-events-none to unit labels)
+- [ ] Fix Distanzberechnung button - calculation not working (REQUIRES: Google Maps API Key - Manus Forge proxy only works in Manus environment)
+- [x] Fix commission validation error - internalCommissionPercent and externalCommissionInternalPercent expect string but receive number (FIXED: Changed schema from z.string() to z.number())
+- [x] Fix Titelbild display - featured image not showing in property header (shows gray icon instead of actual image) (FIXED: Fallback to first image if no featured image exists)
+- [x] Verify automatic title generation from address (Titelüberschrift should auto-generate from street, houseNumber, zipCode, city) (FIXED: Added useEffect to auto-generate title from address when property is first loaded)

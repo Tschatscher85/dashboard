@@ -48,6 +48,27 @@ const formatCategoryName = (category: string): string => {
 };
 
 export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
+  // Convert NAS URLs to proxy URLs to avoid authentication popup
+  const convertToProxyUrl = (url: string | undefined): string => {
+    if (!url) return '';
+    
+    // If URL is from NAS (contains ugreen.tschatscher.eu), convert to proxy URL
+    if (url.includes('ugreen.tschatscher.eu')) {
+      // Extract path after domain
+      // Example: https://ugreen.tschatscher.eu/Daten/... -> /Daten/...
+      const match = url.match(/ugreen\.tschatscher\.eu(\/.*)/i);
+      if (match && match[1]) {
+        const nasPath = match[1];
+        // Remove leading slash for proxy endpoint
+        const proxyUrl = `/api/nas${nasPath}`;
+        return proxyUrl;
+      }
+    }
+    
+    // For S3/Cloud URLs or other sources, return as-is
+    return url;
+  };
+  
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewSize, setViewSize] = useState<"small" | "medium" | "large">("small");
@@ -361,7 +382,7 @@ export function EnhancedMediaTab({ propertyId }: EnhancedMediaTabProps) {
                         className="relative aspect-square overflow-hidden rounded-lg border hover:border-primary transition-colors text-left w-full"
                       >
                         <img
-                          src={item.url}
+                          src={convertToProxyUrl(item.url)}
                           alt={item.displayName || item.title}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           onError={(e) => {

@@ -33,11 +33,15 @@ export function PropertyRightColumn({
 }: PropertyRightColumnProps) {
   const [commissionType, setCommissionType] = useState<"percent" | "euro">("percent");
   const [externalCommissionType, setExternalCommissionType] = useState<"percent" | "euro">("percent");
+  const [totalCommissionInput, setTotalCommissionInput] = useState<string>("");
 
   const [isCalculating, setIsCalculating] = useState(false);
   
   // Homepage sync handlers
   const utils = trpc.useUtils();
+  
+  // Load users for Betreuer dropdown
+  const { data: users } = trpc.users.list.useQuery();
   
   const handleHomepageExport = async () => {
     try {
@@ -217,12 +221,18 @@ export function PropertyRightColumn({
         <CardContent className="space-y-4">
           <div>
             <Label>Betreuer</Label>
-            <Select disabled={!isEditing}>
+            <Select value={formData.caregiverId?.toString() || ""}
+              onValueChange={(value) => handleChange("caregiverId", value ? parseInt(value) : null)}
+              disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Betreuer wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="user1">Sven Jaeger</SelectItem>
+                {users?.map((user) => (
+                  <SelectItem key={user.id} value={user.id.toString()}>
+                    {user.name || user.email || `User ${user.id}`}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -230,6 +240,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Eigentümer *</Label>
             <Input
+              value={formData.ownerId?.toString() || ""}
+              onChange={(e) => handleChange("ownerId", e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -238,6 +250,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Typ (optional)</Label>
             <Input
+              value={formData.ownerType || ""}
+              onChange={(e) => handleChange("ownerType", e.target.value)}
               placeholder="Typ"
               disabled={!isEditing}
             />
@@ -246,6 +260,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Käufer</Label>
             <Input
+              value={formData.buyerId?.toString() || ""}
+              onChange={(e) => handleChange("buyerId", e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -254,6 +270,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Notar</Label>
             <Input
+              value={formData.notaryId?.toString() || ""}
+              onChange={(e) => handleChange("notaryId", e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -262,6 +280,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Hausverwaltung</Label>
             <Input
+              value={formData.propertyManagementId?.toString() || ""}
+              onChange={(e) => handleChange("propertyManagementId", e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -270,6 +290,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Mieter</Label>
             <Input
+              value={formData.tenantId?.toString() || ""}
+              onChange={(e) => handleChange("tenantId", e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -278,6 +300,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Verknüpfte Kontakte</Label>
             <Input
+              value={formData.linkedContactIds || ""}
+              onChange={(e) => handleChange("linkedContactIds", e.target.value)}
               placeholder="Kontakt suchen"
               disabled={!isEditing}
             />
@@ -286,6 +310,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Typ (optional)</Label>
             <Input
+              value={formData.linkedContactType || ""}
+              onChange={(e) => handleChange("linkedContactType", e.target.value)}
               placeholder="Typ"
               disabled={!isEditing}
             />
@@ -434,7 +460,9 @@ export function PropertyRightColumn({
 
           <div>
             <Label>IS24-Ansprechpartner</Label>
-            <Select disabled={!isEditing}>
+            <Select value={formData.is24ContactPerson || ""}
+              onValueChange={(value) => handleChange("is24ContactPerson", value)}
+              disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Sven Jaeger" />
               </SelectTrigger>
@@ -447,6 +475,8 @@ export function PropertyRightColumn({
           <div>
             <Label>IS24-ID</Label>
             <Input
+              value={formData.is24ExternalId || ""}
+              onChange={(e) => handleChange("is24ExternalId", e.target.value)}
               placeholder="158820057"
               disabled={!isEditing}
             />
@@ -460,6 +490,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Übersetzungen</Label>
             <Input
+              value={formData.translations || ""}
+              onChange={(e) => handleChange("translations", e.target.value)}
               placeholder="Übersetzungen"
               disabled={!isEditing}
             />
@@ -475,7 +507,9 @@ export function PropertyRightColumn({
         <CardContent className="space-y-4">
           <div>
             <Label>Auftragsart</Label>
-            <Select disabled={!isEditing}>
+            <Select value={formData.assignmentType || ""}
+              onValueChange={(value) => handleChange("assignmentType", value)}
+              disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Auswählen..." />
               </SelectTrigger>
@@ -489,7 +523,9 @@ export function PropertyRightColumn({
 
           <div>
             <Label>Laufzeit</Label>
-            <Select disabled={!isEditing}>
+            <Select value={formData.assignmentDuration || ""}
+              onValueChange={(value) => handleChange("assignmentDuration", value)}
+              disabled={!isEditing}>
               <SelectTrigger>
                 <SelectValue placeholder="Auswählen..." />
               </SelectTrigger>
@@ -503,11 +539,21 @@ export function PropertyRightColumn({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Auftrag von bis</Label>
-              <Input type="date" disabled={!isEditing} />
+              <Input 
+                type="date" 
+                value={formData.assignmentFrom ? new Date(formData.assignmentFrom).toISOString().split('T')[0] : ""}
+                onChange={(e) => handleChange("assignmentFrom", e.target.value ? new Date(e.target.value) : null)}
+                disabled={!isEditing} 
+              />
             </div>
             <div>
               <Label>&nbsp;</Label>
-              <Input type="date" disabled={!isEditing} />
+              <Input 
+                type="date" 
+                value={formData.assignmentTo ? new Date(formData.assignmentTo).toISOString().split('T')[0] : ""}
+                onChange={(e) => handleChange("assignmentTo", e.target.value ? new Date(e.target.value) : null)}
+                disabled={!isEditing} 
+              />
             </div>
           </div>
         </CardContent>
@@ -538,6 +584,8 @@ export function PropertyRightColumn({
                 type="number"
                 placeholder="1"
                 step="0.01"
+                value={formData.internalCommissionPercent?.toString() || ""}
+                onChange={(e) => handleChange("internalCommissionPercent", e.target.value ? parseFloat(e.target.value) : null)}
                 disabled={!isEditing}
                 className="flex-1"
               />
@@ -573,6 +621,8 @@ export function PropertyRightColumn({
                 type="number"
                 placeholder="2,5"
                 step="0.01"
+                value={formData.externalCommissionInternalPercent?.toString() || ""}
+                onChange={(e) => handleChange("externalCommissionInternalPercent", e.target.value ? parseFloat(e.target.value) : null)}
                 disabled={!isEditing}
                 className="flex-1"
               />
@@ -604,8 +654,25 @@ export function PropertyRightColumn({
           <div>
             <Label>Gesamtprovision</Label>
             <Input
-              placeholder="14.000 €"
-              disabled
+              placeholder="14.000"
+              value={isEditing ? totalCommissionInput : (formData.totalCommission ? (formData.totalCommission / 100).toFixed(2) + " €" : "")}
+              onChange={(e) => {
+                if (isEditing) {
+                  setTotalCommissionInput(e.target.value);
+                }
+              }}
+              onFocus={() => {
+                if (isEditing && formData.totalCommission) {
+                  setTotalCommissionInput((formData.totalCommission / 100).toFixed(2));
+                }
+              }}
+              onBlur={() => {
+                if (isEditing) {
+                  const value = parseFloat(totalCommissionInput.replace(/[^0-9.]/g, ""));
+                  handleChange("totalCommission", value ? Math.round(value * 100) : null);
+                }
+              }}
+              disabled={!isEditing}
             />
           </div>
         </CardContent>
@@ -620,6 +687,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Außenprovision für Exposé</Label>
             <Input
+              value={formData.externalCommissionForExpose || ""}
+              onChange={(e) => handleChange("externalCommissionForExpose", e.target.value)}
               placeholder="2,50% inkl. MwSt."
               disabled={!isEditing}
             />
@@ -628,6 +697,8 @@ export function PropertyRightColumn({
           <div>
             <Label>Provisionshinweis</Label>
             <Textarea
+              value={formData.commissionNote || ""}
+              onChange={(e) => handleChange("commissionNote", e.target.value)}
               placeholder="2,50 inkl. 19 % MwSt."
               disabled={!isEditing}
             />
@@ -741,7 +812,7 @@ export function PropertyRightColumn({
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap pointer-events-none">
                     kWh/(m²·a)
                   </span>
                 </div>
@@ -758,7 +829,7 @@ export function PropertyRightColumn({
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap pointer-events-none">
                     kWh/(m²·a)
                   </span>
                 </div>
@@ -775,7 +846,7 @@ export function PropertyRightColumn({
                     disabled={!isEditing}
                     className="h-10 pr-28"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap pointer-events-none">
                     kWh/(m²·a)
                   </span>
                 </div>
@@ -805,7 +876,11 @@ export function PropertyRightColumn({
           {/* Heating & Energy Source */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
-              <Switch disabled={!isEditing} />
+              <Switch 
+                checked={formData.includesWarmWater || false}
+                onCheckedChange={(checked) => handleChange("includesWarmWater", checked)}
+                disabled={!isEditing} 
+              />
               <Label className="text-sm">Energieverbrauch für Warmwasser enthalten</Label>
             </div>
 
@@ -899,7 +974,11 @@ export function PropertyRightColumn({
             </div>
 
             <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
-              <Switch disabled={!isEditing} />
+              <Switch 
+                checked={formData.constructionYearUnknown || false}
+                onCheckedChange={(checked) => handleChange("constructionYearUnknown", checked)}
+                disabled={!isEditing} 
+              />
               <Label className="text-sm">Baujahr unbekannt</Label>
             </div>
           </div>
