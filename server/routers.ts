@@ -1057,13 +1057,10 @@ export const appRouter = router({
               continue;
             }
             
-            // Build NAS URL
-            const nasConfig = await db.getNASConfig();
-            const webdavUrl = nasConfig.WEBDAV_URL || "";
-            const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+            // Build Proxy URL (instead of direct NAS URL to avoid auth popup)
             const relativePath = file.filename.replace(/^\/volume1/, '');
             const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
-            const url = `${baseUrl}${encodedPath}`;
+            const url = `/api/nas${encodedPath}`;
             
             // Determine image type from filename
             let imageType = "sonstiges";
@@ -1115,13 +1112,10 @@ export const appRouter = router({
                 continue;
               }
               
-              // Build NAS URL
-              const nasConfig = await db.getNASConfig();
-              const webdavUrl = nasConfig.WEBDAV_URL || "";
-              const baseUrl = webdavUrl.replace(/:2002$/, '').replace(/:2002\//, '/');
+              // Build Proxy URL (instead of direct NAS URL to avoid auth popup)
               const relativePath = file.filename.replace(/^\/volume1/, '');
               const encodedPath = relativePath.split('/').map(p => encodeURIComponent(p)).join('/');
-              const url = `${baseUrl}${encodedPath}`;
+              const url = `/api/nas${encodedPath}`;
               
               try {
                 await db.createDocument({
