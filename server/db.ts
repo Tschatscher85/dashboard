@@ -214,13 +214,20 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  console.log('[Database] updateProperty called with:', JSON.stringify({ id, updates }, null, 2));
+  
   // Convert string dates to Date objects
   const processedUpdates: any = { ...updates };
   if (updates.availableFrom && typeof updates.availableFrom === 'string') {
     processedUpdates.availableFrom = new Date(updates.availableFrom);
   }
   
+  console.log('[Database] Processed updates:', JSON.stringify(processedUpdates, null, 2));
+  
   const result = await db.update(properties).set(processedUpdates as Partial<InsertProperty>).where(eq(properties.id, id));
+  
+  console.log('[Database] Update result:', result);
+  
   return result;
 }
 
