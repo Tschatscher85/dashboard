@@ -397,6 +397,12 @@ export const settings = mysqlTable("settings", {
   // Landing Page Settings
   landingPageTemplate: varchar("landingPageTemplate", { length: 50 }).default("modern"), // Template für Property Landing Pages
   
+  // Document Templates (with placeholders)
+  exposeTemplate: text("exposeTemplate"), // Exposé template with {{placeholders}}
+  onePagerTemplate: text("onePagerTemplate"), // One-Pager template with {{placeholders}}
+  invoiceTemplate: text("invoiceTemplate"), // Invoice template with {{placeholders}}
+  maklervertragTemplate: text("maklervertragTemplate"), // Maklervertrag template with {{placeholders}}
+  
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 

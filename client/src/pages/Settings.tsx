@@ -61,6 +61,10 @@ export default function Settings() {
     googleClientSecret: "",
     googleMaps: "",
     landingPageTemplate: "modern",
+    exposeTemplate: "",
+    onePagerTemplate: "",
+    invoiceTemplate: "",
+    maklervertragTemplate: "",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -198,6 +202,10 @@ export default function Settings() {
         googleClientSecret: currentApiKeys.googleClientSecret || "",
         googleMaps: currentApiKeys.googleMaps || "",
         landingPageTemplate: currentApiKeys.landingPageTemplate || "modern",
+        exposeTemplate: currentApiKeys.exposeTemplate || "",
+        onePagerTemplate: currentApiKeys.onePagerTemplate || "",
+        invoiceTemplate: currentApiKeys.invoiceTemplate || "",
+        maklervertragTemplate: currentApiKeys.maklervertragTemplate || "",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -308,6 +316,7 @@ export default function Settings() {
             <TabsTrigger value="users">Benutzerverwaltung</TabsTrigger>
             <TabsTrigger value="api">API-Konfiguration</TabsTrigger>
             <TabsTrigger value="company">Unternehmen</TabsTrigger>
+            <TabsTrigger value="templates">Dokument-Vorlagen</TabsTrigger>
             <TabsTrigger value="modules">Module</TabsTrigger>
           </TabsList>
 
@@ -1511,6 +1520,137 @@ export default function Settings() {
                   <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
                     <Key className="mr-2 h-4 w-4" />
                     {saveApiKeysMutation.isPending ? "Speichere..." : "Modul-Einstellungen speichern"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Document Templates Tab */}
+          <TabsContent value="templates">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dokument-Vorlagen</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Passen Sie die Vorlagen für Exposé, One-Pager, Rechnungen und Maklervertrag an.
+                  Verwenden Sie Platzhalter wie {{property.title}}, {{property.price}}, {{company.name}}, etc.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Placeholder Documentation */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">📝 Verfügbare Platzhalter</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-semibold mb-1">Immobilie:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>{{property.title}}</li>
+                        <li>{{property.price}}</li>
+                        <li>{{property.livingSpace}}</li>
+                        <li>{{property.rooms}}</li>
+                        <li>{{property.address}}</li>
+                        <li>{{property.city}}</li>
+                        <li>{{property.description}}</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold mb-1">Firma:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>{{company.name}}</li>
+                        <li>{{company.address}}</li>
+                        <li>{{company.phone}}</li>
+                        <li>{{company.email}}</li>
+                        <li>{{company.website}}</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold mb-1">Eigentümer:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>{{owner.name}}</li>
+                        <li>{{owner.address}}</li>
+                        <li>{{owner.email}}</li>
+                        <li>{{owner.phone}}</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold mb-1">Sonstiges:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>{{date}} - Aktuelles Datum</li>
+                        <li>{{invoiceNumber}} - Rechnungsnummer</li>
+                        <li>{{total}} - Gesamtbetrag</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Exposé Template */}
+                <div className="space-y-2">
+                  <Label htmlFor="exposeTemplate">Exposé Vorlage</Label>
+                  <Textarea
+                    id="exposeTemplate"
+                    value={apiKeys.exposeTemplate || ''}
+                    onChange={(e) => setApiKeys({ ...apiKeys, exposeTemplate: e.target.value })}
+                    placeholder="Immobilien-Exposé\n\n{{property.title}}\n{{property.address}}\n\nPreis: {{property.price}}\nWohnfläche: {{property.livingSpace}} m²\nZimmer: {{property.rooms}}\n\nBeschreibung:\n{{property.description}}\n\nKontakt:\n{{company.name}}\n{{company.phone}}\n{{company.email}}"
+                    rows={10}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Diese Vorlage wird für die Exposé-Generierung verwendet.
+                  </p>
+                </div>
+
+                {/* One-Pager Template */}
+                <div className="space-y-2">
+                  <Label htmlFor="onePagerTemplate">One-Pager Vorlage</Label>
+                  <Textarea
+                    id="onePagerTemplate"
+                    value={apiKeys.onePagerTemplate || ''}
+                    onChange={(e) => setApiKeys({ ...apiKeys, onePagerTemplate: e.target.value })}
+                    placeholder="{{property.title}}\n\nSchnellübersicht:\nPreis: {{property.price}}\nFläche: {{property.livingSpace}} m²\nZimmer: {{property.rooms}}\nLage: {{property.city}}\n\nKontakt: {{company.name}} | {{company.phone}}"
+                    rows={8}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Kompakte Vorlage für One-Pager (eine Seite).
+                  </p>
+                </div>
+
+                {/* Invoice Template */}
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceTemplate">Rechnungs-Vorlage</Label>
+                  <Textarea
+                    id="invoiceTemplate"
+                    value={apiKeys.invoiceTemplate || ''}
+                    onChange={(e) => setApiKeys({ ...apiKeys, invoiceTemplate: e.target.value })}
+                    placeholder="RECHNUNG\n\nRechnungsnummer: {{invoiceNumber}}\nDatum: {{date}}\n\nRechnungsempfänger:\n{{recipient.name}}\n{{recipient.address}}\n\nLeistungen:\n[Positionen werden automatisch eingefügt]\n\nGesamtbetrag: {{total}} €\n\n{{company.name}}\n{{company.address}}"
+                    rows={10}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Vorlage für Käufer- und Verkäufer-Rechnungen.
+                  </p>
+                </div>
+
+                {/* Maklervertrag Template */}
+                <div className="space-y-2">
+                  <Label htmlFor="maklervertragTemplate">Maklervertrag Vorlage</Label>
+                  <Textarea
+                    id="maklervertragTemplate"
+                    value={apiKeys.maklervertragTemplate || ''}
+                    onChange={(e) => setApiKeys({ ...apiKeys, maklervertragTemplate: e.target.value })}
+                    placeholder="MAKLERVERTRAG\n\nzwischen\n\n{{company.name}}\n{{company.address}}\n- nachfolgend 'Makler' genannt -\n\nund\n\n{{owner.name}}\n{{owner.address}}\n- nachfolgend 'Auftraggeber' genannt -\n\n§ 1 Vertragsgegenstand\nDer Auftraggeber beauftragt den Makler mit der Vermittlung der Immobilie '{{property.title}}' zum Verkauf.\n\n§ 2 Provision\nDie Provision beträgt 3,57% (inkl. MwSt.) des Kaufpreises und ist bei Abschluss des Kaufvertrages fällig."
+                    rows={12}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Vorlage für Maklerverträge mit Eigentümern.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Vorlagen speichern"}
                   </Button>
                 </div>
               </CardContent>

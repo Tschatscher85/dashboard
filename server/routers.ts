@@ -219,6 +219,10 @@ export const appRouter = router({
         propertyMgmtEmailFromName: z.string().optional(),
         propertyMgmtEmailNotificationTo: z.string().optional(),
         landingPageTemplate: z.string().optional(),
+        exposeTemplate: z.string().optional(),
+        onePagerTemplate: z.string().optional(),
+        invoiceTemplate: z.string().optional(),
+        maklervertragTemplate: z.string().optional(),
         brevoPropertyInquiryListId: z.string().optional(),
         brevoOwnerInquiryListId: z.string().optional(),
         brevoInsuranceListId: z.string().optional(),
@@ -459,6 +463,77 @@ export const appRouter = router({
             console.log('[Settings] Configuration saved to database');
           } catch (error) {
             console.error('[Settings] Failed to save to database:', error);
+          }
+          
+          // Update settings table
+          try {
+            const { settings } = await import('../drizzle/schema');
+            const { eq } = await import('drizzle-orm');
+            
+            // Build update object with only provided fields
+            const updateData: any = {};
+            if (input.dashboardLogo !== undefined) updateData.dashboardLogo = input.dashboardLogo;
+            if (input.superchat !== undefined) updateData.superchatApiKey = input.superchat;
+            if (input.brevo !== undefined) updateData.brevoApiKey = input.brevo;
+            if (input.googleMaps !== undefined) updateData.googleMapsApiKey = input.googleMaps;
+            if (input.openai !== undefined) updateData.openaiApiKey = input.openai;
+            if (input.landingPageTemplate !== undefined) updateData.landingPageTemplate = input.landingPageTemplate;
+            
+            // E-Mail settings per module
+            if (input.realestateEmailFrom !== undefined) updateData.realestateEmailFrom = input.realestateEmailFrom;
+            if (input.realestateEmailFromName !== undefined) updateData.realestateEmailFromName = input.realestateEmailFromName;
+            if (input.realestateEmailNotificationTo !== undefined) updateData.realestateEmailNotificationTo = input.realestateEmailNotificationTo;
+            if (input.insuranceEmailFrom !== undefined) updateData.insuranceEmailFrom = input.insuranceEmailFrom;
+            if (input.insuranceEmailFromName !== undefined) updateData.insuranceEmailFromName = input.insuranceEmailFromName;
+            if (input.insuranceEmailNotificationTo !== undefined) updateData.insuranceEmailNotificationTo = input.insuranceEmailNotificationTo;
+            if (input.propertyMgmtEmailFrom !== undefined) updateData.propertyMgmtEmailFrom = input.propertyMgmtEmailFrom;
+            if (input.propertyMgmtEmailFromName !== undefined) updateData.propertyMgmtEmailFromName = input.propertyMgmtEmailFromName;
+            if (input.propertyMgmtEmailNotificationTo !== undefined) updateData.propertyMgmtEmailNotificationTo = input.propertyMgmtEmailNotificationTo;
+            
+            // Document templates
+            if (input.exposeTemplate !== undefined) updateData.exposeTemplate = input.exposeTemplate;
+            if (input.onePagerTemplate !== undefined) updateData.onePagerTemplate = input.onePagerTemplate;
+            if (input.invoiceTemplate !== undefined) updateData.invoiceTemplate = input.invoiceTemplate;
+            if (input.maklervertragTemplate !== undefined) updateData.maklervertragTemplate = input.maklervertragTemplate;
+            
+            // Branding per module
+            if (input.realestateLogo !== undefined) updateData.realestateLogo = input.realestateLogo;
+            if (input.realestateName !== undefined) updateData.realestateName = input.realestateName;
+            if (input.realestatePhone !== undefined) updateData.realestatePhone = input.realestatePhone;
+            if (input.realestateEmail !== undefined) updateData.realestateEmail = input.realestateEmail;
+            if (input.realestateAddress !== undefined) updateData.realestateAddress = input.realestateAddress;
+            if (input.realestateWebsite !== undefined) updateData.realestateWebsite = input.realestateWebsite;
+            if (input.realestateImpressum !== undefined) updateData.realestateImpressum = input.realestateImpressum;
+            if (input.realestateAgb !== undefined) updateData.realestateAgb = input.realestateAgb;
+            if (input.realestateDatenschutz !== undefined) updateData.realestateDatenschutz = input.realestateDatenschutz;
+            
+            if (input.insuranceLogo !== undefined) updateData.insuranceLogo = input.insuranceLogo;
+            if (input.insuranceName !== undefined) updateData.insuranceName = input.insuranceName;
+            if (input.insurancePhone !== undefined) updateData.insurancePhone = input.insurancePhone;
+            if (input.insuranceEmail !== undefined) updateData.insuranceEmail = input.insuranceEmail;
+            if (input.insuranceAddress !== undefined) updateData.insuranceAddress = input.insuranceAddress;
+            if (input.insuranceWebsite !== undefined) updateData.insuranceWebsite = input.insuranceWebsite;
+            if (input.insuranceImpressum !== undefined) updateData.insuranceImpressum = input.insuranceImpressum;
+            if (input.insuranceAgb !== undefined) updateData.insuranceAgb = input.insuranceAgb;
+            if (input.insuranceDatenschutz !== undefined) updateData.insuranceDatenschutz = input.insuranceDatenschutz;
+            
+            if (input.propertyMgmtLogo !== undefined) updateData.propertyMgmtLogo = input.propertyMgmtLogo;
+            if (input.propertyMgmtName !== undefined) updateData.propertyMgmtName = input.propertyMgmtName;
+            if (input.propertyMgmtPhone !== undefined) updateData.propertyMgmtPhone = input.propertyMgmtPhone;
+            if (input.propertyMgmtEmail !== undefined) updateData.propertyMgmtEmail = input.propertyMgmtEmail;
+            if (input.propertyMgmtAddress !== undefined) updateData.propertyMgmtAddress = input.propertyMgmtAddress;
+            if (input.propertyMgmtWebsite !== undefined) updateData.propertyMgmtWebsite = input.propertyMgmtWebsite;
+            if (input.propertyMgmtImpressum !== undefined) updateData.propertyMgmtImpressum = input.propertyMgmtImpressum;
+            if (input.propertyMgmtAgb !== undefined) updateData.propertyMgmtAgb = input.propertyMgmtAgb;
+            if (input.propertyMgmtDatenschutz !== undefined) updateData.propertyMgmtDatenschutz = input.propertyMgmtDatenschutz;
+            
+            // Update settings (id=1)
+            if (Object.keys(updateData).length > 0) {
+              await db!.update(settings).set(updateData).where(eq(settings.id, 1));
+              console.log('[Settings] Settings table updated with', Object.keys(updateData).length, 'fields');
+            }
+          } catch (error) {
+            console.error('[Settings] Failed to update settings table:', error);
           }
         }
         
