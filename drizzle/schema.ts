@@ -260,39 +260,91 @@ export type InsertPropertyLink = typeof propertyLinks.$inferInsert;
 export const contacts = mysqlTable("contacts", {
   id: int("id").primaryKey().autoincrement(),
   
-  // Type
-  type: mysqlEnum("type", ["person", "company"]).notNull(),
+  // Module assignment (multi-select)
+  moduleImmobilienmakler: boolean("moduleImmobilienmakler").default(false),
+  moduleVersicherungen: boolean("moduleVersicherungen").default(false),
+  moduleHausverwaltung: boolean("moduleHausverwaltung").default(false),
   
-  // Basic info (Person)
+  // Contact type & category
+  contactType: mysqlEnum("contactType", ["kunde", "partner", "dienstleister", "sonstiges"]).default("kunde"),
+  contactCategory: varchar("contactCategory", { length: 100 }), // e.g. "Eigentümer Lead", "Käufer", "Notar", "Architekt"
+  
+  // Type (Person or Company)
+  type: mysqlEnum("type", ["person", "company"]).notNull().default("person"),
+  
+  // Stammdaten - Basic info (Person)
   salutation: mysqlEnum("salutation", ["herr", "frau", "divers"]),
   title: varchar("title", { length: 50 }),
   firstName: varchar("firstName", { length: 100 }),
   lastName: varchar("lastName", { length: 100 }),
-  
-  // Basic info (Company)
-  companyName: varchar("companyName", { length: 255 }),
+  language: varchar("language", { length: 50 }),
+  age: int("age"),
+  birthDate: date("birthDate"),
+  birthPlace: varchar("birthPlace", { length: 100 }),
+  birthCountry: varchar("birthCountry", { length: 100 }),
+  idType: varchar("idType", { length: 50 }), // Ausweis type
+  idNumber: varchar("idNumber", { length: 100 }),
+  issuingAuthority: varchar("issuingAuthority", { length: 100 }),
+  taxId: varchar("taxId", { length: 100 }), // Steuer-ID
+  nationality: varchar("nationality", { length: 100 }),
   
   // Contact details
   email: varchar("email", { length: 255 }),
+  alternativeEmail: varchar("alternativeEmail", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
   mobile: varchar("mobile", { length: 50 }),
   fax: varchar("fax", { length: 50 }),
   website: varchar("website", { length: 255 }),
   
-  // Address
+  // Address (Private)
   street: varchar("street", { length: 255 }),
   houseNumber: varchar("houseNumber", { length: 50 }),
   zipCode: varchar("zipCode", { length: 20 }),
   city: varchar("city", { length: 100 }),
-  country: varchar("country", { length: 100 }),
+  country: varchar("country", { length: 100 }).default("Deutschland"),
   
-  // Additional info
-  notes: text("notes"),
-  source: varchar("source", { length: 100 }), // where did they come from
-  status: mysqlEnum("status", ["sonstiges", "partner", "dienstleister", "kunde", "versicherung", "hausverwaltung", "objekteigentuemer"]).default("sonstiges"),
-  tags: text("tags"), // JSON array of tags with categories: ["Dienstleister: Architekt", "Kunde: Käufer", "Partner: Makler", etc.]
+  // Firma - Company info
+  companyName: varchar("companyName", { length: 255 }),
+  position: varchar("position", { length: 100 }),
+  companyStreet: varchar("companyStreet", { length: 255 }),
+  companyHouseNumber: varchar("companyHouseNumber", { length: 50 }),
+  companyZipCode: varchar("companyZipCode", { length: 20 }),
+  companyCity: varchar("companyCity", { length: 100 }),
+  companyCountry: varchar("companyCountry", { length: 100 }),
+  companyWebsite: varchar("companyWebsite", { length: 255 }),
+  companyPhone: varchar("companyPhone", { length: 50 }),
+  companyMobile: varchar("companyMobile", { length: 50 }),
+  companyFax: varchar("companyFax", { length: 50 }),
+  isBusinessContact: boolean("isBusinessContact").default(false), // Gewerblicher Kontakt
   
-  // Brevo sync
+  // Merkmale & Co.
+  advisor: varchar("advisor", { length: 100 }), // Betreuer
+  coAdvisor: varchar("coAdvisor", { length: 100 }), // Co-Betreuer
+  followUpDate: date("followUpDate"), // Followup-Datum
+  source: varchar("source", { length: 100 }), // Quelle (e.g. "Immobilienscout 24")
+  status: varchar("status", { length: 100 }), // Status (e.g. "Kunde")
+  tags: text("tags"), // JSON array of tags
+  archived: boolean("archived").default(false),
+  notes: text("notes"), // Bemerkung
+  availability: varchar("availability", { length: 255 }), // Erreichbarkeit (e.g. "09:00-20:00")
+  
+  // Verrechnung - Billing
+  blockContact: boolean("blockContact").default(false), // Kontakt sperren
+  sharedWithTeams: text("sharedWithTeams"), // JSON array of team IDs
+  sharedWithUsers: text("sharedWithUsers"), // JSON array of user IDs
+  
+  // DSGVO
+  dsgvoStatus: varchar("dsgvoStatus", { length: 100 }), // e.g. "Speicherung zugestimmt"
+  dsgvoConsentGranted: boolean("dsgvoConsentGranted").default(false),
+  dsgvoDeleteBy: date("dsgvoDeleteBy"), // Speichern-bis-Datum
+  dsgvoDeleteReason: varchar("dsgvoDeleteReason", { length: 255 }), // Speichern-bis-Grund
+  newsletterConsent: boolean("newsletterConsent").default(false), // Newsletter gewünscht
+  propertyMailingConsent: boolean("propertyMailingConsent").default(false), // Immobilienmailing gewünscht
+  
+  // Sync with external systems
+  googleContactId: varchar("googleContactId", { length: 255 }), // Google Contacts ID
+  googleSyncStatus: mysqlEnum("googleSyncStatus", ["not_synced", "synced", "error"]).default("not_synced"),
+  googleLastSyncAt: timestamp("googleLastSyncAt"),
   brevoContactId: varchar("brevoContactId", { length: 100 }),
   brevoSyncStatus: mysqlEnum("brevoSyncStatus", ["not_synced", "synced", "error"]).default("not_synced"),
   brevoLastSyncAt: timestamp("brevoLastSyncAt"),

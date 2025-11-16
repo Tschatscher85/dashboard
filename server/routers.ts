@@ -1957,7 +1957,13 @@ Die Beschreibung soll:
   }),
 
   // ============ CONTACTS ============
-  contacts: router({
+  contacts: (async () => {
+    const { contactsRouter } = await import('./contactsRouter');
+    return contactsRouter;
+  })(),
+  
+  // Legacy contacts router (deprecated)
+  contactsOld: router({
     list: publicProcedure
       .input(z.object({
         contactType: z.string().optional(),

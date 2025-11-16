@@ -259,8 +259,20 @@ export async function getContactById(id: number) {
 }
 
 export async function getAllContacts(filters?: {
-  contactType?: string;
+  // Module filters
+  moduleImmobilienmakler?: boolean;
+  moduleVersicherungen?: boolean;
+  moduleHausverwaltung?: boolean;
+  // Type & Category filters
+  contactType?: "kunde" | "partner" | "dienstleister" | "sonstiges";
+  contactCategory?: string;
+  // Search
   searchTerm?: string;
+  // Status filters
+  archived?: boolean;
+  // Pagination
+  limit?: number;
+  offset?: number;
 }) {
   const db = await getDb();
   if (!db) return [];
@@ -268,14 +280,39 @@ export async function getAllContacts(filters?: {
   let query = db.select().from(contacts);
   
   const conditions = [];
-  if (filters?.contactType) conditions.push(eq(contacts.contactType, filters.contactType as any));
+  
+  // Module filters
+  if (filters?.moduleImmobilienmakler !== undefined) {
+    conditions.push(eq(contacts.moduleImmobilienmakler, filters.moduleImmobilienmakler));
+  }
+  if (filters?.moduleVersicherungen !== undefined) {
+    conditions.push(eq(contacts.moduleVersicherungen, filters.moduleVersicherungen));
+  }
+  if (filters?.moduleHausverwaltung !== undefined) {
+    conditions.push(eq(contacts.moduleHausverwaltung, filters.moduleHausverwaltung));
+  }
+  
+  // Type & Category filters
+  if (filters?.contactType) {
+    conditions.push(eq(contacts.contactType, filters.contactType));
+  }
+  if (filters?.contactCategory) {
+    conditions.push(eq(contacts.contactCategory, filters.contactCategory));
+  }
+  
+  // Archived filter
+  if (filters?.archived !== undefined) {
+    conditions.push(eq(contacts.archived, filters.archived));
+  }
+  
+  // Search term
   if (filters?.searchTerm) {
     conditions.push(
       or(
         like(contacts.firstName, `%${filters.searchTerm}%`),
         like(contacts.lastName, `%${filters.searchTerm}%`),
         like(contacts.email, `%${filters.searchTerm}%`),
-        like(contacts.company, `%${filters.searchTerm}%`)
+        like(contacts.companyName, `%${filters.searchTerm}%`)
       )!
     );
   }
@@ -284,7 +321,18 @@ export async function getAllContacts(filters?: {
     query = query.where(and(...conditions)) as any;
   }
   
-  const result = await query.orderBy(desc(contacts.createdAt));
+  // Order by creation date (newest first)
+  query = query.orderBy(desc(contacts.createdAt)) as any;
+  
+  // Pagination
+  if (filters?.limit) {
+    query = query.limit(filters.limit) as any;
+  }
+  if (filters?.offset) {
+    query = query.offset(filters.offset) as any;
+  }
+  
+  const result = await query;
   return result;
 }
 
