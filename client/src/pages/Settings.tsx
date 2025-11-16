@@ -1533,7 +1533,7 @@ export default function Settings() {
                 <CardTitle>Dokument-Vorlagen</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Passen Sie die Vorlagen für Exposé, One-Pager, Rechnungen und Maklervertrag an.
-                  Verwenden Sie Platzhalter wie &lbrace;&lbrace;property.title&rbrace;&rbrace;, &lbrace;&lbrace;property.price&rbrace;&rbrace;, &lbrace;&lbrace;company.name&rbrace;&rbrace;, etc.
+                  Verwenden Sie Platzhalter wie {`{{property.title}}`}, {`{{property.price}}`}, {`{{company.name}}`}, etc.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -1544,40 +1544,40 @@ export default function Settings() {
                     <div>
                       <p className="font-semibold mb-1">Immobilie:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>&lbrace;&lbrace;property.title&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.price&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.livingSpace&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.rooms&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.address&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.city&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;property.description&rbrace;&rbrace;</li>
+                        <li>{`{{property.title}}`}</li>
+                        <li>{`{{property.price}}`}</li>
+                        <li>{`{{property.livingSpace}}`}</li>
+                        <li>{`{{property.rooms}}`}</li>
+                        <li>{`{{property.address}}`}</li>
+                        <li>{`{{property.city}}`}</li>
+                        <li>{`{{property.description}}`}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Firma:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>&lbrace;&lbrace;company.name&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;company.address&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;company.phone&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;company.email&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;company.website&rbrace;&rbrace;</li>
+                        <li>{`{{company.name}}`}</li>
+                        <li>{`{{company.address}}`}</li>
+                        <li>{`{{company.phone}}`}</li>
+                        <li>{`{{company.email}}`}</li>
+                        <li>{`{{company.website}}`}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Eigentümer:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>&lbrace;&lbrace;owner.name&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;owner.address&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;owner.email&rbrace;&rbrace;</li>
-                        <li>&lbrace;&lbrace;owner.phone&rbrace;&rbrace;</li>
+                        <li>{`{{owner.name}}`}</li>
+                        <li>{`{{owner.address}}`}</li>
+                        <li>{`{{owner.email}}`}</li>
+                        <li>{`{{owner.phone}}`}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Sonstiges:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>&lbrace;&lbrace;date&rbrace;&rbrace; - Aktuelles Datum</li>
-                        <li>&lbrace;&lbrace;invoiceNumber&rbrace;&rbrace; - Rechnungsnummer</li>
-                        <li>&lbrace;&lbrace;total&rbrace;&rbrace; - Gesamtbetrag</li>
+                        <li>{`{{date}}`} - Aktuelles Datum</li>
+                        <li>{`{{invoiceNumber}}`} - Rechnungsnummer</li>
+                        <li>{`{{total}}`} - Gesamtbetrag</li>
                       </ul>
                     </div>
                   </div>
@@ -1590,7 +1590,7 @@ export default function Settings() {
                     id="exposeTemplate"
                     value={apiKeys.exposeTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, exposeTemplate: e.target.value })}
-                    placeholder="Immobilien-Exposé\n\n&lbrace;&lbrace;property.title&rbrace;&rbrace;\n&lbrace;&lbrace;property.address&rbrace;&rbrace;\n\nPreis: &lbrace;&lbrace;property.price&rbrace;&rbrace;\nWohnfläche: &lbrace;&lbrace;property.livingSpace&rbrace;&rbrace; m²\nZimmer: &lbrace;&lbrace;property.rooms&rbrace;&rbrace;\n\nBeschreibung:\n&lbrace;&lbrace;property.description&rbrace;&rbrace;\n\nKontakt:\n&lbrace;&lbrace;company.name&rbrace;&rbrace;\n&lbrace;&lbrace;company.phone&rbrace;&rbrace;\n&lbrace;&lbrace;company.email&rbrace;&rbrace;"
+                    placeholder="Immobilien-Exposé\n\n{`{{property.title}}`}\n{`{{property.address}}`}\n\nPreis: {`{{property.price}}`}\nWohnfläche: {`{{property.livingSpace}}`} m²\nZimmer: {`{{property.rooms}}`}\n\nBeschreibung:\n{`{{property.description}}`}\n\nKontakt:\n{`{{company.name}}`}\n{`{{company.phone}}`}\n{`{{company.email}}`}"
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -1606,7 +1606,7 @@ export default function Settings() {
                     id="onePagerTemplate"
                     value={apiKeys.onePagerTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, onePagerTemplate: e.target.value })}
-                    placeholder="&lbrace;&lbrace;property.title&rbrace;&rbrace;\n\nSchnellübersicht:\nPreis: &lbrace;&lbrace;property.price&rbrace;&rbrace;\nFläche: &lbrace;&lbrace;property.livingSpace&rbrace;&rbrace; m²\nZimmer: &lbrace;&lbrace;property.rooms&rbrace;&rbrace;\nLage: &lbrace;&lbrace;property.city&rbrace;&rbrace;\n\nKontakt: &lbrace;&lbrace;company.name&rbrace;&rbrace; | &lbrace;&lbrace;company.phone&rbrace;&rbrace;"
+                    placeholder="{`{{property.title}}`}\n\nSchnellübersicht:\nPreis: {`{{property.price}}`}\nFläche: {`{{property.livingSpace}}`} m²\nZimmer: {`{{property.rooms}}`}\nLage: {`{{property.city}}`}\n\nKontakt: {`{{company.name}}`} | {`{{company.phone}}`}"
                     rows={8}
                     className="font-mono text-sm"
                   />
@@ -1622,7 +1622,7 @@ export default function Settings() {
                     id="invoiceTemplate"
                     value={apiKeys.invoiceTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, invoiceTemplate: e.target.value })}
-                    placeholder="RECHNUNG\n\nRechnungsnummer: &lbrace;&lbrace;invoiceNumber&rbrace;&rbrace;\nDatum: &lbrace;&lbrace;date&rbrace;&rbrace;\n\nRechnungsempfänger:\n&lbrace;&lbrace;recipient.name&rbrace;&rbrace;\n&lbrace;&lbrace;recipient.address&rbrace;&rbrace;\n\nLeistungen:\n[Positionen werden automatisch eingefügt]\n\nGesamtbetrag: &lbrace;&lbrace;total&rbrace;&rbrace; €\n\n&lbrace;&lbrace;company.name&rbrace;&rbrace;\n&lbrace;&lbrace;company.address&rbrace;&rbrace;"
+                    placeholder="RECHNUNG\n\nRechnungsnummer: {`{{invoiceNumber}}`}\nDatum: {`{{date}}`}\n\nRechnungsempfänger:\n{`{{recipient.name}}`}\n{`{{recipient.address}}`}\n\nLeistungen:\n[Positionen werden automatisch eingefügt]\n\nGesamtbetrag: {`{{total}}`} €\n\n{`{{company.name}}`}\n{`{{company.address}}`}"
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -1638,7 +1638,7 @@ export default function Settings() {
                     id="maklervertragTemplate"
                     value={apiKeys.maklervertragTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, maklervertragTemplate: e.target.value })}
-                    placeholder="MAKLERVERTRAG\n\nzwischen\n\n&lbrace;&lbrace;company.name&rbrace;&rbrace;\n&lbrace;&lbrace;company.address&rbrace;&rbrace;\n- nachfolgend 'Makler' genannt -\n\nund\n\n&lbrace;&lbrace;owner.name&rbrace;&rbrace;\n&lbrace;&lbrace;owner.address&rbrace;&rbrace;\n- nachfolgend 'Auftraggeber' genannt -\n\n§ 1 Vertragsgegenstand\nDer Auftraggeber beauftragt den Makler mit der Vermittlung der Immobilie '&lbrace;&lbrace;property.title&rbrace;&rbrace;' zum Verkauf.\n\n§ 2 Provision\nDie Provision beträgt 3,57% (inkl. MwSt.) des Kaufpreises und ist bei Abschluss des Kaufvertrages fällig."
+                    placeholder="MAKLERVERTRAG\n\nzwischen\n\n{`{{company.name}}`}\n{`{{company.address}}`}\n- nachfolgend 'Makler' genannt -\n\nund\n\n{`{{owner.name}}`}\n{`{{owner.address}}`}\n- nachfolgend 'Auftraggeber' genannt -\n\n§ 1 Vertragsgegenstand\nDer Auftraggeber beauftragt den Makler mit der Vermittlung der Immobilie '{`{{property.title}}`}' zum Verkauf.\n\n§ 2 Provision\nDie Provision beträgt 3,57% (inkl. MwSt.) des Kaufpreises und ist bei Abschluss des Kaufvertrages fällig."
                     rows={12}
                     className="font-mono text-sm"
                   />
