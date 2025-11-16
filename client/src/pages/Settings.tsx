@@ -477,7 +477,7 @@ export default function Settings() {
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               e.currentTarget.parentElement!.innerHTML = '<div class="text-gray-400"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
-                            }}
+                            }'}'{'}'}
                           />
                         </div>
                       )}
@@ -529,7 +529,7 @@ export default function Settings() {
                               console.error('Logo upload error:', error);
                               toast.error("Fehler beim Hochladen des Logos");
                             }
-                          }}
+                          }'}'{'}'}
                           className="cursor-pointer"
                         />
                         <p className="text-xs text-muted-foreground mt-2">
@@ -1147,7 +1147,7 @@ export default function Settings() {
                             // Automatically remove trailing slash
                             const url = e.target.value.endsWith('/') ? e.target.value.slice(0, -1) : e.target.value;
                             setApiKeys({ ...apiKeys, webdavUrl: url });
-                          }}
+                          }'}'{'}'}
                           placeholder="https://ugreen.tschatscher.eu"
                         />
                         <p className="text-xs text-muted-foreground mt-1">
@@ -1339,7 +1339,7 @@ export default function Settings() {
                     impressum: apiKeys.realestateImpressum,
                     agb: apiKeys.realestateAgb,
                     datenschutz: apiKeys.realestateDatenschutz,
-                  }}
+                  }'}'{'}'}
                   onChange={(data) => setApiKeys({
                     ...apiKeys,
                     realestateLogo: data.logo,
@@ -1377,7 +1377,7 @@ export default function Settings() {
                     impressum: apiKeys.insuranceImpressum,
                     agb: apiKeys.insuranceAgb,
                     datenschutz: apiKeys.insuranceDatenschutz,
-                  }}
+                  }'}'{'}'}
                   onChange={(data) => setApiKeys({
                     ...apiKeys,
                     insuranceLogo: data.logo,
@@ -1415,7 +1415,7 @@ export default function Settings() {
                     impressum: apiKeys.propertyMgmtImpressum,
                     agb: apiKeys.propertyMgmtAgb,
                     datenschutz: apiKeys.propertyMgmtDatenschutz,
-                  }}
+                  }'}'{'}'}
                   onChange={(data) => setApiKeys({
                     ...apiKeys,
                     propertyMgmtLogo: data.logo,
@@ -1492,7 +1492,7 @@ export default function Settings() {
                       onCheckedChange={(checked) => {
                         console.log('[Module Toggle] Versicherungen:', checked);
                         setApiKeys({ ...apiKeys, moduleVersicherungen: checked });
-                      }}
+                      }'}'{'}'}
                     />
                   </div>
 
@@ -1544,40 +1544,40 @@ export default function Settings() {
                     <div>
                       <p className="font-semibold mb-1">Immobilie:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{{property.title}}</li>
-                        <li>{{property.price}}</li>
-                        <li>{{property.livingSpace}}</li>
-                        <li>{{property.rooms}}</li>
-                        <li>{{property.address}}</li>
-                        <li>{{property.city}}</li>
-                        <li>{{property.description}}</li>
+                        <li>{'{'}{'{'}property.title}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.price}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.livingSpace}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.rooms}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.address}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.city}'}'{'}'}</li>
+                        <li>{'{'}{'{'}property.description}'}'{'}'}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Firma:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{{company.name}}</li>
-                        <li>{{company.address}}</li>
-                        <li>{{company.phone}}</li>
-                        <li>{{company.email}}</li>
-                        <li>{{company.website}}</li>
+                        <li>{'{'}{'{'}company.name}'}'{'}'}</li>
+                        <li>{'{'}{'{'}company.address}'}'{'}'}</li>
+                        <li>{'{'}{'{'}company.phone}'}'{'}'}</li>
+                        <li>{'{'}{'{'}company.email}'}'{'}'}</li>
+                        <li>{'{'}{'{'}company.website}'}'{'}'}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Eigentümer:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{{owner.name}}</li>
-                        <li>{{owner.address}}</li>
-                        <li>{{owner.email}}</li>
-                        <li>{{owner.phone}}</li>
+                        <li>{'{'}{'{'}owner.name}'}'{'}'}</li>
+                        <li>{'{'}{'{'}owner.address}'}'{'}'}</li>
+                        <li>{'{'}{'{'}owner.email}'}'{'}'}</li>
+                        <li>{'{'}{'{'}owner.phone}'}'{'}'}</li>
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold mb-1">Sonstiges:</p>
                       <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{{date}} - Aktuelles Datum</li>
-                        <li>{{invoiceNumber}} - Rechnungsnummer</li>
-                        <li>{{total}} - Gesamtbetrag</li>
+                        <li>{'{'}{'{'}date}'}'{'}'} - Aktuelles Datum</li>
+                        <li>{'{'}{'{'}invoiceNumber}'}'{'}'} - Rechnungsnummer</li>
+                        <li>{'{'}{'{'}total}'}'{'}'} - Gesamtbetrag</li>
                       </ul>
                     </div>
                   </div>
@@ -1590,7 +1590,7 @@ export default function Settings() {
                     id="exposeTemplate"
                     value={apiKeys.exposeTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, exposeTemplate: e.target.value })}
-                    placeholder="Immobilien-Exposé\n\n{{property.title}}\n{{property.address}}\n\nPreis: {{property.price}}\nWohnfläche: {{property.livingSpace}} m²\nZimmer: {{property.rooms}}\n\nBeschreibung:\n{{property.description}}\n\nKontakt:\n{{company.name}}\n{{company.phone}}\n{{company.email}}"
+                    placeholder="Immobilien-Exposé\n\n{'{'}{'{'}property.title}'}'{'}'}\n{'{'}{'{'}property.address}'}'{'}'}\n\nPreis: {'{'}{'{'}property.price}'}'{'}'}\nWohnfläche: {'{'}{'{'}property.livingSpace}'}'{'}'} m²\nZimmer: {'{'}{'{'}property.rooms}'}'{'}'}\n\nBeschreibung:\n{'{'}{'{'}property.description}'}'{'}'}\n\nKontakt:\n{'{'}{'{'}company.name}'}'{'}'}\n{'{'}{'{'}company.phone}'}'{'}'}\n{'{'}{'{'}company.email}'}'{'}'}"
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -1606,7 +1606,7 @@ export default function Settings() {
                     id="onePagerTemplate"
                     value={apiKeys.onePagerTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, onePagerTemplate: e.target.value })}
-                    placeholder="{{property.title}}\n\nSchnellübersicht:\nPreis: {{property.price}}\nFläche: {{property.livingSpace}} m²\nZimmer: {{property.rooms}}\nLage: {{property.city}}\n\nKontakt: {{company.name}} | {{company.phone}}"
+                    placeholder="{'{'}{'{'}property.title}'}'{'}'}\n\nSchnellübersicht:\nPreis: {'{'}{'{'}property.price}'}'{'}'}\nFläche: {'{'}{'{'}property.livingSpace}'}'{'}'} m²\nZimmer: {'{'}{'{'}property.rooms}'}'{'}'}\nLage: {'{'}{'{'}property.city}'}'{'}'}\n\nKontakt: {'{'}{'{'}company.name}'}'{'}'} | {'{'}{'{'}company.phone}'}'{'}'}"
                     rows={8}
                     className="font-mono text-sm"
                   />
@@ -1622,7 +1622,7 @@ export default function Settings() {
                     id="invoiceTemplate"
                     value={apiKeys.invoiceTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, invoiceTemplate: e.target.value })}
-                    placeholder="RECHNUNG\n\nRechnungsnummer: {{invoiceNumber}}\nDatum: {{date}}\n\nRechnungsempfänger:\n{{recipient.name}}\n{{recipient.address}}\n\nLeistungen:\n[Positionen werden automatisch eingefügt]\n\nGesamtbetrag: {{total}} €\n\n{{company.name}}\n{{company.address}}"
+                    placeholder="RECHNUNG\n\nRechnungsnummer: {'{'}{'{'}invoiceNumber}'}'{'}'}\nDatum: {'{'}{'{'}date}'}'{'}'}\n\nRechnungsempfänger:\n{'{'}{'{'}recipient.name}'}'{'}'}\n{'{'}{'{'}recipient.address}'}'{'}'}\n\nLeistungen:\n[Positionen werden automatisch eingefügt]\n\nGesamtbetrag: {'{'}{'{'}total}'}'{'}'} €\n\n{'{'}{'{'}company.name}'}'{'}'}\n{'{'}{'{'}company.address}'}'{'}'}"
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -1638,7 +1638,7 @@ export default function Settings() {
                     id="maklervertragTemplate"
                     value={apiKeys.maklervertragTemplate || ''}
                     onChange={(e) => setApiKeys({ ...apiKeys, maklervertragTemplate: e.target.value })}
-                    placeholder="MAKLERVERTRAG\n\nzwischen\n\n{{company.name}}\n{{company.address}}\n- nachfolgend 'Makler' genannt -\n\nund\n\n{{owner.name}}\n{{owner.address}}\n- nachfolgend 'Auftraggeber' genannt -\n\n§ 1 Vertragsgegenstand\nDer Auftraggeber beauftragt den Makler mit der Vermittlung der Immobilie '{{property.title}}' zum Verkauf.\n\n§ 2 Provision\nDie Provision beträgt 3,57% (inkl. MwSt.) des Kaufpreises und ist bei Abschluss des Kaufvertrages fällig."
+                    placeholder="MAKLERVERTRAG\n\nzwischen\n\n{'{'}{'{'}company.name}'}'{'}'}\n{'{'}{'{'}company.address}'}'{'}'}\n- nachfolgend 'Makler' genannt -\n\nund\n\n{'{'}{'{'}owner.name}'}'{'}'}\n{'{'}{'{'}owner.address}'}'{'}'}\n- nachfolgend 'Auftraggeber' genannt -\n\n§ 1 Vertragsgegenstand\nDer Auftraggeber beauftragt den Makler mit der Vermittlung der Immobilie '{'{'}{'{'}property.title}'}'{'}'}' zum Verkauf.\n\n§ 2 Provision\nDie Provision beträgt 3,57% (inkl. MwSt.) des Kaufpreises und ist bei Abschluss des Kaufvertrages fällig."
                     rows={12}
                     className="font-mono text-sm"
                   />
