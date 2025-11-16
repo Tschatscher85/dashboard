@@ -12,7 +12,6 @@ async function migrate() {
   console.log("🔄 Checking propertyLinks table...");
   
   const connection = await mysql.createConnection(DATABASE_URL);
-  const db = drizzle(connection);
   
   try {
     // Check if table exists
@@ -41,11 +40,69 @@ async function migrate() {
       console.log("✅ propertyLinks table created successfully!");
     } else {
       console.log("✅ propertyLinks table already exists");
+      
+      // Check if we need to migrate from old schema
+      const [columns] = await connection.query("DESCRIBE propertyLinks");
+      const columnNames = columns.map(c => c.Field);
+      
+      // Check if old schema (description, displayOrder) exists
+      const hasOldSchema = columnNames.includes('description') || columnNames.includes('displayOrder');
+      const hasNewSchema = columnNames.includes('showOnLandingPage') && columnNames.includes('sortOrder');
+      
+      if (hasOldSchema && !hasNewSchema) {
+        console.log("🔄 Migrating from old schema to new schema...");
+        
+        // Add new columns
+        if (!columnNames.includes('showOnLandingPage')) {
+          await connection.query(`
+            ALTER TABLE propertyLinks 
+            ADD COLUMN showOnLandingPage BOOLEAN DEFAULT FALSE AFTER url
+          `);
+          console.log("  ✓ Added showOnLandingPage column");
+        }
+        
+        if (!columnNames.includes('sortOrder')) {
+          await connection.query(`
+            ALTER TABLE propertyLinks 
+            ADD COLUMN sortOrder INT DEFAULT 0 AFTER showOnLandingPage
+          `);
+          console.log("  ✓ Added sortOrder column");
+        }
+        
+        if (!columnNames.includes('createdBy')) {
+          await connection.query(`
+            ALTER TABLE propertyLinks 
+            ADD COLUMN createdBy INT AFTER updatedAt
+          `);
+          console.log("  ✓ Added createdBy column");
+        }
+        
+        // Drop old columns
+        if (columnNames.includes('description')) {
+          await connection.query(`
+            ALTER TABLE propertyLinks 
+            DROP COLUMN description
+          `);
+          console.log("  ✓ Removed description column");
+        }
+        
+        if (columnNames.includes('displayOrder')) {
+          await connection.query(`
+            ALTER TABLE propertyLinks 
+            DROP COLUMN displayOrder
+          `);
+          console.log("  ✓ Removed displayOrder column");
+        }
+        
+        console.log("✅ Schema migration completed!");
+      } else if (hasNewSchema) {
+        console.log("✅ Schema is up to date!");
+      }
     }
     
-    // Verify table structure
-    const [columns] = await connection.query("DESCRIBE propertyLinks");
-    console.log("📋 Table structure:", columns.map(c => c.Field).join(", "));
+    // Verify final table structure
+    const [finalColumns] = await connection.query("DESCRIBE propertyLinks");
+    console.log("📋 Table structure:", finalColumns.map(c => c.Field).join(", "));
     
   } catch (error) {
     console.error("❌ Migration failed:", error);
