@@ -2520,12 +2520,12 @@ Die Beschreibung soll:
         // Create lead in database
         await db.createLead(input);
         
-        // Send email notifications
+        // Send email notifications + add to Brevo CRM List 18
         try {
-          const { notifyAdminLead, notifyCustomerLead } = await import("./email");
+          const { processLead } = await import("./email");
           const property = input.propertyId ? await db.getPropertyById(input.propertyId) : null;
           
-          const emailData = {
+          const leadData = {
             firstName: input.firstName || "Unbekannt",
             lastName: input.lastName || "",
             email: input.email,
@@ -2534,16 +2534,13 @@ Die Beschreibung soll:
             propertyTitle: property?.title,
           };
           
-          // Send notification to admin
-          await notifyAdminLead(emailData);
+          // Complete lead processing: emails + CRM
+          await processLead(leadData);
           
-          // Send confirmation to customer
-          if (input.email) {
-            await notifyCustomerLead(emailData);
-          }
+          console.log(`✅ Lead processed: ${input.email} added to Brevo List 18`);
         } catch (emailError) {
-          console.error("Failed to send email notifications:", emailError);
-          // Don't fail the request if email sending fails
+          console.error("Failed to process lead:", emailError);
+          // Don't fail the request if email/CRM processing fails
         }
         
         return { success: true };

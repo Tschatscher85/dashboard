@@ -28,6 +28,18 @@ interface BrevoEmailRequest {
   textContent: string;
 }
 
+interface BrevoContact {
+  email: string;
+  attributes?: {
+    FIRSTNAME?: string;
+    LASTNAME?: string;
+    SMS?: string;
+    [key: string]: any;
+  };
+  listIds?: number[];
+  updateEnabled?: boolean;
+}
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -87,6 +99,27 @@ async function sendBrevoEmail(emailData: BrevoEmailRequest, apiKey: string): Pro
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Brevo API error: ${response.status} - ${errorText}`);
+  }
+}
+
+/**
+ * Create or update contact in Brevo CRM and add to list
+ * List 18 = Immobilienanfragen
+ */
+async function createBrevoContact(contactData: BrevoContact, apiKey: string): Promise<void> {
+  const response = await fetch("https://api.brevo.com/v3/contacts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify(contactData),
+  });
+
+  // 201 = created, 204 = updated (already exists)
+  if (!response.ok && response.status !== 204) {
+    const errorText = await response.text();
+    throw new Error(`Brevo Contacts API error: ${response.status} - ${errorText}`);
   }
 }
 
@@ -247,4 +280,43 @@ export async function notifyCustomerLead(data: LeadData): Promise<void> {
     htmlContent: generateLeadConfirmationHTML(data),
     textContent: generateLeadConfirmationText(data),
   }, config.apiKey);
+}
+
+/**
+ * Add contact to Brevo CRM List 18 (Immobilienanfragen)
+ * This creates/updates the contact and adds them to the list
+ */
+export async function addContactToBrevoList(data: LeadData): Promise<void> {
+  const config = await getEmailSettings();
+  
+  const contactData: BrevoContact = {
+    email: data.email,
+    attributes: {
+      FIRSTNAME: data.firstName,
+      LASTNAME: data.lastName,
+    },
+    listIds: [18], // Liste 18 = Immobilienanfragen
+    updateEnabled: true, // Update if contact already exists
+  };
+  
+  // Add phone if provided
+  if (data.phone) {
+    contactData.attributes!.SMS = data.phone;
+  }
+  
+  await createBrevoContact(contactData, config.apiKey);
+}
+
+/**
+ * Complete lead processing: Send emails + add to CRM
+ */
+export async function processLead(data: LeadData): Promise<void> {
+  // Send notification to admin
+  await notifyAdminLead(data);
+  
+  // Send confirmation to customer
+  await notifyCustomerLead(data);
+  
+  // Add contact to Brevo CRM List 18
+  await addContactToBrevoList(data);
 }
