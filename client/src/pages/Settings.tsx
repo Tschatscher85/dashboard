@@ -41,6 +41,9 @@ export default function Settings() {
     dashboardLogo: "",
     superchat: "",
     brevo: "",
+    emailFrom: "",
+    emailFromName: "",
+    emailNotificationTo: "",
     brevoPropertyInquiryListId: "",
     brevoOwnerInquiryListId: "",
     brevoInsuranceListId: "",
@@ -50,6 +53,7 @@ export default function Settings() {
     googleClientId: "",
     googleClientSecret: "",
     googleMaps: "",
+    landingPageTemplate: "modern",
     propertySync: "",
     openai: "",
     // ImmoScout24 API
@@ -167,6 +171,9 @@ export default function Settings() {
         dashboardLogo: currentApiKeys.dashboardLogo || "",
         superchat: currentApiKeys.superchat || "",
         brevo: currentApiKeys.brevo || "",
+        emailFrom: currentApiKeys.emailFrom || "",
+        emailFromName: currentApiKeys.emailFromName || "",
+        emailNotificationTo: currentApiKeys.emailNotificationTo || "",
         brevoPropertyInquiryListId: currentApiKeys.brevoPropertyInquiryListId || "",
         brevoOwnerInquiryListId: currentApiKeys.brevoOwnerInquiryListId || "",
         brevoInsuranceListId: currentApiKeys.brevoInsuranceListId || "",
@@ -176,6 +183,7 @@ export default function Settings() {
         googleClientId: currentApiKeys.googleClientId || "",
         googleClientSecret: currentApiKeys.googleClientSecret || "",
         googleMaps: currentApiKeys.googleMaps || "",
+        landingPageTemplate: currentApiKeys.landingPageTemplate || "modern",
         propertySync: currentApiKeys.propertySync || "",
         openai: currentApiKeys.openai || "",
         // ImmoScout24 API
@@ -557,6 +565,58 @@ export default function Settings() {
                   </p>
                 </div>
 
+                {/* Brevo Email Settings */}
+                <div className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-blue-50/50">
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2">E-Mail Einstellungen</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Konfiguration für automatische E-Mail-Benachrichtigungen
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="emailFrom">Absender E-Mail</Label>
+                    <Input
+                      id="emailFrom"
+                      type="email"
+                      value={apiKeys.emailFrom || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, emailFrom: e.target.value })}
+                      placeholder="noreply@tschatscher.eu"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      E-Mail-Adresse die als Absender verwendet wird
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="emailFromName">Absender Name</Label>
+                    <Input
+                      id="emailFromName"
+                      type="text"
+                      value={apiKeys.emailFromName || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, emailFromName: e.target.value })}
+                      placeholder="Immo-Jaeger"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Name der als Absender angezeigt wird
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="emailNotificationTo">Benachrichtigungs-E-Mail</Label>
+                    <Input
+                      id="emailNotificationTo"
+                      type="email"
+                      value={apiKeys.emailNotificationTo || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, emailNotificationTo: e.target.value })}
+                      placeholder="info@immo-jaeger.eu"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      E-Mail-Adresse die Benachrichtigungen über neue Anfragen erhält
+                    </p>
+                  </div>
+                </div>
+
                 {/* Brevo List IDs */}
                 <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-blue-50/50">
                   <div className="col-span-2">
@@ -567,7 +627,7 @@ export default function Settings() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="brevoPropertyInquiryListId">Immobilienanfragen List ID</Label>
+                    <Label htmlFor="brevoPropertyInquiryListId">Immobilienanfragen List ID (Landing Page)</Label>
                     <Input
                       id="brevoPropertyInquiryListId"
                       type="number"
@@ -576,7 +636,7 @@ export default function Settings() {
                       placeholder="18"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Standard: #18 (Immobilienanfragen)
+                      Standard: #18 - Kontakte von Property Landing Pages
                     </p>
                   </div>
                   
@@ -796,6 +856,41 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">
                     Für Adress-Autocomplete und Entfernungsberechnung
                   </p>
+                </div>
+
+                {/* Landing Page Template */}
+                <div className="space-y-4 p-4 border rounded-lg bg-indigo-50/50">
+                  <div>
+                    <h4 className="font-semibold text-indigo-900 mb-2">Landing Page Vorlage</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Wählen Sie das Design für Ihre Immobilien-Landing Pages
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="landingPageTemplate">Template auswählen</Label>
+                    <Select
+                      value={apiKeys.landingPageTemplate || 'modern'}
+                      onValueChange={(value) => setApiKeys({ ...apiKeys, landingPageTemplate: value })}
+                    >
+                      <SelectTrigger id="landingPageTemplate">
+                        <SelectValue placeholder="Template wählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="modern">Modern - Minimalistisch & Übersichtlich</SelectItem>
+                        <SelectItem value="elegant">Elegant - Luxuriös & Stilvoll</SelectItem>
+                        <SelectItem value="clean">Clean - Schlicht & Professionell</SelectItem>
+                        <SelectItem value="popular">Popular - Bewährt & Beliebt</SelectItem>
+                        <SelectItem value="trust">Trust - Vertrauenswürdig & Seriös</SelectItem>
+                        <SelectItem value="progress">Progress - Dynamisch & Fortschrittlich</SelectItem>
+                        <SelectItem value="whitesmoke">Whitesmoke - Hell & Luftig</SelectItem>
+                        <SelectItem value="iframe">iFrame - Einbettbar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Das gewählte Template wird für alle Property Landing Pages verwendet
+                    </p>
+                  </div>
                 </div>
 
                 {/* ImmoScout24 API Configuration */}

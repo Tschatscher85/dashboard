@@ -377,6 +377,9 @@ export const settings = mysqlTable("settings", {
   emailFromName: varchar("emailFromName", { length: 255 }), // Absender-Name (z.B. Immo-Jaeger)
   emailNotificationTo: varchar("emailNotificationTo", { length: 255 }), // E-Mail für Benachrichtigungen (z.B. info@immo-jaeger.eu)
   
+  // Landing Page Settings
+  landingPageTemplate: varchar("landingPageTemplate", { length: 50 }).default("modern"), // Template für Property Landing Pages
+  
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 

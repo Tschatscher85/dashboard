@@ -208,6 +208,10 @@ export const appRouter = router({
         dashboardLogo: z.string().optional(),
         superchat: z.string().optional(),
         brevo: z.string().optional(),
+        emailFrom: z.string().optional(),
+        emailFromName: z.string().optional(),
+        emailNotificationTo: z.string().optional(),
+        landingPageTemplate: z.string().optional(),
         brevoPropertyInquiryListId: z.string().optional(),
         brevoOwnerInquiryListId: z.string().optional(),
         brevoInsuranceListId: z.string().optional(),
@@ -2982,15 +2986,44 @@ Die Beschreibung soll:
       }),
   }),
 
-  // ============ DASHBOARD ============
+    // ============ DASHBOARD ============
   dashboard: router({
     stats: publicProcedure.query(async () => {
       return await db.getDashboardStats();
     }),
   }),
-
+  
+  // ============ TEMPLATE RENDERING ============
+  templates: router({
+    // Get available templates
+    list: publicProcedure
+      .query(async () => {
+        const { getAvailableTemplates } = await import('./templateRenderer');
+        return getAvailableTemplates();
+      }),
+    
+    // Get default template from settings
+    getDefault: publicProcedure
+      .query(async () => {
+        const { getDefaultTemplate } = await import('./templateRenderer');
+        return await getDefaultTemplate();
+      }),
+    
+    // Render property landing page with template
+    renderLandingPage: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        template: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const { renderPropertyLandingPage, getDefaultTemplate } = await import('./templateRenderer');
+        const template = input.template || await getDefaultTemplate();
+        const html = await renderPropertyLandingPage(input.propertyId, template);
+        return { html, template };
+      }),
+  }),
+  
   // Note: Brevo router already exists above (line 1546)
   // New endpoints for Immobilienanfragen/Eigentümeranfragen will be added there
 });
-
 export type AppRouter = typeof appRouter;

@@ -1131,3 +1131,23 @@ export async function deletePropertyLink(id: number) {
   
   return { success: true };
 }
+
+
+// ============ SETTINGS OPERATIONS ============
+
+export async function getSettings() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get settings: database not available");
+    return null;
+  }
+  
+  try {
+    const { settings } = await import('../drizzle/schema');
+    const result = await db.select().from(settings).limit(1);
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get settings:", error);
+    return null;
+  }
+}
