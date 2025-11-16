@@ -1533,7 +1533,7 @@ export default function Settings() {
                 <CardTitle>Dokument-Vorlagen</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Passen Sie die Vorlagen für Exposé, One-Pager, Rechnungen und Maklervertrag an.
-                  Verwenden Sie Platzhalter wie {{property.title}}, {{property.price}}, {{company.name}}, etc.
+                  Verwenden Sie Platzhalter wie {property.title}, {property.price}, {company.name}, etc.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
