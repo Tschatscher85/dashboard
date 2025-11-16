@@ -371,6 +371,12 @@ export const settings = mysqlTable("settings", {
   // Other settings
   defaultCommission: varchar("defaultCommission", { length: 50 }),
   
+  // E-Mail settings (Brevo)
+  brevoApiKey: text("brevoApiKey"),
+  emailFrom: varchar("emailFrom", { length: 255 }), // Absender-E-Mail (z.B. noreply@tschatscher.eu)
+  emailFromName: varchar("emailFromName", { length: 255 }), // Absender-Name (z.B. Immo-Jaeger)
+  emailNotificationTo: varchar("emailNotificationTo", { length: 255 }), // E-Mail für Benachrichtigungen (z.B. info@immo-jaeger.eu)
+  
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 

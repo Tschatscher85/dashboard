@@ -2474,7 +2474,35 @@ Die Beschreibung soll:
         message: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
+        // Create lead in database
         await db.createLead(input);
+        
+        // Send email notifications
+        try {
+          const { notifyAdminLead, notifyCustomerLead } = await import("./email");
+          const property = input.propertyId ? await db.getPropertyById(input.propertyId) : null;
+          
+          const emailData = {
+            firstName: input.firstName || "Unbekannt",
+            lastName: input.lastName || "",
+            email: input.email,
+            phone: input.phone,
+            message: input.message,
+            propertyTitle: property?.title,
+          };
+          
+          // Send notification to admin
+          await notifyAdminLead(emailData);
+          
+          // Send confirmation to customer
+          if (input.email) {
+            await notifyCustomerLead(emailData);
+          }
+        } catch (emailError) {
+          console.error("Failed to send email notifications:", emailError);
+          // Don't fail the request if email sending fails
+        }
+        
         return { success: true };
       }),
 
