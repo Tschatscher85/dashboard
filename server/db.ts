@@ -8,6 +8,7 @@ import {
   contacts, InsertContact,
   propertyImages, InsertPropertyImage,
   documents, InsertDocument,
+  propertyLinks, InsertPropertyLink,
   appointments, InsertAppointment,
   activities, InsertActivity,
   leads, InsertLead,
@@ -431,6 +432,42 @@ export async function deleteDocument(id: number) {
   if (!db) throw new Error("Database not available");
   
   const result = await db.delete(documents).where(eq(documents.id, id));
+  return result;
+}
+
+// ============ PROPERTY LINKS OPERATIONS ============
+
+export async function createPropertyLink(link: InsertPropertyLink) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(propertyLinks).values(link);
+  return result[0]?.insertId || 0;
+}
+
+export async function getPropertyLinksByPropertyId(propertyId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(propertyLinks)
+    .where(eq(propertyLinks.propertyId, propertyId))
+    .orderBy(propertyLinks.sortOrder, propertyLinks.createdAt);
+  return result;
+}
+
+export async function updatePropertyLink(id: number, updates: Partial<InsertPropertyLink>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(propertyLinks).set(updates).where(eq(propertyLinks.id, id));
+  return result;
+}
+
+export async function deletePropertyLink(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(propertyLinks).where(eq(propertyLinks.id, id));
   return result;
 }
 

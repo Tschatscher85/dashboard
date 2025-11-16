@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>{{ property.title }} | {{ shop.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    {% if shop.faviconUrl %}
+    <link rel="icon" href="{{ shop.faviconUrl }}" type="image/x-icon" />
+    {% else %}
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    {% endif %}
+    <link
+      rel="stylesheet"
+      href="https://pro-propstack-public.s3.eu-west-1.amazonaws.com/projects/progress/assets/css/bootstrap.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://pro.fontawesome.com/releases/v5.7.1/css/all.css"
+      integrity="sha384-6jHF7Z3XI3fF4XZixAuSu0gGKrXwoX/w3uFPxC56OtjChio7wtTGJWRW53Nhx6Ev"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    {% assign color = shop.color | default: '#0f55eb' %}
+    <style>
+      :root {
+        --primary: {{ color }};
+        --primary-light: {{ color }}dd;
+      }
+      a:hover {
+      	color: {{ color }};
+      	cursor: pointer;
+      }
+      {{ shop.lp_css }}
+
+      .hidden{
+      	display: none;
+      }
+      .show-contact-btn{
+      	background-color: white;
+      	border: 1px black solid;
+      	border-radius: 0.25rem;
+      	height: 35px;
+      	width: 215px;
+      	margin-top: 10px;
+      	cursor: pointer;
+      }
+
+      .disabled{
+      	pointer-events: none;
+      }
+
+      .map-container .embed-responsive.empty {
+        height: 0 !important;
+      }
+      .footer-button {
+        all: unset;
+        cursor: pointer;
+        font-size: .9rem;
+        font-weight: 300;
+      }
+      .footer-button:hover,
+      .footer-button:focus {
+        color: #1F58E2;
+        text-decoration: underline;
+      }
+
+      .baufi-tipster-iframe {
+        width: 100%;
+        height: 415px;
+        border: none;
+        background: #f0f0f0;
+        overflow: auto;
+      }
+
+      @media screen and (max-width: 767px) {
+        .baufi-tipster-iframe {
+          height: 600px;
+          min-height: 600px;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        .baufi-tipster-iframe {
+          height: 650px;
+          min-height: 650px;
+        }
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@v2.9.1/dist/cookieconsent.min.css"
+    />
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@v2.9.1/dist/cookieconsent.min.js"
+    ></script>
+    {{ shop.lp_js }}
+  </head>
+  {% assign needsPolicy = policy.needed %} {% assign policyAccepted = policy.accepted %} {% assign reasonSubmitted =
+  reason.submitted %} {% assign showCancelButton = reason.show_cancel_button %}
+  <body>
+    <nav id="main-nav" class="navbar navbar-expand-lg">
+      <span class="navbar-brand logo-wrap">
+        <a href="#" role="button">
+          <img src="{{ shop.logoUrl }}" alt="Logo" class="d-inline-block logo-img" style="max-height: 133px" />
+        </a>
+      </span>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <i class="fal fa-bars fa-lg"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto text-center">
+          <li class="nav-item">
+            <a class="nav-link" href="#details">{{ t.details }}</a>
+          </li>
+          {% if property.documents.size > 0 %}
+          <li class="nav-item">
+            <a class="nav-link" href="#documents">{{ t.documents }}</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="#images">{{ t.images }}</a>
+          </li>
+          {% for embed in property.embed_links %}
+          <li class="nav-item">
+            <a class="nav-link" href="#embed-{{ embed.id }}">{{ embed.title }}</a>
+          </li>
+          {% endfor %} {% if property.links.size > 0 %}
+          <li class="nav-item">
+            <a class="nav-link" href="#links">{{ t.links }}</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="#location">{{ t.location }}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">{{ t.contact }}</a>
+          </li>
+          {% unless short_exposee %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ print_url }}">{{ t.print }}</a>
+          </li>
+          {% endunless %}
+        </ul>
+      </div>
+    </nav>
+
+    <header class="py-5">
+      <div class="page-container">
+        {% if policyAccepted %}
+        <span class="badge badge-success mb-1">{{ "lp.general.cancelation_policy_accepted" | t }}</span>
+        {% endif %} {% if reasonSubmitted %}
+        <span class="badge badge-danger mb-1">{{ "lp.general.cancelation_reason" | t }}: {{ reason.submitted }}</span>
+        {% endif %}
+        <h1 class="page-title">{{ property.title }}</h1>
+        <p class="page-kicker h6">{{ property.lp_address }}</p>
+      </div>
+    </header>
+
+    <section id="splash" class="splash mb-5">
+      <div
+        class="splash-img"
+        title="{{ t.title_image }}"
+        style="background-image: url('{{ property.images | map: 'url' | first }}')"
+      ></div>
+    </section>
+
+    <main id="main">
+      {% if property.description_note %}
+      <section id="description" class="container py-5">
+        <div class="row">
+          <div class="col-md-4">
+            <h2 class="headline">{{ t.description }}</h2>
+          </div>
+          <div class="col-md-7 offset-md-1">
+            <article>
+              <p>{{ property.description_note }}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      <section id="details" class="py-5">
+        <div id="property-infos">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-4">
+                <h2 class="headline">{{ t.details }}</h2>
+              </div>
+              <div class="col-md-7 offset-md-1">
+                <section>
+                  {% for group in property.structured_data %}
+                  <main class="mb-4" id="property-data-{{ group.id }}">
+                    {% for field in group.fields %}
+                    <div class="d-flex border-bottom py-2" data-field-name="{{ field.key }}">
+                      <div class="w-100 mr-2 text-muted">{{ field.label }}</div>
+                      <div class="w-100">
+                        {% if field.value == true %} {{ t.yes }} {% else %} {{ field.value }} {% endif %}
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </main>
+                  {% endfor %}
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="images" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-1 ox-visible">
+              <h2 class="headline mt-md-4"><span>{{ t.images }}</span></h2>
+            </div>
+            <div class="col-md-11 offset-md-0">
+              <div id="images-gallery" class="image-grid">
+                {% for image in property.images %}
+                <div class="image-cell" title="{{ image.title }}" data-src="{{ image.url }}">
+                  <a href="{{ image.url }}" class="ls-item" style="background-image: url('{{ image.url }}')">
+                    {% if image.title %}
+                    <span class="ls-caption">{{ image.title }}</span>
+                    {% endif %}
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {% if property.documents.size > 0 %}
+      <section id="documents" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline">{{ t.documents }}</h2>
+            </div>
+            <div class="col-md-7 offset-md-1">
+              <div class="doc-grid">
+                {% for doc in property.documents %}
+                <a target="_blank" href="{{ doc.url }}" class="doc-cell">
+                  <span>{{ doc.title }}</span>
+                  <small class="doc-cell-suffix">{{ "lp.general.download" | t }}</small>
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %} {% if property.image_floorplans.size > 0 %}
+      <section id="floorplans" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-1 ox-visible">
+              <h2 class="headline mt-md-4"><span>{{ t.floorplans }}</span></h2>
+            </div>
+            <div class="col-md-11 offset-md-0">
+              <div id="floorplan-gallery" class="floorplan-grid">
+                {% for floorplan in property.image_floorplans %}
+                <div class="floorplan-cell" title="{{ floorplan.title }}" data-src="{{ floorplan.url }}">
+                  <a href="{{ floorplan.url }}" class="ls-item" style="background-image: url('{{ floorplan.url }}')">
+                    <!--<img src="{{ floorplan.url }}" alt="{{ floorplan.title }}" class="w-100">-->
+                    {% if floorplan.title %}
+                    <!--<small class="text-muted">{{ floorplan.title }}</small>-->
+                    {% endif %}
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %} {% if property.furnishing_note %}
+      <section id="furnishing" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline mb-4">{{ t.furnishing }}</h2>
+            </div>
+            <div class="col-md-7 offset-md-1">
+              <article>
+                <p>{{ property.furnishing_note }}</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %} {% if property.links.size > 0 %}
+      <section id="links" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline">{{ t.links }}</h2>
+            </div>
+            <div class="col-md-7 offset-md-1">
+              <div class="doc-grid">
+                {% for link in property.links %}
+                <a target="_blank" href="{{ link.url }}" class="doc-cell">
+                  <span>{{ link.title }}</span>
+                  <small class="doc-cell-suffix">{{ t.visit_link }}</small>
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %} {% for embed in property.embed_links %}
+      <section id="embed-{{ embed.id }}" class="py-5">
+        <div class="container">
+          <h2 class="headline">{{ embed.title }}</h2>
+        </div>
+
+        <div class="container">
+          <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" allowfullscreen="true" src="{{ embed.url }}" frameborder="0"></iframe>
+          </div>
+        </div>
+      </section>
+      {% endfor %} {% if property.location_note %}
+      <section id="location" class="pt-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline">{{ t.location }}</h2>
+            </div>
+            <div class="col-md-7 offset-md-1">
+              <article>
+                <p>{{ property.location_note }}</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      <section id="map">
+        <div class="map-container pt-5">
+          <div class="embed-responsive embed-responsive-21by9 empty">
+            {% if show_complete_address and property.lng and property.lat %}
+            <div
+              id="map-wrap"
+              data-lat="{{ property.lat }}"
+              data-lng="{{ property.lng }}"
+              class="embed-responsive-item"
+            ></div>
+            {% elsif property.zip_code or property.city %}
+            <div
+              id="map-wrap"
+              data-zipcode="{{ property.zip_code }}"
+              data-city="{{ property.city }}"
+              class="embed-responsive-item"
+            ></div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      {% if property.other_note %}
+      <section id="other" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline mb-4">{{ t.other }}</h2>
+            </div>
+            <div class="col-md-7 offset-md-1">
+              <article>
+                <p>{{ property.other_note }}</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %} {% if property.baufi_tipster.widget and property.zip_code and property.formatted.raw.price and
+      property.price_on_inquiry == false and property.for_bidding == false%}
+      <section class="container">
+        <section id="baufi_tipster" class="py-4">
+          <iframe
+            class="baufi-tipster-iframe"
+            src="https://mortgage-form-application.finanzen.immobilienscout24.de/financing/{{property.baufi_tipster.token}}?company_id={{property.baufi_tipster.company_id}}&postcode={{property.zip_code}}&purchaseprice={{property.formatted.raw.price}}&ps_estate_id={{property.id}}&partner_key={{ property.baufi_tipster.partner_key }}&transaction_id={{property.expose_id}}&ps_contact_id={{ broker.name }}"
+          ></iframe>
+        </section>
+      </section>
+      {% endif %}
+
+      <section id="contact" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h2 class="headline">{{ t.contact }}</h2>
+            </div>
+            {% if offmarket_enabled %}
+            <button onclick="action()" id="show-contact" class="show-contact-btn">
+              {{ "lp.general.show_contact_details" | t }}
+            </button>
+            <div id="contact-info" class="col-md-7 offset-md-1 hidden">
+              <h4 class="mb-1 sub-headline">{{ broker.name }}</h4>
+              <p class="mb-2 lead">{{ broker.position }}</p>
+              <span class="mb-2" style="white-space: nowrap">
+                <i class="fal fa-at fa-fw"></i>
+                <a href="mailto:{{ broker.contactEmail }}">{{ broker.contactEmail }}</a>
+              </span>
+              {% if broker.contactPhone %}
+              <br />
+              <span class="mb-2">
+                <i class="fal fa-phone fa-fw"></i>
+                <a href="tel:{{ broker.contactPhone }}">{{ broker.contactPhone }}</a>
+              </span>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="d-flex flex-row">
+              {% if broker.avatarUrl %}
+              <img class="rounded-circle" style="height: 130px" src="{{ broker.avatarUrl }}" />
+              {% endif %}
+              <div class="offset-md-1">
+                <h4 class="mb-1 sub-headline">{{ broker.name }}</h4>
+                <p class="mb-2 lead">{{ broker.position }}</p>
+                <span class="mb-2" style="white-space: nowrap">
+                  <i class="fal fa-at fa-fw"></i>
+                  <a href="mailto:{{ broker.contactEmail }}">{{ broker.contactEmail }}</a>
+                </span>
+                {% if broker.contactPhone %}
+                <br />
+                <span class="mb-2">
+                  <i class="fal fa-phone fa-fw"></i>
+                  <a href="tel:{{ broker.contactPhone }}">{{ broker.contactPhone }}</a>
+                </span>
+                {% endif %} {% if broker.contactCell %}
+                <br />
+                <span class="mb-2">
+                  <i class="fal fa-mobile fa-fw"></i>
+                  <a href="tel:{{ broker.contactCell }}">{{ broker.contactCell }}</a>
+                </span>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %} {% if showCancelButton %}
+            <div class="col-md-12 text-center my-5">
+              <a
+                href="#"
+                role="button"
+                data-toggle="modal"
+                data-target="#not-interested"
+                class="btn btn-light btn-block btn-one"
+              >
+                <i class="fal fa-house-circle-xmark fa-fw"></i>
+                {{ "lp.no_interest.button" | t }}
+              </a>
+              <center>
+                <p><small>{{ "lp.no_interest.text" | t }}</small></p>
+              </center>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {% if policy.show_form %} {% unless reasonSubmitted %}
+    <div class="modal" id="policy" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <form
+          id="policy-form"
+          class="modal-content"
+          action="{{ policy.submit_url }}"
+          method="post"
+          data-alert-msg="{{ policy.alert }}"
+        >
+          <input type="hidden" name="_method" value="put" />
+          <div class="modal-header">
+            <h5 class="modal-title">{{ t.cta.approve_modal.headline }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article class="py-3">
+              {% for checkbox in policy.checkboxes %}
+              <div class="js-checkable">
+                <label for="{{ checkbox.name }}">
+                  {% if checkbox.required %}
+                  <input
+                    type="checkbox"
+                    name="{{ checkbox.name }}"
+                    id="{{ checkbox.name }}"
+                    value="1"
+                    class="mr-2"
+                    required
+                  />
+                  {% else %}
+                  <input type="checkbox" name="{{ checkbox.name }}" id="{{ checkbox.name }}" value="1" class="mr-2" />
+                  {% endif %} {{ checkbox.label }}
+                </label>
+              </div>
+              {% endfor %}
+              <p class="text-muted mb-0"><small>{{ t.cta.approve_modal.footnote }}</small></p>
+            </article>
+          </div>
+          <div class="modal-footer">
+            <button id="policy-submit-button" class="btn btn-sm btn-primary">{{ t.cta.approve_modal.submit }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal" id="reason" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <form id="reason-form" class="modal-content" action="{{ reason.submit_url }}" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ t.cta.cancel_modal.headline }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article class="py-3">
+              {% for option in reason.options %}
+              <div>
+                <label for="reason_{{ option.id }}">
+                  <input type="radio" name="reason" id="reason_{{ option.id }}" value="{{ option.id }}" class="mr-2" />
+                  {{ option.name }}
+                </label>
+              </div>
+              {% endfor %}
+              <div>
+                <label for="reason_note">{{ t.cta.cancel_modal.reason_note }}</label>
+                <textarea name="reason_note" class="form-control"></textarea>
+              </div>
+            </article>
+          </div>
+          <div class="modal-footer">
+            <button id="reason-submit-button" class="btn btn-sm btn-primary">{{ t.cta.cancel_modal.submit }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal" id="policy-description" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ "lp.general.cancelation_policy" | t }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article>{{ policy.description }}</article>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside id="floating-action" class="floatingAction">
+      <section class="container">
+        <div class="text-center">
+          <p>
+            <strong>{{ t.cta.headline }}</strong>
+            <br />
+            {{ t.cta.desc }}
+          </p>
+          <div>
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#policy">
+              {{ t.cta.approve }}
+            </button>
+            <button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#reason">
+              {{ t.cta.cancel }}
+            </button>
+          </div>
+        </div>
+      </section>
+    </aside>
+    {% endunless %} {% endif %}
+
+    <footer id="footer" class="footer">
+      <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="w-100">
+            <img src="{{ shop.logoUrl }}" alt="Logo" width="200" />
+          </div>
+
+          <nav class="d-flex flex-column flex-lg-row flex-md-row mt-1">
+            {% if shop.termsNote %}
+            <button class="footer-button mr-3 text-reset" data-toggle="modal" data-target="#terms">
+              {{ "lp.general.tc" | t }}
+            </button>
+            {% endif %} {% if shop.privacyNote %}
+            <button class="footer-button mr-3 text-reset" data-toggle="modal" data-target="#privacy">
+              {{ "lp.general.privacy" | t }}
+            </button>
+            {% endif %} {% if cookie_consent.active %}
+            <button class="footer-button mr-3 text-reset" data-cc="c-settings">{{ "lp.general.cookie" | t }}</button>
+            {% endif %} {% if shop.imprintNote %}
+            <button class="footer-button mr-3 text-reset" data-toggle="modal" data-target="#imprint">
+              {{ "lp.general.imprint" | t }}
+            </button>
+            {% endif %} {% if shop.accessibilityNote %}
+            <button class="footer-button mr-3 text-reset" data-toggle="modal" data-target="#accessibility">
+              {{ "lp.general.accessibility" | t }}
+            </button>
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <div class="modal" id="imprint" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ "lp.general.imprint" | t }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article>{{ shop.imprintNote }}</article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="privacy" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ "lp.general.privacy" | t }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article>{{ shop.privacyNote }}</article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="terms" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ "lp.general.tc" | t }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article>{{ shop.termsNote }}</article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="accessibility" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ "lp.general.accessibility" | t }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article>{{ shop.accessibilityNote }}</article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="not-interested" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <form id="not-interested-form" class="modal-content" action="{{ reason.submit_url }}" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ t.not_interested_modal.headline }}</h5>
+            <button class="close" data-dismiss="modal">
+              <span aria-hidden="true"><i class="fal fa-times"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <article class="py-3">
+              <label>{{ t.not_interested_modal.reservation_reason }}</label>
+              {% for option in reason.options %}
+              <div>
+                <label>
+                  <input type="radio" name="reason" value="{{ option.id }}" class="mr-2" />
+                  {{ option.name }}
+                </label>
+              </div>
+              {% endfor %}
+              <div>
+                <label for="reason_note">{{ t.not_interested_modal.reason_note }}</label>
+                <textarea name="reason_note" class="form-control"></textarea>
+              </div>
+            </article>
+          </div>
+          <div class="modal-footer">
+            <button id="not-interested-submit-button" class="btn btn-sm btn-primary">
+              {{ t.cta.cancel_modal.submit }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://pro-propstack-public.s3.eu-west-1.amazonaws.com/projects/progress/assets/js/min/jquery-3.4.1-min.js"></script>
+    <script src="https://pro-propstack-public.s3.eu-west-1.amazonaws.com/projects/progress/assets/js/min/popper-min.js"></script>
+    <script src="https://pro-propstack-public.s3.eu-west-1.amazonaws.com/projects/progress/assets/js/min/bootstrap-min.js"></script>
+    <script src="https://pro-propstack-public.s3.eu-west-1.amazonaws.com/projects/progress/assets/js/min/lightgallery-min.js"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrUF4g1DQ78Rs_wurS4WvQXuZigEOPEhs&callback=Function.prototype"></script> -->
+
+    <script>
+      function action() {
+        $("#show-contact").addClass("hidden"), $("#contact-info").removeClass("hidden")
+        var url = window.location.href
+        var queryStart = url.indexOf("?")
+        if (queryStart) {
+          url = url.substring(0, queryStart)
+        }
+        var token = url.split("/").slice(-1)[0]
+        $.post(`/public/exposee/create_tracking/${token}`, { event_type: "offmarket_contact_broker_button_clicked" })
+      }
+      $(document).ready(function () {
+        var e = $("#main-nav"),
+          t = $("#floating-action"),
+          l = 0,
+          o = !1
+        function r() {
+          $('#policy-form input[type="checkbox"]:required:not(:checked)').length > 0
+            ? $("#policy-submit-button").addClass("disabled")
+            : $("#policy-submit-button").removeClass("disabled")
+        }
+        function a() {
+          $('#reason-form input[type="radio"]:checked').length <= 0 && !$("#reason-form textarea").val()
+            ? $("#reason-submit-button").addClass("disabled")
+            : $("#reason-submit-button").removeClass("disabled")
+        }
+        function b() {
+          $('#not-interested-form input[type="radio"]:checked').length <= 0
+            ? $("#not-interested-submit-button").addClass("disabled")
+            : $("#not-interested-submit-button").removeClass("disabled")
+        }
+        $('#not-interested-form input[type="radio"]').on("change", b),
+          b(),
+          $("#not-interested-form").on("submit", function (e) {
+            $("#not-interested-submit-button").addClass("disabled")
+          })
+        $(window).on("scroll", function () {
+          ;(l = window.scrollY),
+            o ||
+              setTimeout(function () {
+                e.toggleClass("navbar--scrolled", l > 50), t.toggleClass("floatingAction--active", l > 500), (o = !1)
+              }, 16),
+            (o = !0)
+        }),
+          $('#policy-form input[type="checkbox"]').on("change", r),
+          $("#policy-form").on("submit", function (e) {
+            $('input[name="accept_service"]').length > 0 &&
+            $('input[name="accept_service"]:checked').length <= 0 &&
+            !confirm($("#policy-form").data("alert-msg"))
+              ? e.preventDefault()
+              : $("#policy-submit-button").addClass("disabled")
+          }),
+          r(),
+          $('#reason-form input[type="radio"]').on("change", a),
+          $("#reason-form textarea").on("keyup", a),
+          $("#reason-form").on("submit", function (e) {
+            $("#reason-submit-button").addClass("disabled")
+          }),
+          a(),
+          $(document).on("click", ".js-scrollTo", function (e) {
+            e.preventDefault()
+            var t = $(this).attr("href"),
+              l = $(t).offset().top - ($(".navbar-brand").height() || 0) - 30
+            $("html, body").animate({ scrollTop: l }, 700)
+          }),
+          $("#images-gallery").lightGallery({ download: !1, thumbnail: !1 })
+      })
+    </script>
+
+    <!--floorplan lightbox-->
+    <script>
+      $(document).ready(function () {
+        var e = $("#floorplan-gallery").lightGallery({ download: !1, thumbnail: !1 })
+      })
+    </script>
+
+    <!--close nav on click-->
+    <script>
+      $(document).ready(function () {
+        $(".navbar-nav>li>a").on("click", function () {
+          $(".navbar-collapse").collapse("hide")
+        })
+      })
+    </script>
+    <!--shrink nav-->
+    <script>
+      $(window).scroll(function () {
+        if ($(document).scrollTop() >= 10) {
+          $("nav").addClass("shrink")
+        } else {
+          $("nav").removeClass("shrink")
+        }
+      })
+    </script>
+    <script
+      type="{% if cookie_consent.active %}text/plain{% else %}application/javascript{% endif %}"
+      data-cookiecategory="thirdparty"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrUF4g1DQ78Rs_wurS4WvQXuZigEOPEhs&callback=Function.prototype"
+    ></script>
+    <script
+      type="{% if cookie_consent.active %}text/plain{% else %}application/javascript{% endif %}"
+      data-cookiecategory="thirdparty"
+    >
+      window.mapStyle = [
+        {
+          featureType: "all",
+          elementType: "geometry.fill",
+          stylers: [
+            {
+              weight: "2.00",
+            },
+          ],
+        },
+        {
+          featureType: "all",
+          elementType: "geometry.stroke",
+          stylers: [
+            {
+              color: "#999999",
+            },
+          ],
+        },
+        {
+          featureType: "all",
+          elementType: "labels.text",
+          stylers: [
+            {
+              visibility: "on",
+            },
+          ],
+        },
+        {
+          featureType: "landscape",
+          elementType: "all",
+          stylers: [
+            {
+              color: "#f2f2f2",
+            },
+          ],
+        },
+        {
+          featureType: "landscape",
+          elementType: "geometry.fill",
+          stylers: [
+            {
+              color: "#ffffff",
+            },
+          ],
+        },
+        {
+          featureType: "landscape.man_made",
+          elementType: "geometry.fill",
+          stylers: [
+            {
+              color: "#f8f9fa",
+            },
+          ],
+        },
+        {
+          featureType: "poi",
+          elementType: "all",
+          stylers: [
+            {
+              visibility: "off",
+            },
+          ],
+        },
+        {
+          featureType: "road",
+          elementType: "all",
+          stylers: [
+            {
+              saturation: -100,
+            },
+            {
+              lightness: 45,
+            },
+          ],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.fill",
+          stylers: [
+            {
+              color: "#f2f2f2",
+            },
+          ],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [
+            {
+              color: "#282828",
+            },
+          ],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.stroke",
+          stylers: [
+            {
+              color: "#ffffff",
+            },
+          ],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "all",
+          stylers: [
+            {
+              visibility: "simplified",
+            },
+          ],
+        },
+        {
+          featureType: "road.arterial",
+          elementType: "labels.icon",
+          stylers: [
+            {
+              visibility: "off",
+            },
+          ],
+        },
+        {
+          featureType: "transit",
+          elementType: "all",
+          stylers: [
+            {
+              visibility: "off",
+            },
+          ],
+        },
+        {
+          featureType: "water",
+          elementType: "all",
+          stylers: [
+            {
+              color: "#CAE3FF",
+            },
+            {
+              visibility: "on",
+            },
+          ],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry.fill",
+          stylers: [
+            {
+              color: "#CAE3FF",
+            },
+          ],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [
+            {
+              color: "#0061ca",
+            },
+          ],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.stroke",
+          stylers: [
+            {
+              color: "#ffffff",
+            },
+          ],
+        },
+      ]
+      $(document).ready(function () {
+        var s = $("#map-wrap"),
+          n = { lat: s.data("lat"), lng: s.data("lng") }
+        if (s.length > 0) {
+          s.get(0).parentNode.classList.remove("empty")
+          if (n.lat && n.lng) {
+            var map = L.map('map-wrap', { scrollWheelZoom: false }).setView([n.lat, n.lng], 15);
+
+            // Load and display the OSM tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            // Define a location using latitude and longitude
+            var markerLocation = L.latLng(n.lat, n.lng);  // You can replace these values with your desired coordinates.
+
+            // Create a marker and add it to the map
+            var marker = L.marker(markerLocation).addTo(map);
+          } else {
+            s.get(0).innerHTML =
+              '<iframe src="https://maps.google.de/maps?hl=de&q={{ property.zip_code }} {{ property.city }}&ie=UTF8&output=embed" frameborder="0"></iframe>'
+          }
+        }
+      })
+    </script>
+    {% if cookie_consent.active %}
+    <script>
+      window.addEventListener("load", function () {
+        const mapSelector = document.getElementById("map-wrap")
+
+        const cookieConsentUrl = "{{ cookie_consent.consent_url }}"
+        const cookieTitle = "{{ 'lp.cookies.title' | t }}"
+        const cookieText =
+          "{{ 'lp.cookies.text' | t }}" +
+          ' <a href="#" data-toggle="modal" data-target="#privacy" class="cc-link">' +
+          "{{ 'lp.cookies.privacy_policy' | t }}" +
+          "</a>"
+        const cookieconsent = initCookieConsent()
+        cookieconsent.run({
+          current_lang: "{{ locale }}",
+          autoclear_cookies: true,
+          cookie_name: "accept-cookie-disclaimer",
+          cookie_expiration: 365,
+          page_scripts: true,
+          force_consent: true,
+          mode: "opt-in",
+          revision: 0,
+          gui_options: {
+            consent_modal: {
+              layout: "cloud",
+              position: "bottom center",
+              transition: "slide",
+            },
+            settings_modal: {
+              layout: "bar",
+              position: "left",
+              transition: "slide",
+            },
+          },
+          onFirstAction: function (cookie) {
+            if (!cookieConsentUrl) return
+            $.post(cookieConsentUrl, {
+              preferences: cookie.accepted_categories.join(","),
+              source: "exposee",
+              created_at: Date.now(),
+            })
+          },
+          onChange: function (cookie, changed_preferences) {
+            if (!cookieConsentUrl) return
+            $.post(cookieConsentUrl, {
+              preferences: cookie.categories.join(","),
+              source: "exposee",
+              created_at: Date.now(),
+            })
+          },
+          languages: {
+            en: {
+              consent_modal: {
+                title: cookieTitle,
+                description: cookieText,
+                primary_btn: {
+                  text: "{{ 'lp.cookies.accept_all' | t }}",
+                  role: "accept_all",
+                },
+                secondary_btn: {
+                  text: "{{ 'lp.cookies.settings' | t }}",
+                  role: "settings",
+                },
+                revision_message: "<br><br> Revision changed",
+              },
+              settings_modal: {
+                title: cookieTitle,
+                save_settings_btn: "{{ 'lp.cookies.save' | t }}",
+                close_btn_label: "{{ 'lp.cookies.close' | t }}",
+                accept_all_btn: "{{ 'lp.cookies.accept_all' | t }}",
+                reject_all_btn: "{{ 'lp.cookies.reject_all' | t }}",
+                cookie_table_headers: [{ col1: "Name" }, { col2: "Domain" }],
+                blocks: [
+                  {
+                    title: "{{ 'lp.cookies.subtitle' | t }}",
+                    description: cookieText,
+                  },
+                  {
+                    title: "{{ 'lp.cookies.strictly_neccessary' | t }}",
+                    toggle: {
+                      value: "necessary",
+                      enabled: true,
+                      readonly: true,
+                    },
+                  },
+                  {
+                    title: "{{ 'lp.cookies.third_party' | t }}",
+                    toggle: {
+                      value: "thirdparty",
+                      enabled: false,
+                      readonly: false,
+                    },
+                    cookie_table: [
+                      mapSelector && mapSelector.dataset.lat && mapSelector.dataset.lng
+                        ? {
+                            col1: "OpenStreetMap",
+                            col2: "openstreetmap.org",
+                          }
+                        : {
+                            col1: "Google Maps",
+                            col2: "maps.google.com",
+                          },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        })
+      })
+    </script>
+    {% endif %}
+  </body>
+</html>

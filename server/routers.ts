@@ -2115,6 +2115,49 @@ Die Beschreibung soll:
       }),
   }),
 
+  // ============ PROPERTY LINKS ============
+  propertyLinks: router({
+    getByProperty: publicProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getPropertyLinksByPropertyId(input.propertyId);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        name: z.string(),
+        url: z.string(),
+        showOnLandingPage: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createPropertyLink(input);
+        return { id };
+      }),
+
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        url: z.string().optional(),
+        showOnLandingPage: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...updates } = input;
+        await db.updatePropertyLink(id, updates);
+        return { success: true };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deletePropertyLink(input.id);
+        return { success: true };
+      }),
+  }),
+
   // ============ DOCUMENTS ============
   documents: router({
     getByProperty: publicProcedure
