@@ -20,7 +20,21 @@ import {
   X,
   FileDown,
   ExternalLink,
+  MoreVertical,
+  Eye,
+  Share2,
+  Printer,
+  Receipt,
+  FileSignature,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -57,6 +71,47 @@ export default function PropertyDetail() {
   const [editedTitle, setEditedTitle] = useState("");
   const formRef = useRef<PropertyDetailFormHandle>(null);
   const [activeTab, setActiveTab] = useState("details");
+  
+  // PDF Generation Mutations
+  const generateExposeMutation = trpc.pdf.generateExpose.useMutation({
+    onSuccess: (data) => {
+      // Download PDF
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${data.pdf}`;
+      link.download = data.filename;
+      link.click();
+      toast.success('Exposé wurde erstellt!');
+    },
+    onError: (error) => {
+      toast.error('Fehler beim Erstellen des Exposés: ' + error.message);
+    },
+  });
+  
+  const generateOnePagerMutation = trpc.pdf.generateOnePager.useMutation({
+    onSuccess: (data) => {
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${data.pdf}`;
+      link.download = data.filename;
+      link.click();
+      toast.success('One-Pager wurde erstellt!');
+    },
+    onError: (error) => {
+      toast.error('Fehler beim Erstellen des One-Pagers: ' + error.message);
+    },
+  });
+  
+  const generateMaklervertragMutation = trpc.pdf.generateMaklervertrag.useMutation({
+    onSuccess: (data) => {
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${data.pdf}`;
+      link.download = data.filename;
+      link.click();
+      toast.success('Maklervertrag wurde erstellt!');
+    },
+    onError: (error) => {
+      toast.error('Fehler beim Erstellen des Maklervertrags: ' + error.message);
+    },
+  });
 
   // Check URL hash on mount and when hash changes
   useEffect(() => {
@@ -310,29 +365,80 @@ export default function PropertyDetail() {
               <div className="flex gap-2">
                 {!isEditing ? (
                   <>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        // Open landing page in new tab
-                        window.open(`/property/${propertyId}`, '_blank');
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Landing Page öffnen
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        // Open landing page in print mode
-                        window.open(`/property/${propertyId}?print=true`, '_blank');
-                      }}
-                    >
-                      <FileDown className="h-4 w-4 mr-2" />
-                      Exposé erstellen
-                    </Button>
+                    {/* Actions Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                          <MoreVertical className="h-4 w-4 mr-2" />
+                          Aktionen
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Dokumente</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => window.open(`/property/${propertyId}`, '_blank')}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Landing Page Vorschau
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/property/${propertyId}`);
+                          toast.success('Landing Page Link kopiert!');
+                        }}>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Landing Page teilen
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => generateExposeMutation.mutate({ propertyId })}>
+                          <Printer className="h-4 w-4 mr-2" />
+                          Exposé ausdrucken
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          // TODO: Implement share functionality
+                          toast.info('Exposé teilen - In Entwicklung');
+                        }}>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Exposé teilen
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => generateOnePagerMutation.mutate({ propertyId })}>
+                          <Printer className="h-4 w-4 mr-2" />
+                          One-Pager ausdrucken
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          // TODO: Implement share functionality
+                          toast.info('One-Pager teilen - In Entwicklung');
+                        }}>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          One-Pager teilen
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Rechnungen & Verträge</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => {
+                          // TODO: Implement invoice dialog
+                          toast.info('Rechnung Käufer - Dialog in Entwicklung');
+                        }}>
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Rechnung Käufer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          // TODO: Implement invoice dialog
+                          toast.info('Rechnung Verkäufer - Dialog in Entwicklung');
+                        }}>
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Rechnung Verkäufer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          // TODO: Get owner ID from property
+                          generateMaklervertragMutation.mutate({ propertyId, ownerId: 1 });
+                        }}>
+                          <FileSignature className="h-4 w-4 mr-2" />
+                          Maklervertrag erstellen
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    
                     <Button variant="outline" onClick={() => setLocation(`/dashboard/properties/${propertyId}/media`)}>
                       <ImageIcon className="h-4 w-4 mr-2" />
-                      Medien verwalten
+                      Medien
                     </Button>
                     <Button variant="outline" onClick={handleEditClick}>
                       <Edit className="h-4 w-4 mr-2" />

@@ -3030,6 +3030,84 @@ Die Beschreibung soll:
       }),
   }),
   
+  // ============ PDF GENERATION ============
+  pdf: router({
+    // Generate Exposé PDF
+    generateExpose: publicProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { generateExpose } = await import('./pdfGenerator');
+        const pdfBuffer = await generateExpose(input.propertyId);
+        // Return base64 encoded PDF
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `expose_${input.propertyId}.pdf`,
+        };
+      }),
+    
+    // Generate One-Pager PDF
+    generateOnePager: publicProcedure
+      .input(z.object({ propertyId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { generateOnePager } = await import('./pdfGenerator');
+        const pdfBuffer = await generateOnePager(input.propertyId);
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `onepager_${input.propertyId}.pdf`,
+        };
+      }),
+    
+    // Generate Invoice PDF
+    generateInvoice: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        recipientType: z.enum(['buyer', 'seller']),
+        invoiceNumber: z.string(),
+        recipientName: z.string(),
+        recipientAddress: z.string(),
+        items: z.array(z.object({
+          description: z.string(),
+          quantity: z.number(),
+          unitPrice: z.number(),
+          total: z.number(),
+        })),
+        subtotal: z.number(),
+        tax: z.number(),
+        total: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { generateInvoice } = await import('./pdfGenerator');
+        const { propertyId, recipientType, ...invoiceData } = input;
+        const pdfBuffer = await generateInvoice(
+          propertyId,
+          recipientType,
+          {
+            ...invoiceData,
+            date: new Date().toLocaleDateString('de-DE'),
+          }
+        );
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `rechnung_${recipientType}_${propertyId}.pdf`,
+        };
+      }),
+    
+    // Generate Maklervertrag PDF
+    generateMaklervertrag: publicProcedure
+      .input(z.object({
+        propertyId: z.number(),
+        ownerId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { generateMaklervertrag } = await import('./pdfGenerator');
+        const pdfBuffer = await generateMaklervertrag(input.propertyId, input.ownerId);
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `maklervertrag_${input.propertyId}.pdf`,
+        };
+      }),
+  }),
+  
   // Note: Brevo router already exists above (line 1546)
   // New endpoints for Immobilienanfragen/Eigentümeranfragen will be added there
 });
