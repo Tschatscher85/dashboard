@@ -19,9 +19,11 @@ import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContactForm() {
-  const [, params] = useRoute("/dashboard/contacts/:id/edit");
   const [, setLocation] = useLocation();
-  const contactId = params?.id ? parseInt(params.id) : null;
+  const [matchEdit, paramsEdit] = useRoute("/dashboard/contacts/:id/edit");
+  const [matchNew] = useRoute("/dashboard/contacts/new");
+  
+  const contactId = matchEdit && paramsEdit?.id ? parseInt(paramsEdit.id) : null;
   const isEdit = contactId !== null;
 
   // Form state

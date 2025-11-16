@@ -10,7 +10,9 @@ import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import Properties from "./pages/dashboard/Properties";
 import PropertyDetail from "./pages/dashboard/PropertyDetail";
 import Contacts from "./pages/dashboard/Contacts";
+import ContactsNew from "./pages/dashboard/ContactsNew";
 import ContactDetail from "./pages/dashboard/ContactDetail";
+import ContactForm from "./pages/dashboard/ContactForm";
 import Leads from "./pages/dashboard/Leads";
 import Insurances from "./pages/dashboard/Insurances";
 import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
@@ -129,6 +131,20 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
+      <Route path="/dashboard/contacts/new">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <ContactForm />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/contacts/:id/edit">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <ContactForm />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route path="/dashboard/contacts/:id">
         {() => (
           <DashboardLayout navItems={dashboardNavItems}>
@@ -139,7 +155,7 @@ function Router() {
       <Route path="/dashboard/contacts">
         {() => (
           <DashboardLayout navItems={dashboardNavItems}>
-            <Contacts />
+            <ContactsNew />
           </DashboardLayout>
         )}
       </Route>
