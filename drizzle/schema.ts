@@ -476,24 +476,6 @@ export type Settings = typeof settings.$inferSelect;
 export type InsertSettings = typeof settings.$inferInsert;
 
 /**
- * Property Links - Flexible links for properties (virtual tours, videos, etc.)
- */
-export const propertyLinks = mysqlTable("propertyLinks", {
-  id: int("id").autoincrement().primaryKey(),
-  propertyId: int("propertyId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  url: varchar("url", { length: 1000 }).notNull(),
-  showOnLandingPage: boolean("showOnLandingPage").default(false),
-  sortOrder: int("sortOrder").default(0),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  createdBy: int("createdBy"),
-});
-
-export type PropertyLink = typeof propertyLinks.$inferSelect;
-export type InsertPropertyLink = typeof propertyLinks.$inferInsert;
-
-/**
  * Appointments - Scheduled property viewings and meetings
  */
 export const appointments = mysqlTable("appointments", {
