@@ -455,6 +455,20 @@ export const settings = mysqlTable("settings", {
   invoiceTemplate: text("invoiceTemplate"), // Invoice template with {{placeholders}}
   maklervertragTemplate: text("maklervertragTemplate"), // Maklervertrag template with {{placeholders}}
   
+  // Google Contacts Sync Settings
+  googleSyncEnabled: boolean("googleSyncEnabled").default(false),
+  googleSyncBidirectional: boolean("googleSyncBidirectional").default(true),
+  googleLabelRealEstateBuyer: varchar("googleLabelRealEstateBuyer", { length: 100 }).default("Immobilienanfrage"),
+  googleLabelRealEstateSeller: varchar("googleLabelRealEstateSeller", { length: 100 }).default("Eigentümeranfragen"),
+  googleLabelInsurance: varchar("googleLabelInsurance", { length: 100 }).default("Allianz Privat"),
+  googleLabelPropertyMgmt: varchar("googleLabelPropertyMgmt", { length: 100 }).default("Hausverwaltung"),
+  
+  // Brevo CRM Sync Settings
+  brevoSyncEnabled: boolean("brevoSyncEnabled").default(false),
+  brevoListRealestate: varchar("brevoListRealestate", { length: 100 }).default("18"), // Property Inquiry List
+  brevoListInsurance: varchar("brevoListInsurance", { length: 100 }),
+  brevoListPropertyMgmt: varchar("brevoListPropertyMgmt", { length: 100 }),
+  
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
