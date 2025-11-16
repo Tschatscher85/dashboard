@@ -51,6 +51,9 @@ interface ShopData {
   address?: string;
   website?: string;
   faviconUrl?: string;
+  impressum?: string;
+  agb?: string;
+  datenschutz?: string;
 }
 
 // ============================================================================
@@ -122,13 +125,17 @@ async function getShopData(): Promise<ShopData> {
   try {
     const settingsData = await db.getSettings();
     return {
-      name: settingsData?.companyName || 'Immobilien',
-      logo: settingsData?.companyLogo || '',
-      phone: settingsData?.companyPhone || '',
-      email: settingsData?.companyEmail || '',
-      address: settingsData?.companyAddress || '',
-      website: settingsData?.companyWebsite || '',
-      faviconUrl: settingsData?.companyLogo || '',
+      name: settingsData?.realestateName || settingsData?.companyName || 'Immobilien',
+      logo: settingsData?.realestateLogo || settingsData?.companyLogo || '',
+      phone: settingsData?.realestatePhone || settingsData?.companyPhone || '',
+      email: settingsData?.realestateEmail || settingsData?.companyEmail || '',
+      address: settingsData?.realestateAddress || settingsData?.companyAddress || '',
+      website: settingsData?.realestateWebsite || settingsData?.companyWebsite || '',
+      faviconUrl: settingsData?.realestateLogo || settingsData?.companyLogo || '',
+      // Legal texts
+      impressum: settingsData?.realestateImpressum || settingsData?.imprintText || '',
+      agb: settingsData?.realestateAgb || settingsData?.termsText || '',
+      datenschutz: settingsData?.realestateDatenschutz || settingsData?.privacyPolicyText || '',
     };
   } catch (error) {
     console.error('Failed to load shop data:', error);

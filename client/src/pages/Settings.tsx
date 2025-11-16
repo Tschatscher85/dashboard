@@ -41,9 +41,16 @@ export default function Settings() {
     dashboardLogo: "",
     superchat: "",
     brevo: "",
-    emailFrom: "",
-    emailFromName: "",
-    emailNotificationTo: "",
+    // E-Mail settings per module
+    realestateEmailFrom: "",
+    realestateEmailFromName: "",
+    realestateEmailNotificationTo: "",
+    insuranceEmailFrom: "",
+    insuranceEmailFromName: "",
+    insuranceEmailNotificationTo: "",
+    propertyMgmtEmailFrom: "",
+    propertyMgmtEmailFromName: "",
+    propertyMgmtEmailNotificationTo: "",
     brevoPropertyInquiryListId: "",
     brevoOwnerInquiryListId: "",
     brevoInsuranceListId: "",
@@ -171,9 +178,16 @@ export default function Settings() {
         dashboardLogo: currentApiKeys.dashboardLogo || "",
         superchat: currentApiKeys.superchat || "",
         brevo: currentApiKeys.brevo || "",
-        emailFrom: currentApiKeys.emailFrom || "",
-        emailFromName: currentApiKeys.emailFromName || "",
-        emailNotificationTo: currentApiKeys.emailNotificationTo || "",
+        // E-Mail settings per module
+        realestateEmailFrom: currentApiKeys.realestateEmailFrom || "",
+        realestateEmailFromName: currentApiKeys.realestateEmailFromName || "",
+        realestateEmailNotificationTo: currentApiKeys.realestateEmailNotificationTo || "",
+        insuranceEmailFrom: currentApiKeys.insuranceEmailFrom || "",
+        insuranceEmailFromName: currentApiKeys.insuranceEmailFromName || "",
+        insuranceEmailNotificationTo: currentApiKeys.insuranceEmailNotificationTo || "",
+        propertyMgmtEmailFrom: currentApiKeys.propertyMgmtEmailFrom || "",
+        propertyMgmtEmailFromName: currentApiKeys.propertyMgmtEmailFromName || "",
+        propertyMgmtEmailNotificationTo: currentApiKeys.propertyMgmtEmailNotificationTo || "",
         brevoPropertyInquiryListId: currentApiKeys.brevoPropertyInquiryListId || "",
         brevoOwnerInquiryListId: currentApiKeys.brevoOwnerInquiryListId || "",
         brevoInsuranceListId: currentApiKeys.brevoInsuranceListId || "",
@@ -565,23 +579,23 @@ export default function Settings() {
                   </p>
                 </div>
 
-                {/* Brevo Email Settings */}
+                {/* Brevo Email Settings - Immobilienmakler */}
                 <div className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-blue-50/50">
                   <div>
-                    <h4 className="font-semibold text-blue-900 mb-2">E-Mail Einstellungen</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">🏠 E-Mail Einstellungen - Immobilienmakler</h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Konfiguration für automatische E-Mail-Benachrichtigungen
+                      E-Mail-Konfiguration für Immobilienanfragen (Landing Pages)
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="emailFrom">Absender E-Mail</Label>
+                    <Label htmlFor="realestateEmailFrom">Absender E-Mail</Label>
                     <Input
-                      id="emailFrom"
+                      id="realestateEmailFrom"
                       type="email"
-                      value={apiKeys.emailFrom || ''}
-                      onChange={(e) => setApiKeys({ ...apiKeys, emailFrom: e.target.value })}
-                      placeholder="noreply@tschatscher.eu"
+                      value={apiKeys.realestateEmailFrom || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, realestateEmailFrom: e.target.value })}
+                      placeholder="noreply@immo-jaeger.eu"
                     />
                     <p className="text-xs text-muted-foreground">
                       E-Mail-Adresse die als Absender verwendet wird
@@ -589,12 +603,12 @@ export default function Settings() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="emailFromName">Absender Name</Label>
+                    <Label htmlFor="realestateEmailFromName">Absender Name</Label>
                     <Input
-                      id="emailFromName"
+                      id="realestateEmailFromName"
                       type="text"
-                      value={apiKeys.emailFromName || ''}
-                      onChange={(e) => setApiKeys({ ...apiKeys, emailFromName: e.target.value })}
+                      value={apiKeys.realestateEmailFromName || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, realestateEmailFromName: e.target.value })}
                       placeholder="Immo-Jaeger"
                     />
                     <p className="text-xs text-muted-foreground">
@@ -603,17 +617,103 @@ export default function Settings() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="emailNotificationTo">Benachrichtigungs-E-Mail</Label>
+                    <Label htmlFor="realestateEmailNotificationTo">Benachrichtigungs-E-Mail</Label>
                     <Input
-                      id="emailNotificationTo"
+                      id="realestateEmailNotificationTo"
                       type="email"
-                      value={apiKeys.emailNotificationTo || ''}
-                      onChange={(e) => setApiKeys({ ...apiKeys, emailNotificationTo: e.target.value })}
+                      value={apiKeys.realestateEmailNotificationTo || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, realestateEmailNotificationTo: e.target.value })}
                       placeholder="info@immo-jaeger.eu"
                     />
                     <p className="text-xs text-muted-foreground">
                       E-Mail-Adresse die Benachrichtigungen über neue Anfragen erhält
                     </p>
+                  </div>
+                </div>
+
+                {/* Brevo Email Settings - Versicherungen */}
+                <div className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-green-50/50">
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">🛡️ E-Mail Einstellungen - Versicherungen</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      E-Mail-Konfiguration für Versicherungsanfragen
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="insuranceEmailFrom">Absender E-Mail</Label>
+                    <Input
+                      id="insuranceEmailFrom"
+                      type="email"
+                      value={apiKeys.insuranceEmailFrom || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, insuranceEmailFrom: e.target.value })}
+                      placeholder="noreply@versicherung.eu"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="insuranceEmailFromName">Absender Name</Label>
+                    <Input
+                      id="insuranceEmailFromName"
+                      type="text"
+                      value={apiKeys.insuranceEmailFromName || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, insuranceEmailFromName: e.target.value })}
+                      placeholder="Versicherungsmakler"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="insuranceEmailNotificationTo">Benachrichtigungs-E-Mail</Label>
+                    <Input
+                      id="insuranceEmailNotificationTo"
+                      type="email"
+                      value={apiKeys.insuranceEmailNotificationTo || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, insuranceEmailNotificationTo: e.target.value })}
+                      placeholder="info@versicherung.eu"
+                    />
+                  </div>
+                </div>
+
+                {/* Brevo Email Settings - Hausverwaltung */}
+                <div className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-purple-50/50">
+                  <div>
+                    <h4 className="font-semibold text-purple-900 mb-2">🏛️ E-Mail Einstellungen - Hausverwaltung</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      E-Mail-Konfiguration für Hausverwaltungsanfragen
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="propertyMgmtEmailFrom">Absender E-Mail</Label>
+                    <Input
+                      id="propertyMgmtEmailFrom"
+                      type="email"
+                      value={apiKeys.propertyMgmtEmailFrom || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, propertyMgmtEmailFrom: e.target.value })}
+                      placeholder="noreply@hausverwaltung.eu"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="propertyMgmtEmailFromName">Absender Name</Label>
+                    <Input
+                      id="propertyMgmtEmailFromName"
+                      type="text"
+                      value={apiKeys.propertyMgmtEmailFromName || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, propertyMgmtEmailFromName: e.target.value })}
+                      placeholder="Hausverwaltung"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="propertyMgmtEmailNotificationTo">Benachrichtigungs-E-Mail</Label>
+                    <Input
+                      id="propertyMgmtEmailNotificationTo"
+                      type="email"
+                      value={apiKeys.propertyMgmtEmailNotificationTo || ''}
+                      onChange={(e) => setApiKeys({ ...apiKeys, propertyMgmtEmailNotificationTo: e.target.value })}
+                      placeholder="info@hausverwaltung.eu"
+                    />
                   </div>
                 </div>
 

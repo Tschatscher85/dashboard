@@ -62,8 +62,9 @@ function encodeGermanChars(text: string): string {
 
 /**
  * Get email settings from database
+ * @param module - Which module to get settings for (realestate, insurance, propertyMgmt)
  */
-async function getEmailSettings() {
+async function getEmailSettings(module: 'realestate' | 'insurance' | 'propertyMgmt' = 'realestate') {
   const settingsData = await db.select().from(settings).limit(1);
   if (!settingsData || settingsData.length === 0) {
     throw new Error("Email settings not configured");
@@ -75,11 +76,28 @@ async function getEmailSettings() {
     throw new Error("Brevo API Key not configured");
   }
   
+  // Module-specific email settings with fallback to legacy settings
+  let fromEmail, fromName, notificationEmail;
+  
+  if (module === 'realestate') {
+    fromEmail = config.realestateEmailFrom || config.emailFrom || "noreply@immo-jaeger.eu";
+    fromName = config.realestateEmailFromName || config.emailFromName || "Immo-Jaeger";
+    notificationEmail = config.realestateEmailNotificationTo || config.emailNotificationTo || "info@immo-jaeger.eu";
+  } else if (module === 'insurance') {
+    fromEmail = config.insuranceEmailFrom || config.emailFrom || "noreply@versicherung.eu";
+    fromName = config.insuranceEmailFromName || config.emailFromName || "Versicherungsmakler";
+    notificationEmail = config.insuranceEmailNotificationTo || config.emailNotificationTo || "info@versicherung.eu";
+  } else if (module === 'propertyMgmt') {
+    fromEmail = config.propertyMgmtEmailFrom || config.emailFrom || "noreply@hausverwaltung.eu";
+    fromName = config.propertyMgmtEmailFromName || config.emailFromName || "Hausverwaltung";
+    notificationEmail = config.propertyMgmtEmailNotificationTo || config.emailNotificationTo || "info@hausverwaltung.eu";
+  }
+  
   return {
     apiKey: config.brevoApiKey,
-    fromEmail: config.emailFrom || "noreply@tschatscher.eu",
-    fromName: config.emailFromName || "Immobilien Dashboard",
-    notificationEmail: config.emailNotificationTo || "info@tschatscher.eu",
+    fromEmail,
+    fromName,
+    notificationEmail,
   };
 }
 

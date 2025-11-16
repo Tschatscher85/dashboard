@@ -373,9 +373,26 @@ export const settings = mysqlTable("settings", {
   
   // E-Mail settings (Brevo)
   brevoApiKey: text("brevoApiKey"),
-  emailFrom: varchar("emailFrom", { length: 255 }), // Absender-E-Mail (z.B. noreply@tschatscher.eu)
-  emailFromName: varchar("emailFromName", { length: 255 }), // Absender-Name (z.B. Immo-Jaeger)
-  emailNotificationTo: varchar("emailNotificationTo", { length: 255 }), // E-Mail für Benachrichtigungen (z.B. info@immo-jaeger.eu)
+  
+  // E-Mail settings - Immobilienmakler
+  realestateEmailFrom: varchar("realestateEmailFrom", { length: 255 }),
+  realestateEmailFromName: varchar("realestateEmailFromName", { length: 255 }),
+  realestateEmailNotificationTo: varchar("realestateEmailNotificationTo", { length: 255 }),
+  
+  // E-Mail settings - Versicherungen
+  insuranceEmailFrom: varchar("insuranceEmailFrom", { length: 255 }),
+  insuranceEmailFromName: varchar("insuranceEmailFromName", { length: 255 }),
+  insuranceEmailNotificationTo: varchar("insuranceEmailNotificationTo", { length: 255 }),
+  
+  // E-Mail settings - Hausverwaltung
+  propertyMgmtEmailFrom: varchar("propertyMgmtEmailFrom", { length: 255 }),
+  propertyMgmtEmailFromName: varchar("propertyMgmtEmailFromName", { length: 255 }),
+  propertyMgmtEmailNotificationTo: varchar("propertyMgmtEmailNotificationTo", { length: 255 }),
+  
+  // Legacy E-Mail settings (for backward compatibility)
+  emailFrom: varchar("emailFrom", { length: 255 }),
+  emailFromName: varchar("emailFromName", { length: 255 }),
+  emailNotificationTo: varchar("emailNotificationTo", { length: 255 }),
   
   // Landing Page Settings
   landingPageTemplate: varchar("landingPageTemplate", { length: 50 }).default("modern"), // Template für Property Landing Pages
