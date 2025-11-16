@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    {% if shop.faviconUrl %}
+    <link rel="icon" href="{{ shop.faviconUrl }}" type="image/x-icon" />
+    {% else %}
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    {% endif %}
+    <title>{{ property.title }} - {{ shop.name }}</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.4/tiny-slider.css" />
+    <link
+      rel="stylesheet"
+      href="https://pro.fontawesome.com/releases/v5.7.1/css/all.css"
+      integrity="sha384-6jHF7Z3XI3fF4XZixAuSu0gGKrXwoX/w3uFPxC56OtjChio7wtTGJWRW53Nhx6Ev"
+      crossorigin="anonymous"
+    />
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon" />
+
+    <!-- Open Graph data -->
+    <meta property="og:title" content="Immobilienangebot - {{ property.title }} - {{ shop.name }}" />
+    <meta property="og:image" content="{{ property.images | map: 'url' | first }}" />
+    <meta
+      property="og:description"
+      content="{{ property.formatted.rs_type }} {{ property.formatted.rs_art }} {{ property.formatted.marketing_type }} {{ shop.name }}"
+    />
+
+    <!-- Styles -->
+    {% assign color = shop.color | default: '#0f55eb' %}
+    <style>
+        :root {
+          --primary: {
+              {
+              color
+            }
+          }
+
+          ;
+
+          --primary-light: {
+              {
+              color
+            }
+          }
+
+          dd;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+          font-weight: 300;
+          color: #222222;
+        }
+
+        a {
+          color: var(--primary);
+        }
+
+        a:hover {
+          color: var(--primary);
+        }
+
+        .heading,
+        th {
+          font-weight: 400;
+        }
+
+        table th,
+        table td {
+          font-weight: 300;
+          border-top-color: #fbfbfb !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+          background-color: #eeeeee;
+
+        }
+        .doc-grid a {
+            background-color: #f8f9fa;
+            border: thin #f8f9fa white;
+            border-radius: .25rem;
+            box-shadow: none;
+        }
+        .doc-grid a:hover {
+          background-color: #f8f9fa;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .doc-grid {
+          display: grid;
+          grid-template-columns: repeat(1,1fr);
+          gap: 10px;
+        }
+        .doc-cell {
+          padding: .75rem 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .doc-cell:hover {
+          text-decoration: none;
+        }
+        .doc-title {
+          margin-bottom: 1rem;
+        }
+        .doc-cell-suffix {
+          text-transform: none;
+          color: #6c757d;
+        }
+
+
+
+        #owl .hero {
+          padding-top: 55%;
+        }
+
+        .hidden{
+          display: none;
+        }
+        .show-contact-btn{
+          background-color: white;
+          border: 1px black solid;
+          border-radius: 0.25rem;
+          height: 35px;
+          width: 215px;
+          margin-top: 30px;
+        }
+
+        .disabled{
+      	pointer-events: none;
+      }
+    </style>
+    {{ shop.lp_js }}
+  </head>
+
+  {% assign showCancelButton = reason.show_cancel_button %}
+
+  <body>
+    <section id="headline">
+      <div class="container pt-2">
+        <a href="javascript:history.back()">
+          <i class="fal fa-angle-left"></i>
+          Zurück
+        </a>
+        <h1 class="headline mt-4">{{ property.title }}</h1>
+        <p class="lead">
+          {% if property.rs_type %}{{ property.formatted.rs_type }}{% endif %} {% if property.rs_art %}{{
+          property.formatted.rs_art }}{% endif %} {% if property.marketing_type %}{{ property.formatted.marketing_type
+          }}{% endif %}
+        </p>
+      </div>
+    </section>
+
+    {% assign images = property.images | concat: property.image_floorplans %}
+    <section id="owl">
+      <div class="container">
+        <div class="owl-carousel owl-theme">
+          {% for image in images %}
+          <div class="item" data-hash="{{ image.url }}">
+            <div
+              class="hero"
+              title="{{ image.title }}"
+              style="background: url('{{ image.url }}'); background-size: cover; background-position: center center;"
+            ></div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="d-flex flex-wrap justify-content-center mt-2">
+          {% for image in images %}
+          <a
+            href="#"
+            role="button"
+            class="js-owl-thumb img-thumbnail mr-1 mb-1"
+            title="{{ image.title }}"
+            style="display: inline-block; width: 60px; height: 60px; background: url('{{ image.url }}'); background-size: cover; background-position: center center;"
+          ></a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section id="details">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.details }}</h2>
+            <div class="table-responsive">
+              {% for group in property.structured_data %} {% if group.fields.size > 0 %}
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <tbody>
+                    {% for field in group.fields %}
+                    <tr data-field-name="{{ field.key }}">
+                      <th>{{ field.label }}</th>
+                      <td class="text-right">
+                        {% if field.value == true %} {{ t.yes }} {% else %} {{ field.value }} {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% endif %} {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="description">
+      <div class="container py-5">
+        {% if property.description_note %}
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.description }}</h2>
+            {{ property.description_note }}
+          </div>
+        </div>
+        {% endif %} {% if property.furnishing_note %}
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.furnishing }}</h2>
+            {{ property.furnishing_note }}
+          </div>
+        </div>
+        {% endif %} {% if property.location_note %}
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.location }}</h2>
+            <article>{{ property.location_note }}</article>
+          </div>
+        </div>
+        {% endif %} {% if property.other_note %}
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.other }}</h2>
+            {{ property.other_note }}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if property.links.size > 0 %}
+    <section id="links" class="page-container">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.links }}</h2>
+            <div class="doc-grid">
+              {% for link in property.links %}
+              <a target="_blank" href="{{ link.url }}" class="doc-cell">
+                <span>{{ link.title }}</span>
+                <small class="doc-cell-suffix">{{ t.visit_link }}</small>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %} {% for embed in property.embed_links %}
+    <section id="embed-{{ embed.id }}" class="py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ embed.title }}</h2>
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe
+                class="embed-responsive-item"
+                allowfullscreen="true"
+                src="{{ embed.url }}"
+                frameborder="0"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endfor %} {% if property.documents.size > 0 %}
+    <section id="documents" class="py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">{{ t.documents }}</h2>
+            <div class="doc-grid">
+              {% for doc in property.documents %}
+              <a target="_blank" href="{{ doc.url }}" class="doc-cell">
+                <span>{{ doc.title }}</span>
+                <small class="doc-cell-suffix">Download</small>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <section id="map">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">Karte</h2>
+            {% if show_complete_address and property.lat %}
+            <div class="embed-responsive embed-responsive-21by9">
+              <iframe
+                class="embed-responsive-item"
+                src="https://maps.google.de/maps?hl=de&q={{ property.lat }} {{ property.lng }}&ie=UTF8&output=embed"
+                frameborder="0"
+              ></iframe>
+            </div>
+            {% elsif property.zip_code or property.city %}
+            <div class="embed-responsive embed-responsive-21by9">
+              <iframe
+                class="embed-responsive-item"
+                src="https://maps.google.de/maps?hl=de&q={{ property.zip_code }} {{ property.city }}&ie=UTF8&output=embed"
+                frameborder="0"
+              ></iframe>
+            </div>
+            {% endif %}
+            <p class="mv-4 text-center">
+              <small>
+                {% if show_complete_address %} {% if property.lat %} {{ property.street }} {{ property.house_number }},
+                {{ property.zip_code }} {{ property.city }} {% endif %} {% elsif property.zip_code %} Die vollständige
+                Adresse der Immobilie erhalten Sie vom Anbieter. {% endif %}
+              </small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="response">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col-12 col-md-12 col-sm-12">
+            <h2 class="headline">Kontakt aufnehmen</h2>
+            <p>Ihre Anfrage zu Objekt {{ property_unit_id }}, {{ property.title }}</p>
+          </div>
+        </div>
+        <form action="{{ inquiry_form.submit_url }}" method="POST" id="contact-form">
+          <div class="form-group row mt-4">
+            <label for="contact_salutation" class="col-sm-2 col-form-label">Anrede</label>
+            <div class="col-sm-10">
+              <select name="contact[salutation]" id="contact_salutation" class="form-control" required>
+                <option value="mr">Herr</option>
+                <option value="ms">Frau</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_first_name" class="col-sm-2 col-form-label">
+              Vor- & Nachname
+              <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Vorname"
+                    name="contact[first_name]"
+                    id="contact_first_name"
+                    required
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nachname"
+                    name="contact[last_name]"
+                    id="contact_last_name"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_street" class="col-sm-2 col-form-label">
+              Strasse Nr.
+              <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Musterstraße 123"
+                name="contact[street]"
+                id="contact_street"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_zip_code" class="col-sm-2 col-form-label">
+              PLZ Ort
+              <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="12345"
+                    name="contact[zip_code]"
+                    id="contact_zip_code"
+                    required
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Musterstadt"
+                    name="contact[city]"
+                    id="contact_city"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_phone" class="col-sm-2 col-form-label">
+              Telefonnummer
+              <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="tel" class="form-control" name="contact[phone]" id="contact_phone" value="" required />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_email" class="col-sm-2 col-form-label">
+              E-Mail Adresse
+              <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="email"
+                class="form-control"
+                placeholder="max.mustermann@beispiel.de"
+                name="contact[email]"
+                id="contact_email"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="contact_body" class="col-sm-2 col-form-label">Ihre Nachricht</label>
+            <div class="col-sm-10">
+              <textarea class="form-control" rows="6" name="contact[body]" id="contact_body">
+Ich bin an dieser Immobilie interessiert. Bitte kontaktieren Sie mich.</textarea
+              >
+            </div>
+          </div>
+          <p>
+            <small>
+              Datenschutzinformation
+              <br />
+              Mit der Eingabe meiner Daten und Absendung der Anfrage erkläre ich mich damit einverstanden, dass die
+              Daten verschlüsselt an {{ shop.name }} weitergeleitet werden. Weitere Informationen erfahren Sie unter
+              Datenschutz
+            </small>
+          </p>
+          <p>
+            <small>
+              Verbraucher im Sinne des § 13 BGB geben uns mit der Übermittlung ihrer Telefonnummer die ausdrückliche
+              Einverständniserklärung zur telefonischen Kontaktaufnahme.
+            </small>
+          </p>
+          <!-- <div class="g-recaptcha mb-4" data-sitekey="6Ldy3-AZAAAAAA9sloRHPI7EHIjrN8A0KcwpvyLt"></div> -->
+          <button type="submit" class="btn btn-lg btn-primary mb-4">OK - Absenden</button>
+        </form>
+        <p id="contact-form-success" class="text-success" style="display: none">
+          Vielen Dank, Ihre Anfrage wurde erfolgreich abgeschickt! Wir werden uns in Kürze bei Ihnen melden.
+        </p>
+      </div>
+    </section>
+
+    {% if property.baufi_tipster.widget and property.zip_code and property.formatted.raw.price and
+    property.price_on_inquiry == false and property.for_bidding == false%}
+    <section id="baufi_tipster" class="py-4">
+      <div class="container">
+        <iframe
+          style="width: 100%; height: 415px; border: 0px; background: #f0f0f0; overflow: hidden; border-radius: 0"
+          src="https://mortgage-form-application.finanzen.immobilienscout24.de/financing/{{property.baufi_tipster.token}}?company_id={{property.baufi_tipster.company_id}}&postcode={{property.zip_code}}&purchaseprice={{property.formatted.raw.price}}&ps_estate_id={{property.id}}&partner_key={{ property.baufi_tipster.partner_key }}&transaction_id={{property.expose_id}}&ps_contact_id={{ broker.name }}"
+        ></iframe>
+      </div>
+    </section>
+    {% endif %}
+
+    <section id="contact">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col-12 col-md-4 col-sm-12">
+            <div class="card h-100">
+              {% if broker.avatarUrl %}
+              <img class="card-img-top" src="{{ broker.avatarUrl }}" />
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-md-4 col-sm-12">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title">Kontakt</h3>
+                {% if offmarket_enabled %}
+                <button onclick="action()" id="show-contact" class="show-contact-btn">Kontakt Daten anzeigen</button>
+                <p id="contact-info" class="card-text hidden">
+                  <br />
+                  <strong>{{ broker.name }}</strong>
+                  {% if broker.position %}
+                  <br />
+                  {{ broker.position }} {% endif %} {% if broker.phone %}
+                  <br />
+                  <a href="tel:{{ broker.phone }}" class="card-link mt-3 mr-0 mb-0 ml-0">
+                    <i class="fal fa-phone-office fa-fw"></i>
+                    {{ broker.phone }}
+                  </a>
+                  {% endif %} {% if broker.publicPhone %}
+                  <br />
+                  <a href="tel:{{ broker.publicPhone }}" class="card-link mt-2 mr-0 mb-0 ml-0">
+                    <i class="fal fa-mobile fa-fw"></i>
+                    {{ broker.publicPhone }}
+                  </a>
+                  {% endif %} {% if broker.contactEmail %}
+                  <br />
+                  <a href="mailto:{{ broker.contactEmail }}" class="card-link mt-2 mr-0 mb-0 ml-0">
+                    <i class="fal fa-at fa-fw"></i>
+                    {{ broker.contactEmail }}
+                  </a>
+                  {% endif %}
+                </p>
+                {% else %}
+                <p class="card-text">
+                  <br />
+                  <strong>{{ broker.name }}</strong>
+                  {% if broker.position %}
+                  <br />
+                  {{ broker.position }} {% endif %} {% if broker.phone %}
+                  <br />
+                  <a href="tel:{{ broker.phone }}" class="card-link mt-3 mr-0 mb-0 ml-0">
+                    <i class="fal fa-phone-office fa-fw"></i>
+                    {{ broker.phone }}
+                  </a>
+                  {% endif %} {% if broker.publicPhone %}
+                  <br />
+                  <a href="tel:{{ broker.publicPhone }}" class="card-link mt-2 mr-0 mb-0 ml-0">
+                    <i class="fal fa-mobile fa-fw"></i>
+                    {{ broker.publicPhone }}
+                  </a>
+                  {% endif %} {% if broker.contactEmail %}
+                  <br />
+                  <a href="mailto:{{ broker.contactEmail }}" class="card-link mt-2 mr-0 mb-0 ml-0">
+                    <i class="fal fa-at fa-fw"></i>
+                    {{ broker.contactEmail }}
+                  </a>
+                  {% endif %}
+                </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4 col-sm-12">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title">Anschrift</h3>
+                <p class="card-text">
+                  <br />
+                  {{ shop.name }}
+                  <br />
+                  {{ shop.street }}
+                  <br />
+                  {{ shop.zipCode }} {{ shop.city }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% if showCancelButton %}
+    <section>
+      <div class="col-md-12 text-center my-5">
+        <a
+          href="#"
+          role="button"
+          data-toggle="modal"
+          data-target="#not-interested"
+          class="btn btn-light btn-block btn-one"
+        >
+          <i class="fal fa-house-circle-xmark fa-fw"></i>
+          {{ "lp.no_interest.button" | t }}
+        </a>
+        <center>
+          <p><small>{{ "lp.no_interest.text" | t }}</small></p>
+        </center>
+      </div>
+    </section>
+    {% endif %}
+  </body>
+
+  <div class="modal" id="not-interested" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <form id="not-interested-form" class="modal-content" action="{{ reason.submit_url }}" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ t.not_interested_modal.headline }}</h5>
+          <button class="close" data-dismiss="modal">
+            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <article class="py-3">
+            <label>{{ t.not_interested_modal.reservation_reason }}</label>
+            {% for option in reason.options %}
+            <div>
+              <label>
+                <input type="radio" name="reason" value="{{ option.id }}" class="mr-2" />
+                {{ option.name }}
+              </label>
+            </div>
+            {% endfor %}
+            <div>
+              <label for="reason_note">{{ t.not_interested_modal.reason_note }}</label>
+              <textarea name="reason_note" class="form-control"></textarea>
+            </div>
+          </article>
+        </div>
+        <div class="modal-footer">
+          <button id="not-interested-submit-button" class="btn btn-sm btn-primary">
+            {{ t.cta.cancel_modal.submit }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.2/min/tiny-slider.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrUF4g1DQ78Rs_wurS4WvQXuZigEOPEhs&callback=Function.prototype"></script>
+
+  <!--Owl Carousel-->
+  <script type="text/javascript">
+    var slider = tns({
+      container: ".owl-carousel",
+      slideBy: "page",
+      autoplay: false,
+      edgePadding: 60,
+      loop: true,
+      gutter: 10,
+      mouseDrag: true,
+      controls: false,
+      nav: false,
+    })
+    $(document).ready(function () {
+      function b() {
+        $('#not-interested-form input[type="radio"]:checked').length <= 0
+          ? $("#not-interested-submit-button").addClass("disabled")
+          : $("#not-interested-submit-button").removeClass("disabled")
+      }
+      $('#not-interested-form input[type="radio"]').on("change", b),
+        b(),
+        $("#not-interested-form").on("submit", function (e) {
+          $("#not-interested-submit-button").addClass("disabled")
+        })
+    }),
+      $("#contact-form").on("submit", function (e) {
+        e.preventDefault()
+        var form = $(this)
+        var url = form.attr("action")
+
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: form.serialize(), // serializes the form's elements.
+          success: function (data) {
+            console.log(data)
+            form.hide()
+            $("#contact-form-success").show()
+          },
+        })
+      })
+
+    $(".js-owl-thumb").on("click", function (e) {
+      e.preventDefault()
+      slider.goTo($(this).index())
+    })
+
+    window.addEventListener("load", function (event) {
+      parent.postMessage({ contentHeight: document.body.scrollHeight, state: "ready" }, "*")
+    })
+    function action() {
+      $("#show-contact").addClass("hidden"), $("#contact-info").removeClass("hidden")
+      var url = window.location.href
+      var queryStart = url.indexOf("?")
+      if (queryStart) {
+        url = url.substring(0, queryStart)
+      }
+      var token = url.split("/").slice(-1)[0]
+      $.post(`/public/exposee/create_tracking/${token}`, { event_type: "offmarket_contact_broker_button_clicked" })
+    }
+  </script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</html>

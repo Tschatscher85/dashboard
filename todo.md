@@ -1265,3 +1265,17 @@
 - [x] Restore Google Maps autocomplete in Properties dialog (PlaceAutocompleteElement)
 - [x] Update Map component to use user's API key instead of Manus Forge proxy (fallback logic)
 - [ ] Test autocomplete and distance calculation (requires user testing)
+
+## CRITICAL FIX - Property Links Implementation
+
+- [x] Add propertyLinks schema to drizzle/schema.ts
+- [ ] Create migration script for propertyLinks table
+- [x] Add propertyLinks CRUD functions to server/db.ts (NO DUPLICATES!)
+- [x] Add propertyLinks router to server/routers.ts
+- [ ] Update PropertyMedia Links tab with flexible link management
+- [ ] Copy HTML templates to server/templates/
+- [ ] Add landing page template selection to Settings
+- [ ] Create One-Pager generator module
+- [ ] Add One-Pager button to PropertyDetail
+- [ ] Test all features locally
+- [ ] Push to GitHub
