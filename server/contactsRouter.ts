@@ -289,4 +289,84 @@ export const contactsRouter = router({
       
       return categories[input.contactType] || [];
     }),
+
+  /**
+   * Contact Documents - Upload document
+   */
+  uploadDocument: publicProcedure
+    .input(z.object({
+      contactId: z.number(),
+      module: z.enum(["immobilienmakler", "versicherungen", "hausverwaltung"]),
+      category: z.string().optional(),
+      subcategory: z.string().optional(),
+      fileName: z.string(),
+      fileData: z.string(), // Base64 encoded
+      fileType: z.string().optional(),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { uploadContactDocument } = await import('./contactDocumentsWebdav');
+      const fileBuffer = Buffer.from(input.fileData, 'base64');
+      
+      const result = await uploadContactDocument({
+        contactId: input.contactId,
+        module: input.module,
+        category: input.category,
+        subcategory: input.subcategory,
+        fileName: input.fileName,
+        fileBuffer,
+        fileType: input.fileType,
+        fileSize: fileBuffer.length,
+        description: input.description,
+      });
+      
+      return result;
+    }),
+
+  /**
+   * Contact Documents - List documents
+   */
+  listDocuments: publicProcedure
+    .input(z.object({
+      contactId: z.number(),
+      module: z.enum(["immobilienmakler", "versicherungen", "hausverwaltung"]).optional(),
+    }))
+    .query(async ({ input }) => {
+      const { listContactDocuments } = await import('./contactDocumentsWebdav');
+      return await listContactDocuments(input.contactId, input.module);
+    }),
+
+  /**
+   * Contact Documents - Download document
+   */
+  downloadDocument: publicProcedure
+    .input(z.object({ documentId: z.number() }))
+    .query(async ({ input }) => {
+      const { downloadContactDocument } = await import('./contactDocumentsWebdav');
+      const buffer = await downloadContactDocument(input.documentId);
+      
+      if (!buffer) {
+        throw new Error('Document not found');
+      }
+      
+      return {
+        data: buffer.toString('base64'),
+      };
+    }),
+
+  /**
+   * Contact Documents - Delete document
+   */
+  deleteDocument: publicProcedure
+    .input(z.object({ documentId: z.number() }))
+    .mutation(async ({ input }) => {
+      const { deleteContactDocument } = await import('./contactDocumentsWebdav');
+      const success = await deleteContactDocument(input.documentId);
+      
+      if (!success) {
+        throw new Error('Failed to delete document');
+      }
+      
+      return { success: true };
+    }),
 });

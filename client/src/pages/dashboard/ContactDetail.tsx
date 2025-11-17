@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { ContactTagsInput } from "@/components/ContactTagsInput";
+import ContactDocuments from "@/components/ContactDocuments";
 
 export default function ContactDetail() {
   const [, params] = useRoute("/dashboard/contacts/:id");
@@ -409,17 +410,14 @@ export default function ContactDetail() {
 
         {/* Documents Tab */}
         <TabsContent value="documents">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dokumente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Noch keine Dokumente hochgeladen</p>
-              </div>
-            </CardContent>
-          </Card>
+          <ContactDocuments
+            contactId={contactId}
+            modules={{
+              immobilienmakler: contact.moduleImmobilienmakler || false,
+              versicherungen: contact.moduleVersicherungen || false,
+              hausverwaltung: contact.moduleHausverwaltung || false,
+            }}
+          />
         </TabsContent>
 
         {/* History Tab */}

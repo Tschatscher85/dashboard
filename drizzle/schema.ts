@@ -735,3 +735,37 @@ export const appConfig = mysqlTable("appConfig", {
 
 export type AppConfig = typeof appConfig.$inferSelect;
 export type InsertAppConfig = typeof appConfig.$inferInsert;
+
+
+/**
+ * Contact Documents - Files associated with contacts
+ * Supports module-specific folder structures for Immobilienmakler, Versicherungen, Hausverwaltung
+ */
+export const contactDocuments = mysqlTable("contactDocuments", {
+  id: int("id").primaryKey().autoincrement(),
+  contactId: int("contactId").notNull(),
+  
+  // Module assignment (which business area this document belongs to)
+  module: mysqlEnum("module", ["immobilienmakler", "versicherungen", "hausverwaltung"]).notNull(),
+  
+  // Document info
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 500 }).notNull(), // WebDAV path
+  fileType: varchar("fileType", { length: 50 }), // pdf, docx, jpg, etc.
+  fileSize: int("fileSize"), // in bytes
+  
+  // Categorization (e.g., "Eigentümer", "Kaufinteressent", "Mietinteressent")
+  category: varchar("category", { length: 100 }),
+  subcategory: varchar("subcategory", { length: 100 }), // For nested folders
+  
+  // Metadata
+  description: text("description"),
+  tags: text("tags"), // Comma-separated tags
+  
+  // Timestamps
+  uploadedAt: timestamp("uploadedAt").defaultNow().notNull(),
+  uploadedBy: int("uploadedBy"), // User ID who uploaded
+});
+
+export type ContactDocument = typeof contactDocuments.$inferSelect;
+export type InsertContactDocument = typeof contactDocuments.$inferInsert;
