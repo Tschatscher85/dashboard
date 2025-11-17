@@ -132,12 +132,25 @@ export async function createProperty(property: InsertProperty) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Filter out undefined, null, and empty string values to avoid SQL errors
+  // Filter out undefined, null, and empty string values
   const cleanProperty = Object.fromEntries(
     Object.entries(property).filter(([_, v]) => v !== undefined && v !== null && v !== '')
-  ) as InsertProperty;
+  );
   
-  const result = await db.insert(properties).values(cleanProperty);
+  // Build dynamic SQL with only provided fields
+  const fields = Object.keys(cleanProperty);
+  const values = Object.values(cleanProperty);
+  
+  if (fields.length === 0) {
+    throw new Error("No fields provided for property creation");
+  }
+  
+  const placeholders = fields.map(() => '?').join(', ');
+  const fieldList = fields.map(f => `\`${f}\``).join(', ');
+  const sql = `INSERT INTO properties (${fieldList}) VALUES (${placeholders})`;
+  
+  // Use raw SQL query
+  const result = await db.execute({ sql, args: values });
   return result;
 }
 
@@ -249,12 +262,25 @@ export async function createContact(contact: InsertContact) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Filter out undefined, null, and empty string values to avoid SQL errors
+  // Filter out undefined, null, and empty string values
   const cleanContact = Object.fromEntries(
     Object.entries(contact).filter(([_, v]) => v !== undefined && v !== null && v !== '')
-  ) as InsertContact;
+  );
   
-  const result = await db.insert(contacts).values(cleanContact);
+  // Build dynamic SQL with only provided fields
+  const fields = Object.keys(cleanContact);
+  const values = Object.values(cleanContact);
+  
+  if (fields.length === 0) {
+    throw new Error("No fields provided for contact creation");
+  }
+  
+  const placeholders = fields.map(() => '?').join(', ');
+  const fieldList = fields.map(f => `\`${f}\``).join(', ');
+  const sql = `INSERT INTO contacts (${fieldList}) VALUES (${placeholders})`;
+  
+  // Use raw SQL query
+  const result = await db.execute({ sql, args: values });
   return result;
 }
 
