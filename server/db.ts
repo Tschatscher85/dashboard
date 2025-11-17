@@ -132,9 +132,9 @@ export async function createProperty(property: InsertProperty) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Filter out undefined values to avoid SQL errors
+  // Filter out undefined, null, and empty string values to avoid SQL errors
   const cleanProperty = Object.fromEntries(
-    Object.entries(property).filter(([_, v]) => v !== undefined)
+    Object.entries(property).filter(([_, v]) => v !== undefined && v !== null && v !== '')
   ) as InsertProperty;
   
   const result = await db.insert(properties).values(cleanProperty);
@@ -249,9 +249,9 @@ export async function createContact(contact: InsertContact) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Filter out undefined values to avoid SQL errors
+  // Filter out undefined, null, and empty string values to avoid SQL errors
   const cleanContact = Object.fromEntries(
-    Object.entries(contact).filter(([_, v]) => v !== undefined)
+    Object.entries(contact).filter(([_, v]) => v !== undefined && v !== null && v !== '')
   ) as InsertContact;
   
   const result = await db.insert(contacts).values(cleanContact);
