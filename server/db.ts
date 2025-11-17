@@ -132,7 +132,12 @@ export async function createProperty(property: InsertProperty) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(properties).values(property);
+  // Filter out undefined values to avoid SQL errors
+  const cleanProperty = Object.fromEntries(
+    Object.entries(property).filter(([_, v]) => v !== undefined)
+  ) as InsertProperty;
+  
+  const result = await db.insert(properties).values(cleanProperty);
   return result;
 }
 
@@ -244,7 +249,12 @@ export async function createContact(contact: InsertContact) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(contacts).values(contact);
+  // Filter out undefined values to avoid SQL errors
+  const cleanContact = Object.fromEntries(
+    Object.entries(contact).filter(([_, v]) => v !== undefined)
+  ) as InsertContact;
+  
+  const result = await db.insert(contacts).values(cleanContact);
   return result;
 }
 
