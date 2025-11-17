@@ -129,9 +129,6 @@ export async function deleteUser(id: number) {
 // ============ PROPERTY OPERATIONS ============
 
 export async function createProperty(property: InsertProperty) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
   // Filter out undefined, null, and empty string values
   const cleanProperty = Object.fromEntries(
     Object.entries(property).filter(([_, v]) => v !== undefined && v !== null && v !== '')
@@ -149,9 +146,16 @@ export async function createProperty(property: InsertProperty) {
   const fieldList = fields.map(f => `\`${f}\``).join(', ');
   const sql = `INSERT INTO properties (${fieldList}) VALUES (${placeholders})`;
   
-  // Use raw SQL query
-  const result = await db.execute({ sql, args: values });
-  return result;
+  // Use mysql2 directly
+  const mysql2 = await import('mysql2/promise');
+  const connection = await mysql2.createConnection(process.env.DATABASE_URL!);
+  
+  try {
+    const [result] = await connection.execute(sql, values);
+    return result;
+  } finally {
+    await connection.end();
+  }
 }
 
 export async function getPropertyById(id: number) {
@@ -259,9 +263,6 @@ export async function deleteProperty(id: number) {
 // ============ CONTACT OPERATIONS ============
 
 export async function createContact(contact: InsertContact) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
   // Filter out undefined, null, and empty string values
   const cleanContact = Object.fromEntries(
     Object.entries(contact).filter(([_, v]) => v !== undefined && v !== null && v !== '')
@@ -279,9 +280,16 @@ export async function createContact(contact: InsertContact) {
   const fieldList = fields.map(f => `\`${f}\``).join(', ');
   const sql = `INSERT INTO contacts (${fieldList}) VALUES (${placeholders})`;
   
-  // Use raw SQL query
-  const result = await db.execute({ sql, args: values });
-  return result;
+  // Use mysql2 directly
+  const mysql2 = await import('mysql2/promise');
+  const connection = await mysql2.createConnection(process.env.DATABASE_URL!);
+  
+  try {
+    const [result] = await connection.execute(sql, values);
+    return result;
+  } finally {
+    await connection.end();
+  }
 }
 
 export async function getContactById(id: number) {
