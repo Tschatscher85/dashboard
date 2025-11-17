@@ -4,6 +4,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { contactsRouter } from "./contactsRouter";
 import * as db from "./db";
 import { getDb } from "./db";
 import { generateExpose } from "./exposeGenerator";
@@ -1957,10 +1958,7 @@ Die Beschreibung soll:
   }),
 
   // ============ CONTACTS ============
-  contacts: (async () => {
-    const { contactsRouter } = await import('./contactsRouter');
-    return contactsRouter;
-  })(),
+  contacts: contactsRouter,
   
 
   // ============ APPOINTMENTS ============
