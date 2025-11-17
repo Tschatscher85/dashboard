@@ -10,9 +10,7 @@ import {
   documents, InsertDocument,
   propertyLinks, InsertPropertyLink,
   appointments, InsertAppointment,
-  activities, InsertActivity,
-  leads, InsertLead,
-  inquiries, InsertInquiry
+  leads, InsertLead
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -595,33 +593,33 @@ export async function deleteAppointment(id: number) {
 
 // ============ ACTIVITY OPERATIONS ============
 
-export async function createActivity(activity: InsertActivity) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.insert(activities).values(activity);
-  return result;
-}
-
-export async function getActivitiesByProperty(propertyId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(activities)
-    .where(eq(activities.propertyId, propertyId))
-    .orderBy(desc(activities.createdAt));
-  return result;
-}
-
-export async function getActivitiesByContact(contactId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db.select().from(activities)
-    .where(eq(activities.contactId, contactId))
-    .orderBy(desc(activities.createdAt));
-  return result;
-}
+// export async function createActivity(activity: InsertActivity) {
+//   const db = await getDb();
+//   if (!db) throw new Error("Database not available");
+//   
+//   const result = await db.insert(activities).values(activity);
+//   return result;
+// }
+// 
+// export async function getActivitiesByProperty(propertyId: number) {
+//   const db = await getDb();
+//   if (!db) return [];
+//   
+//   const result = await db.select().from(activities)
+//     .where(eq(activities.propertyId, propertyId))
+//     .orderBy(desc(activities.createdAt));
+//   return result;
+// }
+// 
+// export async function getActivitiesByContact(contactId: number) {
+//   const db = await getDb();
+//   if (!db) return [];
+//   
+//   const result = await db.select().from(activities)
+//     .where(eq(activities.contactId, contactId))
+//     .orderBy(desc(activities.createdAt));
+//   return result;
+// }
 
 // ============ LEAD OPERATIONS ============
 
@@ -927,91 +925,91 @@ export async function deleteUtilityBill(id: number) {
 
 // ============ INQUIRY OPERATIONS ============
 
-export async function createInquiry(inquiry: InsertInquiry) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.insert(inquiries).values(inquiry);
-  return result;
-}
-
-export async function getInquiryById(id: number) {
-  const db = await getDb();
-  if (!db) return undefined;
-
-  const result = await db.select().from(inquiries).where(eq(inquiries.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
-}
-
-export async function getAllInquiries(filters?: {
-  status?: string;
-  channel?: string;
-  propertyId?: number;
-  contactId?: number;
-}) {
-  const db = await getDb();
-  if (!db) return [];
-
-  let query = db.select().from(inquiries);
-
-  if (filters) {
-    const conditions = [];
-    if (filters.status) conditions.push(eq(inquiries.status, filters.status as any));
-    if (filters.channel) conditions.push(eq(inquiries.channel, filters.channel as any));
-    if (filters.propertyId) conditions.push(eq(inquiries.propertyId, filters.propertyId));
-    if (filters.contactId) conditions.push(eq(inquiries.contactId, filters.contactId));
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-  }
-
-  const result = await query.orderBy(desc(inquiries.createdAt));
-  return result;
-}
-
-export async function updateInquiry(id: number, updates: Partial<InsertInquiry>) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.update(inquiries).set(updates).where(eq(inquiries.id, id));
-  return result;
-}
-
-export async function deleteInquiry(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const result = await db.delete(inquiries).where(eq(inquiries.id, id));
-  return result;
-}
-
-export async function getInquiriesByProperty(propertyId: number) {
-  const db = await getDb();
-  if (!db) return [];
-
-  const result = await db
-    .select()
-    .from(inquiries)
-    .where(eq(inquiries.propertyId, propertyId))
-    .orderBy(desc(inquiries.createdAt));
-  
-  return result;
-}
-
-export async function getInquiriesByContact(contactId: number) {
-  const db = await getDb();
-  if (!db) return [];
-
-  const result = await db
-    .select()
-    .from(inquiries)
-    .where(eq(inquiries.contactId, contactId))
-    .orderBy(desc(inquiries.createdAt));
-  
-  return result;
-}
-
+// export async function createInquiry(inquiry: InsertInquiry) {
+//   const db = await getDb();
+//   if (!db) throw new Error("Database not available");
+// 
+//   const result = await db.insert(inquiries).values(inquiry);
+//   return result;
+// }
+// 
+// export async function getInquiryById(id: number) {
+//   const db = await getDb();
+//   if (!db) return undefined;
+// 
+//   const result = await db.select().from(inquiries).where(eq(inquiries.id, id)).limit(1);
+//   return result.length > 0 ? result[0] : undefined;
+// }
+// 
+// export async function getAllInquiries(filters?: {
+//   status?: string;
+//   channel?: string;
+//   propertyId?: number;
+//   contactId?: number;
+// }) {
+//   const db = await getDb();
+//   if (!db) return [];
+// 
+//   let query = db.select().from(inquiries);
+// 
+//   if (filters) {
+//     const conditions = [];
+//     if (filters.status) conditions.push(eq(inquiries.status, filters.status as any));
+//     if (filters.channel) conditions.push(eq(inquiries.channel, filters.channel as any));
+//     if (filters.propertyId) conditions.push(eq(inquiries.propertyId, filters.propertyId));
+//     if (filters.contactId) conditions.push(eq(inquiries.contactId, filters.contactId));
+// 
+//     if (conditions.length > 0) {
+//       query = query.where(and(...conditions)) as any;
+//     }
+//   }
+// 
+//   const result = await query.orderBy(desc(inquiries.createdAt));
+//   return result;
+// }
+// 
+// export async function updateInquiry(id: number, updates: Partial<InsertInquiry>) {
+//   const db = await getDb();
+//   if (!db) throw new Error("Database not available");
+// 
+//   const result = await db.update(inquiries).set(updates).where(eq(inquiries.id, id));
+//   return result;
+// }
+// 
+// export async function deleteInquiry(id: number) {
+//   const db = await getDb();
+//   if (!db) throw new Error("Database not available");
+// 
+//   const result = await db.delete(inquiries).where(eq(inquiries.id, id));
+//   return result;
+// }
+// 
+// export async function getInquiriesByProperty(propertyId: number) {
+//   const db = await getDb();
+//   if (!db) return [];
+// 
+//   const result = await db
+//     .select()
+//     .from(inquiries)
+//     .where(eq(inquiries.propertyId, propertyId))
+//     .orderBy(desc(inquiries.createdAt));
+//   
+//   return result;
+// }
+// 
+// export async function getInquiriesByContact(contactId: number) {
+//   const db = await getDb();
+//   if (!db) return [];
+// 
+//   const result = await db
+//     .select()
+//     .from(inquiries)
+//     .where(eq(inquiries.contactId, contactId))
+//     .orderBy(desc(inquiries.createdAt));
+//   
+//   return result;
+// }
+// 
 // ============ IMAGE SORTING ============
 export async function updateImageSortOrder(imageId: number, sortOrder: number) {
   const db = await getDb();
@@ -1127,58 +1125,7 @@ export async function getPropertyLinksByProperty(propertyId: number) {
     .orderBy(propertyLinks.sortOrder);
 }
 
-export async function createPropertyLink(data: {
-  propertyId: number;
-  name: string;
-  url: string;
-  showOnLandingPage?: boolean;
-  sortOrder?: number;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error('Database not available');
-  
-  const { propertyLinks } = await import('../drizzle/schema');
-  const result = await db.insert(propertyLinks).values({
-    propertyId: data.propertyId,
-    name: data.name,
-    url: data.url,
-    showOnLandingPage: data.showOnLandingPage ?? true,
-    sortOrder: data.sortOrder ?? 0,
-  });
-  
-  return { id: result[0].insertId };
-}
 
-export async function updatePropertyLink(
-  id: number,
-  data: {
-    name?: string;
-    url?: string;
-    showOnLandingPage?: boolean;
-    sortOrder?: number;
-  }
-) {
-  const db = await getDb();
-  if (!db) throw new Error('Database not available');
-  
-  const { propertyLinks } = await import('../drizzle/schema');
-  await db
-    .update(propertyLinks)
-    .set(data)
-    .where(eq(propertyLinks.id, id));
-  
-  return { success: true };
-}
-
-export async function deletePropertyLink(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error('Database not available');
-  
-  const { propertyLinks } = await import('../drizzle/schema');
-  await db.delete(propertyLinks).where(eq(propertyLinks.id, id));
-  
-  return { success: true };
-}
 
 
 // ============ SETTINGS OPERATIONS ============

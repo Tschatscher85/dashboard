@@ -7,7 +7,7 @@
 import nunjucks from 'nunjucks';
 import path from 'path';
 import fs from 'fs';
-import { db } from './db';
+import { getDb } from './db';
 
 // Configure Nunjucks
 const templatesPath = path.join(__dirname, 'templates');

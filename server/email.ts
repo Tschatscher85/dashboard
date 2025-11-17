@@ -4,8 +4,7 @@
  * Handles transactional email sending via Brevo API
  */
 
-import { db } from "./db";
-import { settings } from "../drizzle/schema";
+import { getDb } from "./db";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -65,6 +64,9 @@ function encodeGermanChars(text: string): string {
  * @param module - Which module to get settings for (realestate, insurance, propertyMgmt)
  */
 async function getEmailSettings(module: 'realestate' | 'insurance' | 'propertyMgmt' = 'realestate') {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const { settings } = await import('../drizzle/schema');
   const settingsData = await db.select().from(settings).limit(1);
   if (!settingsData || settingsData.length === 0) {
     throw new Error("Email settings not configured");

@@ -5,7 +5,7 @@
  */
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { db } from './db';
+import { getDb } from './db';
 import * as fs from 'fs';
 import * as path from 'path';
 

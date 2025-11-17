@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { db } from './db';
+import { getDb } from './db';
 import { contacts } from '../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 

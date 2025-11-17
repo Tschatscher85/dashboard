@@ -1318,6 +1318,48 @@ export default function Settings() {
 
           {/* Company Branding Tab - Now with three sub-sections */}
           <TabsContent value="company">
+            {/* Landing Page Template Selection */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Landing Page Einstellungen</CardTitle>
+                <CardDescription>
+                  Wählen Sie das Design-Template für Ihre Immobilien-Landing Pages
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="landingPageTemplate">Landing Page Template</Label>
+                    <Select
+                      value={apiKeys.landingPageTemplate || 'modern'}
+                      onValueChange={(value) => setApiKeys({ ...apiKeys, landingPageTemplate: value })}
+                    >
+                      <SelectTrigger id="landingPageTemplate">
+                        <SelectValue placeholder="Template wählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="modern">Modern - Zeitgemäßes Design mit großen Bildern</SelectItem>
+                        <SelectItem value="elegant">Elegant - Klassisches, elegantes Layout</SelectItem>
+                        <SelectItem value="clean">Clean - Minimalistisches, aufgeräumtes Design</SelectItem>
+                        <SelectItem value="popular">Popular - Beliebtes, bewährtes Layout</SelectItem>
+                        <SelectItem value="trust">Trust - Vertrauenswürdiges Design mit Testimonials</SelectItem>
+                        <SelectItem value="progress">Progress - Fortschrittsbasiertes Layout</SelectItem>
+                        <SelectItem value="whitesmoke">Whitesmoke - Helles, luftiges Design</SelectItem>
+                        <SelectItem value="iframe">iFrame - Für Einbettung in andere Websites</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      Aktuell: <strong>{apiKeys.landingPageTemplate || 'modern'}</strong> - Alle Templates enthalten Superchat Widget und AGB/Impressum/Datenschutz Footer
+                    </p>
+                  </div>
+                  <Button onClick={handleSaveApiKeys} disabled={saveApiKeysMutation.isPending}>
+                    <Key className="mr-2 h-4 w-4" />
+                    {saveApiKeysMutation.isPending ? "Speichere..." : "Template speichern"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Tabs defaultValue="realestate" className="space-y-4">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="realestate">Immobilienmakler</TabsTrigger>
