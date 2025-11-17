@@ -4,7 +4,6 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { contactsRouter } from "./contactsRouter";
 import * as db from "./db";
 import { getDb } from "./db";
 import { generateExpose } from "./exposeGenerator";
@@ -1958,8 +1957,80 @@ Die Beschreibung soll:
   }),
 
   // ============ CONTACTS ============
-  contacts: contactsRouter,
-  
+  contacts: router({
+    list: publicProcedure
+      .input(z.object({
+        moduleImmobilienmakler: z.boolean().optional(),
+        moduleVersicherungen: z.boolean().optional(),
+        moduleHausverwaltung: z.boolean().optional(),
+        contactType: z.enum(["kunde", "partner", "dienstleister", "sonstiges"]).optional(),
+        contactCategory: z.string().optional(),
+        searchTerm: z.string().optional(),
+        archived: z.boolean().optional(),
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllContacts(input);
+      }),
+
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getContactById(input.id);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        moduleImmobilienmakler: z.boolean().optional(),
+        moduleVersicherungen: z.boolean().optional(),
+        moduleHausverwaltung: z.boolean().optional(),
+        contactType: z.enum(["kunde", "partner", "dienstleister", "sonstiges"]).optional(),
+        contactCategory: z.string().optional(),
+        type: z.enum(["person", "company"]).optional(),
+        salutation: z.enum(["herr", "frau", "divers"]).optional(),
+        title: z.string().optional(),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        language: z.string().optional(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        mobile: z.string().optional(),
+        street: z.string().optional(),
+        houseNumber: z.string().optional(),
+        zipCode: z.string().optional(),
+        city: z.string().optional(),
+        country: z.string().optional(),
+        companyName: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createContact(input);
+      }),
+
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          moduleImmobilienmakler: z.boolean().optional(),
+          moduleVersicherungen: z.boolean().optional(),
+          moduleHausverwaltung: z.boolean().optional(),
+          contactType: z.enum(["kunde", "partner", "dienstleister", "sonstiges"]).optional(),
+          firstName: z.string().optional(),
+          lastName: z.string().optional(),
+          email: z.string().optional(),
+          phone: z.string().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.updateContact(input.id, input.data);
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deleteContact(input.id);
+      }),
+  }),
 
   // ============ APPOINTMENTS ============
   appointments: router({
