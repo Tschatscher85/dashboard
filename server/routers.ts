@@ -553,7 +553,7 @@ export const appRouter = router({
         city: z.string().optional(),
       }).optional())
       .query(async ({ input }) => {
-        return await db.getAllProperties(input);
+        return await db.getAllProperties(input || {});
       }),
 
     getById: publicProcedure

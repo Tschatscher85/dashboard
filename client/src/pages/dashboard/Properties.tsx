@@ -128,7 +128,7 @@ export default function Properties() {
     toast.success('Adresse automatisch ausgefüllt');
   };
 
-  const { data: properties, isLoading, refetch } = trpc.properties.list.useQuery();
+  const { data: properties, isLoading, refetch } = trpc.properties.list.useQuery({});
   const createMutation = trpc.properties.create.useMutation({
     onSuccess: () => {
       toast.success("Immobilie erfolgreich erstellt");
