@@ -218,9 +218,9 @@ export default function Properties() {
       houseNumber: formData.houseNumber || undefined,
       zipCode: formData.zipCode || undefined,
       city: formData.city || undefined,
-      livingArea: formData.livingArea ? parseFloat(formData.livingArea) : undefined,
-      rooms: formData.rooms ? parseFloat(formData.rooms) : undefined,
-      purchasePrice: formData.price ? parseFloat(formData.price) : undefined
+      livingArea: formData.livingArea && formData.livingArea !== "" ? parseFloat(formData.livingArea) : undefined,
+      rooms: formData.rooms && formData.rooms !== "" ? parseFloat(formData.rooms) : undefined,
+      purchasePrice: formData.price && formData.price !== "" ? parseFloat(formData.price) : undefined
     });
   };
 
