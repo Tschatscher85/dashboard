@@ -1580,47 +1580,47 @@ export default function Settings() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Placeholder Documentation */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">📝 Verfügbare Platzhalter</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="font-semibold mb-1">Immobilie:</p>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{`{{property.title}}`}</li>
-                        <li>{`{{property.price}}`}</li>
-                        <li>{`{{property.livingSpace}}`}</li>
-                        <li>{`{{property.rooms}}`}</li>
-                        <li>{`{{property.address}}`}</li>
-                        <li>{`{{property.city}}`}</li>
-                        <li>{`{{property.description}}`}</li>
+                {/* Placeholder Documentation - Improved */}
+                <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-blue-900 mb-3 text-lg">📝 Verfügbare Platzhalter</h4>
+                  <p className="text-sm text-blue-700 mb-4">Verwenden Sie diese Platzhalter in Ihren Vorlagen. Sie werden automatisch mit den entsprechenden Daten ersetzt.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <p className="font-semibold text-blue-900 mb-2 flex items-center gap-1">🏠 Immobilie:</p>
+                      <ul className="space-y-1 text-xs text-gray-600">
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.title}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.price}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.livingSpace}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.rooms}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.address}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{property.city}}`}</code></li>
                       </ul>
                     </div>
-                    <div>
-                      <p className="font-semibold mb-1">Firma:</p>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{`{{company.name}}`}</li>
-                        <li>{`{{company.address}}`}</li>
-                        <li>{`{{company.phone}}`}</li>
-                        <li>{`{{company.email}}`}</li>
-                        <li>{`{{company.website}}`}</li>
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <p className="font-semibold text-blue-900 mb-2 flex items-center gap-1">🏢 Firma:</p>
+                      <ul className="space-y-1 text-xs text-gray-600">
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{company.name}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{company.address}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{company.phone}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{company.email}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{company.website}}`}</code></li>
                       </ul>
                     </div>
-                    <div>
-                      <p className="font-semibold mb-1">Eigentümer:</p>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{`{{owner.name}}`}</li>
-                        <li>{`{{owner.address}}`}</li>
-                        <li>{`{{owner.email}}`}</li>
-                        <li>{`{{owner.phone}}`}</li>
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <p className="font-semibold text-blue-900 mb-2 flex items-center gap-1">👤 Eigentümer:</p>
+                      <ul className="space-y-1 text-xs text-gray-600">
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{owner.name}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{owner.address}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{owner.email}}`}</code></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{owner.phone}}`}</code></li>
                       </ul>
                     </div>
-                    <div>
-                      <p className="font-semibold mb-1">Sonstiges:</p>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        <li>{`{{date}}`} - Aktuelles Datum</li>
-                        <li>{`{{invoiceNumber}}`} - Rechnungsnummer</li>
-                        <li>{`{{total}}`} - Gesamtbetrag</li>
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <p className="font-semibold text-blue-900 mb-2 flex items-center gap-1">📅 Sonstiges:</p>
+                      <ul className="space-y-1 text-xs text-gray-600">
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{date}}`}</code> <span className="text-gray-500">Datum</span></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{invoiceNumber}}`}</code> <span className="text-gray-500">Rechnung</span></li>
+                        <li><code className="bg-gray-100 px-1 rounded">{`{{total}}`}</code> <span className="text-gray-500">Betrag</span></li>
                       </ul>
                     </div>
                   </div>

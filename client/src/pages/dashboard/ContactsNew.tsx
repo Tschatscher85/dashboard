@@ -63,9 +63,9 @@ export default function ContactsNew() {
   // Get module badges for a contact
   const getModuleBadges = (contact: any) => {
     const badges = [];
-    if (contact.moduleImmobilienmakler) badges.push({ label: "Immobilienmakler", color: "bg-blue-500" });
-    if (contact.moduleVersicherungen) badges.push({ label: "Versicherungen", color: "bg-green-500" });
-    if (contact.moduleHausverwaltung) badges.push({ label: "Hausverwaltung", color: "bg-purple-500" });
+    if (contact.moduleImmobilienmakler) badges.push({ label: "Immobilienmakler", color: "bg-sky-400" }); // Hellblau
+    if (contact.moduleVersicherungen) badges.push({ label: "Versicherungen", color: "bg-blue-700" }); // Allianz Blau
+    if (contact.moduleHausverwaltung) badges.push({ label: "Hausverwaltung", color: "bg-gray-500" }); // Grau
     return badges;
   };
   
