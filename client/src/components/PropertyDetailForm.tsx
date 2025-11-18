@@ -130,26 +130,34 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     const numberFields = [
       'latitude', 'longitude', 'price', 'coldRent', 'warmRent', 'heatingCosts', 'additionalCosts',
       'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome',
-      'livingSpace', 'plotSize', 'usableSpace', 'balconyArea', 'gardenArea', 'rooms', 'bedrooms', 'bathrooms',
-      'floor', 'totalFloors', 'parkingCount', 'yearBuilt', 'lastModernization', 'heatingSystemYear',
+      'livingSpace', 'livingArea', 'plotSize', 'plotArea', 'usableSpace', 'usableArea', 'balconyArea', 'balconyTerraceArea', 'gardenArea', 'rooms', 'bedrooms', 'bathrooms',
+      'floor', 'floors', 'totalFloors', 'parkingCount', 'parkingSpaces', 'yearBuilt', 'lastModernization', 'heatingSystemYear',
       'energyConsumption', 'energyConsumptionElectricity', 'energyConsumptionHeat', 'co2Emissions',
       'walkingTimeToPublicTransport', 'distanceToPublicTransport', 'drivingTimeToHighway', 'distanceToHighway',
       'drivingTimeToMainStation', 'distanceToMainStation', 'drivingTimeToAirport', 'distanceToAirport',
       'supervisorId', 'ownerId', 'buyerId', 'notaryId', 'propertyManagementId', 'tenantId', 'totalCommission',
-      'headlineScore'
+      'headlineScore', 'purchasePrice', 'baseRent', 'totalRent', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea'
     ];
     
     Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && (value !== '' || value === 0)) {
-        // Convert number fields from string to number
-        if (numberFields.includes(key) && typeof value === 'string') {
+      // Skip null, undefined, and empty strings
+      if (value === null || value === undefined || value === '') {
+        return;
+      }
+      
+      // Convert number fields from string to number
+      if (numberFields.includes(key)) {
+        if (typeof value === 'string') {
           const numValue = parseFloat(value);
           if (!isNaN(numValue)) {
             cleanedData[key] = numValue;
           }
-        } else {
+          // Skip if string is not a valid number
+        } else if (typeof value === 'number') {
           cleanedData[key] = value;
         }
+      } else {
+        cleanedData[key] = value;
       }
     });
     console.log('[Frontend] cleanedData being sent:', cleanedData);
