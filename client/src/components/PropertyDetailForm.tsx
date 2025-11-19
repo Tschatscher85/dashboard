@@ -140,14 +140,8 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     ];
     
     Object.entries(formData).forEach(([key, value]) => {
-      // Convert empty strings to null
-      if (value === '') {
-        cleanedData[key] = null;
-        return;
-      }
-      
-      // Skip undefined (but keep null)
-      if (value === undefined) {
+      // Skip null, undefined, and empty strings - don't send them at all
+      if (value === null || value === undefined || value === '') {
         return;
       }
       
@@ -157,13 +151,10 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           const numValue = parseFloat(value);
           if (!isNaN(numValue)) {
             cleanedData[key] = numValue;
-          } else {
-            cleanedData[key] = null; // Invalid number becomes null
           }
+          // Skip if not a valid number
         } else if (typeof value === 'number') {
           cleanedData[key] = value;
-        } else {
-          cleanedData[key] = null;
         }
       } else {
         cleanedData[key] = value;
