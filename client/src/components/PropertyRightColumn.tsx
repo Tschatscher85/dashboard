@@ -585,7 +585,7 @@ export function PropertyRightColumn({
                 placeholder="1"
                 step="0.01"
                 value={formData.internalCommissionPercent?.toString() || ""}
-                onChange={(e) => handleChange("internalCommissionPercent", e.target.value ? parseFloat(e.target.value) : null)}
+                onChange={(e) => handleChange("internalCommissionPercent", e.target.value || null)}
                 disabled={!isEditing}
                 className="flex-1"
               />
@@ -622,7 +622,7 @@ export function PropertyRightColumn({
                 placeholder="2,5"
                 step="0.01"
                 value={formData.externalCommissionInternalPercent?.toString() || ""}
-                onChange={(e) => handleChange("externalCommissionInternalPercent", e.target.value ? parseFloat(e.target.value) : null)}
+                onChange={(e) => handleChange("externalCommissionInternalPercent", e.target.value || null)}
                 disabled={!isEditing}
                 className="flex-1"
               />
