@@ -167,7 +167,7 @@ export default function ContactsNew() {
                   <TableRow key={contact.id}>
                     <TableCell className="font-medium">
                       {contact.type === "company" ? (
-                        <div>
+                        <div className="cursor-pointer hover:text-blue-600" onClick={() => setLocation(`/dashboard/contacts/${contact.id}`)}>
                           <div>{contact.companyName}</div>
                           {contact.firstName && contact.lastName && (
                             <div className="text-sm text-gray-500">
@@ -176,7 +176,7 @@ export default function ContactsNew() {
                           )}
                         </div>
                       ) : (
-                        <div>
+                        <div className="cursor-pointer hover:text-blue-600" onClick={() => setLocation(`/dashboard/contacts/${contact.id}`)}>
                           <div>
                             {contact.salutation === "herr" && "Herr "}
                             {contact.salutation === "frau" && "Frau "}
