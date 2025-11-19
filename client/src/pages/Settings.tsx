@@ -968,41 +968,6 @@ export default function Settings() {
                   </p>
                 </div>
 
-                {/* Landing Page Template */}
-                <div className="space-y-4 p-4 border rounded-lg bg-indigo-50/50">
-                  <div>
-                    <h4 className="font-semibold text-indigo-900 mb-2">Landing Page Vorlage</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Wählen Sie das Design für Ihre Immobilien-Landing Pages
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="landingPageTemplate">Template auswählen</Label>
-                    <Select
-                      value={apiKeys.landingPageTemplate || 'modern'}
-                      onValueChange={(value) => setApiKeys({ ...apiKeys, landingPageTemplate: value })}
-                    >
-                      <SelectTrigger id="landingPageTemplate">
-                        <SelectValue placeholder="Template wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="modern">Modern - Minimalistisch & Übersichtlich</SelectItem>
-                        <SelectItem value="elegant">Elegant - Luxuriös & Stilvoll</SelectItem>
-                        <SelectItem value="clean">Clean - Schlicht & Professionell</SelectItem>
-                        <SelectItem value="popular">Popular - Bewährt & Beliebt</SelectItem>
-                        <SelectItem value="trust">Trust - Vertrauenswürdig & Seriös</SelectItem>
-                        <SelectItem value="progress">Progress - Dynamisch & Fortschrittlich</SelectItem>
-                        <SelectItem value="whitesmoke">Whitesmoke - Hell & Luftig</SelectItem>
-                        <SelectItem value="iframe">iFrame - Einbettbar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Das gewählte Template wird für alle Property Landing Pages verwendet
-                    </p>
-                  </div>
-                </div>
-
                 {/* ImmoScout24 API Configuration */}
                 <div className="border-t pt-6 mt-6">
                   <h3 className="text-lg font-semibold mb-4">ImmoScout24 API</h3>
