@@ -257,6 +257,7 @@ export const contactsRouter = router({
     .query(async ({ input }) => {
       const categories: Record<string, string[]> = {
         kunde: [
+          "Eigennutzer",
           "Eigentümer",
           "Eigentümer Lead",
           "Kapitalanleger",
@@ -282,7 +283,6 @@ export const contactsRouter = router({
           "Handwerker",
           "Hausverwaltung",
           "IT-Branche",
-          "Eigennutzer",
         ],
         sonstiges: [],
       };
