@@ -769,3 +769,205 @@ export const contactDocuments = mysqlTable("contactDocuments", {
 
 export type ContactDocument = typeof contactDocuments.$inferSelect;
 export type InsertContactDocument = typeof contactDocuments.$inferInsert;
+
+/**
+ * Insurances - Insurance policies for contacts
+ */
+export const insurances = mysqlTable("insurances", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Contact association
+  contactId: int("contactId").notNull(),
+  
+  // Insurance details
+  policyNumber: varchar("policyNumber", { length: 100 }),
+  insuranceCompany: varchar("insuranceCompany", { length: 255 }),
+  insuranceType: varchar("insuranceType", { length: 100 }), // Hausrat, Rechtsschutz, Haftpflicht, KFZ, Leben, etc.
+  
+  // Dates
+  yearlyMeeting: date("yearlyMeeting"), // Jahresgespräch
+  startDate: date("startDate"),
+  endDate: date("endDate"),
+  
+  // Premium
+  premium: decimal("premium", { precision: 10, scale: 2 }),
+  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "quarterly", "yearly"]).default("yearly"),
+  
+  // Status
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active"),
+  
+  // Notes
+  notes: text("notes"),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Insurance = typeof insurances.$inferSelect;
+export type InsertInsurance = typeof insurances.$inferInsert;
+
+/**
+ * Contact Tags - Tags for filtering and categorizing contacts
+ */
+export const contactTags = mysqlTable("contact_tags", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Tag details
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  color: varchar("color", { length: 50 }).default("#6b7280"),
+  module: mysqlEnum("module", ["immobilienmakler", "versicherungen", "hausverwaltung", "general"]).default("general"),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ContactTag = typeof contactTags.$inferSelect;
+export type InsertContactTag = typeof contactTags.$inferInsert;
+
+/**
+ * Contact Tag Assignments - Many-to-many relationship between contacts and tags
+ */
+export const contactTagAssignments = mysqlTable("contact_tag_assignments", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  contactId: int("contactId").notNull(),
+  tagId: int("tagId").notNull(),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ContactTagAssignment = typeof contactTagAssignments.$inferSelect;
+export type InsertContactTagAssignment = typeof contactTagAssignments.$inferInsert;
+
+/**
+ * Kanban Boards - Flexible boards for managing deals/tasks
+ */
+export const kanbanBoards = mysqlTable("kanban_boards", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Board details
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  module: mysqlEnum("module", ["immobilienmakler", "versicherungen", "hausverwaltung", "general"]).default("general"),
+  
+  // Settings
+  isActive: boolean("isActive").default(true),
+  sortOrder: int("sortOrder").default(0),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type KanbanBoard = typeof kanbanBoards.$inferSelect;
+export type InsertKanbanBoard = typeof kanbanBoards.$inferInsert;
+
+/**
+ * Kanban Columns - Columns within boards
+ */
+export const kanbanColumns = mysqlTable("kanban_columns", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Board association
+  boardId: int("boardId").notNull(),
+  
+  // Column details
+  name: varchar("name", { length: 255 }).notNull(),
+  color: varchar("color", { length: 50 }).default("#3b82f6"),
+  
+  // Settings
+  sortOrder: int("sortOrder").default(0),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type KanbanColumn = typeof kanbanColumns.$inferSelect;
+export type InsertKanbanColumn = typeof kanbanColumns.$inferInsert;
+
+/**
+ * Kanban Cards - Cards (deals/tasks) within columns
+ */
+export const kanbanCards = mysqlTable("kanban_cards", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Board and column association
+  boardId: int("boardId").notNull(),
+  columnId: int("columnId").notNull(),
+  
+  // Card details
+  title: varchar("title", { length: 255 }).notNull(), // Kundenname
+  description: text("description"), // z.B. "Anfrage für Wohnung XY"
+  
+  // Associations
+  contactId: int("contactId"),
+  propertyId: int("propertyId"),
+  
+  // Settings
+  sortOrder: int("sortOrder").default(0),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  movedAt: timestamp("movedAt").defaultNow().onUpdateNow(),
+});
+
+export type KanbanCard = typeof kanbanCards.$inferSelect;
+export type InsertKanbanCard = typeof kanbanCards.$inferInsert;
+
+/**
+ * Customer Users - Portal access for customers
+ */
+export const customerUsers = mysqlTable("customer_users", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Contact association
+  contactId: int("contactId").notNull().unique(),
+  
+  // Login credentials
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(), // Hashed
+  
+  // Settings
+  isActive: boolean("isActive").default(true),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  lastLogin: timestamp("lastLogin"),
+});
+
+export type CustomerUser = typeof customerUsers.$inferSelect;
+export type InsertCustomerUser = typeof customerUsers.$inferInsert;
+
+/**
+ * Document Templates - Templates for generating documents
+ */
+export const documentTemplates = mysqlTable("document_templates", {
+  id: int("id").primaryKey().autoincrement(),
+  
+  // Template details
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: mysqlEnum("category", ["contract", "invoice", "letter", "other"]).default("other"),
+  
+  // Template content
+  templateContent: text("templateContent").notNull(), // HTML with placeholders
+  templateType: mysqlEnum("templateType", ["html", "markdown", "docx"]).default("html"),
+  
+  // Placeholders (JSON array)
+  availablePlaceholders: text("availablePlaceholders"),
+  
+  // Settings
+  isActive: boolean("isActive").default(true),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DocumentTemplate = typeof documentTemplates.$inferSelect;
+export type InsertDocumentTemplate = typeof documentTemplates.$inferInsert;
