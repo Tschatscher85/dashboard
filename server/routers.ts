@@ -3647,5 +3647,5 @@ async function triggerWebhook(event: string, data: any) {
   } catch (error) {
     console.error('[Webhook] Failed to trigger:', error);
   }
-});
+}
 export type AppRouter = typeof appRouter;
