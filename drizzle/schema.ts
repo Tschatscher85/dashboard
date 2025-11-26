@@ -208,6 +208,60 @@ export const properties = mysqlTable("properties", {
   
   // Portal settings
   autoSendToPortals: boolean("autoSendToPortals").default(false),
+  hideStreetOnPortals: boolean("hideStreetOnPortals").default(false),
+  
+  // Category
+  category: varchar("category", { length: 100 }),
+  
+  // Additional floor details
+  floorLevel: varchar("floorLevel", { length: 50 }),
+  totalFloors: int("totalFloors"),
+  
+  // Additional financial fields
+  nonRecoverableCosts: decimal("nonRecoverableCosts", { precision: 10, scale: 2 }),
+  houseMoney: decimal("houseMoney", { precision: 10, scale: 2 }),
+  maintenanceReserve: decimal("maintenanceReserve", { precision: 10, scale: 2 }),
+  
+  // Additional features
+  isBarrierFree: boolean("isBarrierFree").default(false),
+  hasLoggia: boolean("hasLoggia").default(false),
+  isMonument: boolean("isMonument").default(false),
+  suitableAsHoliday: boolean("suitableAsHoliday").default(false),
+  hasFireplace: boolean("hasFireplace").default(false),
+  hasPool: boolean("hasPool").default(false),
+  hasSauna: boolean("hasSauna").default(false),
+  hasAlarm: boolean("hasAlarm").default(false),
+  hasWinterGarden: boolean("hasWinterGarden").default(false),
+  hasAirConditioning: boolean("hasAirConditioning").default(false),
+  hasParking: boolean("hasParking").default(false),
+  
+  // Bathroom features
+  bathroomFeatures: text("bathroomFeatures"),
+  
+  // Additional building details
+  heatingSystemYear: int("heatingSystemYear"),
+  buildingPhase: varchar("buildingPhase", { length: 100 }),
+  equipmentQuality: varchar("equipmentQuality", { length: 100 }),
+  
+  // Availability
+  availableFrom: date("availableFrom"),
+  
+  // Owner details
+  ownerType: varchar("ownerType", { length: 100 }),
+  
+  // Transportation & Location
+  walkingTimeToPublicTransport: int("walkingTimeToPublicTransport"),
+  distanceToPublicTransport: decimal("distanceToPublicTransport", { precision: 10, scale: 2 }),
+  drivingTimeToHighway: int("drivingTimeToHighway"),
+  distanceToHighway: decimal("distanceToHighway", { precision: 10, scale: 2 }),
+  drivingTimeToMainStation: int("drivingTimeToMainStation"),
+  distanceToMainStation: decimal("distanceToMainStation", { precision: 10, scale: 2 }),
+  drivingTimeToAirport: int("drivingTimeToAirport"),
+  distanceToAirport: decimal("distanceToAirport", { precision: 10, scale: 2 }),
+  
+  // Landing page
+  landingPageSlug: varchar("landingPageSlug", { length: 255 }),
+  landingPagePublished: boolean("landingPagePublished").default(false),
   
   // Warning/Notes
   warningNote: text("warningNote"),

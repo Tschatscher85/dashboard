@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { getDb } from "./db";
+import { mapRouterFieldsToSchema, validateSchemaFields } from "./fieldMapping";
 import { generateExpose } from "./exposeGenerator";
 import { getBrevoClient } from "./brevoClient";
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "./googleCalendar";
@@ -785,7 +786,7 @@ export const appRouter = router({
         console.log('[tRPC] properties.update called with:', JSON.stringify(input, null, 2));
         
         // Convert string dates to Date objects before saving
-        const processedData: any = { ...input.data };
+        let processedData: any = { ...input.data };
         if (input.data.availableFrom && typeof input.data.availableFrom === 'string') {
           processedData.availableFrom = new Date(input.data.availableFrom);
         }
@@ -808,6 +809,17 @@ export const appRouter = router({
               processedData.title = title;
             }
           }
+        }
+        
+        // *** CRITICAL FIX: Map router field names to database schema field names ***
+        console.log('[tRPC] Before field mapping:', Object.keys(processedData));
+        processedData = mapRouterFieldsToSchema(processedData);
+        console.log('[tRPC] After field mapping:', Object.keys(processedData));
+        
+        // Validate that all fields exist in schema (for debugging)
+        const unknownFields = validateSchemaFields(processedData);
+        if (unknownFields.length > 0) {
+          console.warn('[tRPC] WARNING: Unknown fields detected:', unknownFields);
         }
         
         await db.updateProperty(input.id, processedData);
