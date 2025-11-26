@@ -1206,61 +1206,7 @@ export async function getSettings() {
 }
 
 
-// ============ INSURANCE OPERATIONS ============
 
-export async function getAllInsurances(filters?: { contactId?: number; status?: string }) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  let query = db.select().from(insurances);
-  
-  const conditions = [];
-  if (filters?.contactId) {
-    conditions.push(eq(insurances.contactId, filters.contactId));
-  }
-  if (filters?.status) {
-    conditions.push(eq(insurances.status, filters.status as any));
-  }
-  
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions)) as any;
-  }
-  
-  const result = await query.orderBy(sql`createdAt DESC`);
-  return result;
-}
-
-export async function getInsuranceById(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(insurances).where(eq(insurances.id, id));
-  return result[0] || null;
-}
-
-export async function createInsurance(insurance: InsertInsurance) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.insert(insurances).values(insurance);
-  return result[0].insertId;
-}
-
-export async function updateInsurance(id: number, updates: Partial<InsertInsurance>) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.update(insurances).set(updates).where(eq(insurances.id, id));
-  return result;
-}
-
-export async function deleteInsurance(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.delete(insurances).where(eq(insurances.id, id));
-  return result;
-}
 
 // ============ CONTACT TAG OPERATIONS ============
 
