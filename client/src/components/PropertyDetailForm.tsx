@@ -1,3 +1,4 @@
+
 import { forwardRef, useState, useRef, useEffect, useImperativeHandle } from "react";
 import type { Property } from "../../../drizzle/schema";
 import { Save } from "lucide-react";
@@ -120,13 +121,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
 
   const handleSave = () => {
     console.log('[Frontend] handleSave called with formData:', formData);
-    console.log('[Frontend] headline value:', formData.headline);
-    
-    // Filter out null/undefined/empty string values to avoid validation errors
-    // BUT keep numeric zeros (important for energy values)
-    const cleanedData: any = {};
-    
-    // List of fields that should be numbers
+
+    const cleanedData: { [key: string]: any } = {};
+
     const numberFields = [
       'latitude', 'longitude', 'price', 'coldRent', 'warmRent', 'heatingCosts', 'additionalCosts',
       'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome',
@@ -138,31 +135,33 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
       'supervisorId', 'ownerId', 'buyerId', 'notaryId', 'propertyManagementId', 'tenantId', 'totalCommission',
       'headlineScore', 'purchasePrice', 'baseRent', 'totalRent', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea'
     ];
-    
-    Object.entries(formData).forEach(([key, value]) => {
-      // Skip null, undefined, and empty strings - don't send them at all
-      if (value === null || value === undefined || value === '') {
-        return;
-      }
-      
-      // Convert number fields from string to number
-      if (numberFields.includes(key)) {
-        if (typeof value === 'string') {
-          const numValue = parseFloat(value);
-          if (!isNaN(numValue)) {
-            cleanedData[key] = numValue;
+
+    for (const key in formData) {
+      if (Object.prototype.hasOwnProperty.call(formData, key)) {
+        const value = (formData as any)[key];
+
+        if (value === null || value === undefined) {
+          cleanedData[key] = null;
+          continue;
+        }
+
+        if (numberFields.includes(key)) {
+          if (typeof value === 'string' && value.trim() === '') {
+            cleanedData[key] = null;
+          } else {
+            const numValue = parseFloat(String(value));
+            cleanedData[key] = isNaN(numValue) ? null : numValue;
           }
-          // Skip if not a valid number
-        } else if (typeof value === 'number') {
+        } else if (typeof value === 'string' && value.trim() === '') {
+          cleanedData[key] = null;
+        } else {
           cleanedData[key] = value;
         }
-      } else {
-        cleanedData[key] = value;
       }
-    });
+    }
+
     console.log('[Frontend] cleanedData being sent:', cleanedData);
-    console.log('[Frontend] headline in cleanedData:', cleanedData.headline);
-    onSave(cleanedData);
+    onSave(cleanedData as Partial<Property>);
   };
 
   // Expose save function to parent via ref
