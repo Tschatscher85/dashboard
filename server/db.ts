@@ -10,7 +10,15 @@ import {
   documents, InsertDocument,
   propertyLinks, InsertPropertyLink,
   appointments, InsertAppointment,
-  leads, InsertLead
+  leads, InsertLead,
+  insurances, InsertInsurance,
+  contactTags, InsertContactTag,
+  contactTagAssignments, InsertContactTagAssignment,
+  kanbanBoards, InsertKanbanBoard,
+  kanbanColumns, InsertKanbanColumn,
+  kanbanCards, InsertKanbanCard,
+  customerUsers, InsertCustomerUser,
+  documentTemplates, InsertDocumentTemplate
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1195,4 +1203,372 @@ export async function getSettings() {
     console.error("[Database] Failed to get settings:", error);
     return null;
   }
+}
+
+
+// ============ INSURANCE OPERATIONS ============
+
+export async function getAllInsurances(filters?: { contactId?: number; status?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(insurances);
+  
+  const conditions = [];
+  if (filters?.contactId) {
+    conditions.push(eq(insurances.contactId, filters.contactId));
+  }
+  if (filters?.status) {
+    conditions.push(eq(insurances.status, filters.status as any));
+  }
+  
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as any;
+  }
+  
+  const result = await query.orderBy(sql`createdAt DESC`);
+  return result;
+}
+
+export async function getInsuranceById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(insurances).where(eq(insurances.id, id));
+  return result[0] || null;
+}
+
+export async function createInsurance(insurance: InsertInsurance) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(insurances).values(insurance);
+  return result[0].insertId;
+}
+
+export async function updateInsurance(id: number, updates: Partial<InsertInsurance>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(insurances).set(updates).where(eq(insurances.id, id));
+  return result;
+}
+
+export async function deleteInsurance(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(insurances).where(eq(insurances.id, id));
+  return result;
+}
+
+// ============ CONTACT TAG OPERATIONS ============
+
+export async function getAllContactTags(filters?: { module?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(contactTags);
+  
+  if (filters?.module) {
+    query = query.where(eq(contactTags.module, filters.module as any)) as any;
+  }
+  
+  const result = await query.orderBy(contactTags.name);
+  return result;
+}
+
+export async function createContactTag(tag: InsertContactTag) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(contactTags).values(tag);
+  return result[0].insertId;
+}
+
+export async function deleteContactTag(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(contactTags).where(eq(contactTags.id, id));
+  return result;
+}
+
+export async function assignTagToContact(contactId: number, tagId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(contactTagAssignments).values({ contactId, tagId });
+  return result;
+}
+
+export async function removeTagFromContact(contactId: number, tagId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(contactTagAssignments)
+    .where(and(
+      eq(contactTagAssignments.contactId, contactId),
+      eq(contactTagAssignments.tagId, tagId)
+    ));
+  return result;
+}
+
+export async function getContactTags(contactId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db
+    .select({
+      id: contactTags.id,
+      name: contactTags.name,
+      color: contactTags.color,
+      module: contactTags.module,
+    })
+    .from(contactTagAssignments)
+    .innerJoin(contactTags, eq(contactTagAssignments.tagId, contactTags.id))
+    .where(eq(contactTagAssignments.contactId, contactId));
+  
+  return result;
+}
+
+// ============ KANBAN OPERATIONS ============
+
+export async function getAllKanbanBoards(filters?: { module?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(kanbanBoards).where(eq(kanbanBoards.isActive, true));
+  
+  if (filters?.module) {
+    query = query.where(and(
+      eq(kanbanBoards.isActive, true),
+      eq(kanbanBoards.module, filters.module as any)
+    )) as any;
+  }
+  
+  const result = await query.orderBy(kanbanBoards.sortOrder);
+  return result;
+}
+
+export async function getKanbanBoardById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(kanbanBoards).where(eq(kanbanBoards.id, id));
+  return result[0] || null;
+}
+
+export async function createKanbanBoard(board: InsertKanbanBoard) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(kanbanBoards).values(board);
+  return result[0].insertId;
+}
+
+export async function updateKanbanBoard(id: number, updates: Partial<InsertKanbanBoard>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(kanbanBoards).set(updates).where(eq(kanbanBoards.id, id));
+  return result;
+}
+
+export async function deleteKanbanBoard(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete all columns and cards first
+  await db.delete(kanbanCards).where(eq(kanbanCards.boardId, id));
+  await db.delete(kanbanColumns).where(eq(kanbanColumns.boardId, id));
+  
+  const result = await db.delete(kanbanBoards).where(eq(kanbanBoards.id, id));
+  return result;
+}
+
+export async function getKanbanColumns(boardId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(kanbanColumns)
+    .where(eq(kanbanColumns.boardId, boardId))
+    .orderBy(kanbanColumns.sortOrder);
+  return result;
+}
+
+export async function createKanbanColumn(column: InsertKanbanColumn) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(kanbanColumns).values(column);
+  return result[0].insertId;
+}
+
+export async function updateKanbanColumn(id: number, updates: Partial<InsertKanbanColumn>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(kanbanColumns).set(updates).where(eq(kanbanColumns.id, id));
+  return result;
+}
+
+export async function deleteKanbanColumn(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete all cards in this column first
+  await db.delete(kanbanCards).where(eq(kanbanCards.columnId, id));
+  
+  const result = await db.delete(kanbanColumns).where(eq(kanbanColumns.id, id));
+  return result;
+}
+
+export async function getKanbanCards(boardId: number, columnId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(kanbanCards).where(eq(kanbanCards.boardId, boardId));
+  
+  if (columnId) {
+    query = query.where(and(
+      eq(kanbanCards.boardId, boardId),
+      eq(kanbanCards.columnId, columnId)
+    )) as any;
+  }
+  
+  const result = await query.orderBy(kanbanCards.sortOrder);
+  return result;
+}
+
+export async function createKanbanCard(card: InsertKanbanCard) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(kanbanCards).values(card);
+  return result[0].insertId;
+}
+
+export async function updateKanbanCard(id: number, updates: Partial<InsertKanbanCard>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(kanbanCards).set(updates).where(eq(kanbanCards.id, id));
+  return result;
+}
+
+export async function moveKanbanCard(id: number, newColumnId: number, newSortOrder: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(kanbanCards)
+    .set({ 
+      columnId: newColumnId, 
+      sortOrder: newSortOrder,
+      movedAt: new Date()
+    })
+    .where(eq(kanbanCards.id, id));
+  
+  return result;
+}
+
+export async function deleteKanbanCard(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(kanbanCards).where(eq(kanbanCards.id, id));
+  return result;
+}
+
+// ============ CUSTOMER USER OPERATIONS ============
+
+export async function getCustomerUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(customerUsers).where(eq(customerUsers.email, email));
+  return result[0] || null;
+}
+
+export async function getCustomerUserByContactId(contactId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(customerUsers).where(eq(customerUsers.contactId, contactId));
+  return result[0] || null;
+}
+
+export async function createCustomerUser(user: InsertCustomerUser) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(customerUsers).values(user);
+  return result[0].insertId;
+}
+
+export async function updateCustomerUser(id: number, updates: Partial<InsertCustomerUser>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(customerUsers).set(updates).where(eq(customerUsers.id, id));
+  return result;
+}
+
+export async function deleteCustomerUser(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(customerUsers).where(eq(customerUsers.id, id));
+  return result;
+}
+
+// ============ DOCUMENT TEMPLATE OPERATIONS ============
+
+export async function getAllDocumentTemplates(filters?: { category?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(documentTemplates).where(eq(documentTemplates.isActive, true));
+  
+  if (filters?.category) {
+    query = query.where(and(
+      eq(documentTemplates.isActive, true),
+      eq(documentTemplates.category, filters.category as any)
+    )) as any;
+  }
+  
+  const result = await query.orderBy(documentTemplates.name);
+  return result;
+}
+
+export async function getDocumentTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(documentTemplates).where(eq(documentTemplates.id, id));
+  return result[0] || null;
+}
+
+export async function createDocumentTemplate(template: InsertDocumentTemplate) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(documentTemplates).values(template);
+  return result[0].insertId;
+}
+
+export async function updateDocumentTemplate(id: number, updates: Partial<InsertDocumentTemplate>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(documentTemplates).set(updates).where(eq(documentTemplates.id, id));
+  return result;
+}
+
+export async function deleteDocumentTemplate(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.delete(documentTemplates).where(eq(documentTemplates.id, id));
+  return result;
 }
