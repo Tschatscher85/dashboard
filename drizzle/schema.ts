@@ -161,6 +161,7 @@ export const properties = mysqlTable("properties", {
   linkedContactIds: text("linkedContactIds"), // JSON array of contact IDs for "Verknüpfte Kontakte"
   
   // Court & Land Registry
+  districtCourt: varchar("districtCourt", { length: 255 }),
   courtName: varchar("courtName", { length: 255 }),
   courtCity: varchar("courtCity", { length: 100 }),
   landRegisterNumber: varchar("landRegisterNumber", { length: 100 }),
