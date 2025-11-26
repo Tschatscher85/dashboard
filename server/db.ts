@@ -245,17 +245,18 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   
   console.log('[Database] updateProperty called with:', JSON.stringify({ id, updates }, null, 2));
   
-  // Convert string dates to Date objects
-  // Filter out fields that are not in the Drizzle schema
-  const validKeys = Object.keys(properties);
-  const filteredUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([key]) => validKeys.includes(key))
-  );
-  
-  const processedUpdates: any = { ...filteredUpdates };
+  // Process updates: convert string dates to Date objects
+  const processedUpdates: any = { ...updates };
   if (updates.availableFrom && typeof updates.availableFrom === 'string') {
     processedUpdates.availableFrom = new Date(updates.availableFrom);
   }
+  
+  // Remove any undefined values
+  Object.keys(processedUpdates).forEach(key => {
+    if (processedUpdates[key] === undefined) {
+      delete processedUpdates[key];
+    }
+  });
   
   console.log('[Database] Processed updates:', JSON.stringify(processedUpdates, null, 2));
   
