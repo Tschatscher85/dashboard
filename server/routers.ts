@@ -637,7 +637,6 @@ export const appRouter = router({
         await db.createProperty({
           ...input,
           title,
-          createdBy: 1, // Default user since no authentication
         });
         return { success: true };
       }),
@@ -2070,7 +2069,6 @@ Die Beschreibung soll:
         // Create appointment in database
         const appointmentId = await db.createAppointment({
           ...appointmentData,
-          createdBy: 1, // Default user since no authentication
         });
         
         // Sync to Google Calendar if requested
@@ -2276,7 +2274,6 @@ Die Beschreibung soll:
       .mutation(async ({ input, ctx }) => {
         await db.createActivity({
           ...input,
-          createdBy: 1, // Default user since no authentication
         });
         return { success: true };
       }),
