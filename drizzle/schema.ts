@@ -165,6 +165,10 @@ export const properties = mysqlTable("properties", {
   courtCity: varchar("courtCity", { length: 100 }),
   landRegisterNumber: varchar("landRegisterNumber", { length: 100 }),
   landRegisterSheet: varchar("landRegisterSheet", { length: 100 }),
+  landRegisterOf: varchar("landRegisterOf", { length: 100 }),
+  cadastralDistrict: varchar("cadastralDistrict", { length: 100 }),
+  corridor: varchar("corridor", { length: 100 }),
+  parcel: varchar("parcel", { length: 100 }),
   parcelNumber: varchar("parcelNumber", { length: 100 }),
   
   // Plot details
