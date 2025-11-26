@@ -1035,10 +1035,10 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectValue placeholder="Qualität wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="luxuriös">luxuriös</SelectItem>
-                <SelectItem value="gehoben">gehoben</SelectItem>
+                <SelectItem value="luxurious">luxuriös</SelectItem>
+                <SelectItem value="upscale">gehoben</SelectItem>
                 <SelectItem value="normal">normal</SelectItem>
-                <SelectItem value="einfach">einfach</SelectItem>
+                <SelectItem value="simple">einfach</SelectItem>
               </SelectContent>
             </Select>
           </div>

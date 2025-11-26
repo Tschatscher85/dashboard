@@ -515,8 +515,8 @@ export function PropertyRightColumn({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="alleinauftrag">Alleinauftrag</SelectItem>
-                <SelectItem value="einfach">Einfacher Auftrag</SelectItem>
-                <SelectItem value="qualifiziert">Qualifizierter Alleinauftrag</SelectItem>
+                <SelectItem value="einfacher_auftrag">Einfacher Auftrag</SelectItem>
+                <SelectItem value="qualifizierter_alleinauftrag">Qualifizierter Alleinauftrag</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -730,9 +730,9 @@ export function PropertyRightColumn({
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nicht_benoetigt">wird nicht benötigt</SelectItem>
-                    <SelectItem value="liegt_vor">liegt vor</SelectItem>
-                    <SelectItem value="zur_besichtigung">liegt zur Besichtigung vor</SelectItem>
+                    <SelectItem value="not_required">wird nicht benötigt</SelectItem>
+                    <SelectItem value="available">liegt vor</SelectItem>
+                    <SelectItem value="not_available">liegt zur Besichtigung vor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
