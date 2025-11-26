@@ -588,7 +588,7 @@ export const appRouter = router({
     create: publicProcedure
       .input(z.object({
         title: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
         marketingType: z.enum(["sale", "rent", "lease"]),
         status: z.enum(["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).optional(),
@@ -598,11 +598,11 @@ export const appRouter = router({
         city: z.string().optional(),
         country: z.string().optional(),
         livingArea: z.number().optional(),
-        plotArea: z.number().optional(),
+        plotArea: z.number().nullable().optional(),
         rooms: z.number().optional(),
-        bedrooms: z.number().optional(),
-        bathrooms: z.number().optional(),
-        floor: z.number().optional(),
+        bedrooms: z.number().nullable().optional(),
+        bathrooms: z.number().nullable().optional(),
+        floor: z.number().nullable().optional(),
         totalFloors: z.number().optional(),
         price: z.number().optional(),
         additionalCosts: z.number().optional(),
@@ -646,7 +646,7 @@ export const appRouter = router({
         id: z.number(),
         data: z.object({
           title: z.string().optional(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           category: z.string().optional(),
           propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]).optional(),
           subType: z.string().optional(),
@@ -656,10 +656,10 @@ export const appRouter = router({
           houseNumber: z.string().optional(),
           zipCode: z.string().optional(),
           city: z.string().optional(),
-          region: z.string().optional(),
+          region: z.string().nullable().optional(),
           country: z.string().optional(),
-          latitude: z.number().optional(),
-          longitude: z.number().optional(),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
           hideStreetOnPortals: z.boolean().optional(),
           districtCourt: z.string().optional(),
           landRegisterSheet: z.string().optional(),
@@ -668,14 +668,14 @@ export const appRouter = router({
           corridor: z.string().optional(),
           parcel: z.string().optional(),
           livingArea: z.number().optional(),
-          plotArea: z.number().optional(),
-          usableArea: z.number().optional(),
+          plotArea: z.number().nullable().optional(),
+          usableArea: z.number().nullable().optional(),
           balconyArea: z.number().optional(),
-          gardenArea: z.number().optional(),
+          gardenArea: z.number().nullable().optional(),
           rooms: z.number().optional(),
-          bedrooms: z.number().optional(),
-          bathrooms: z.number().optional(),
-          floor: z.number().optional(),
+          bedrooms: z.number().nullable().optional(),
+          bathrooms: z.number().nullable().optional(),
+          floor: z.number().nullable().optional(),
           floorLevel: z.string().optional().nullable(),
           totalFloors: z.number().optional().nullable(),
           price: z.number().optional().nullable(),
@@ -829,7 +829,7 @@ export const appRouter = router({
         imageUrl: z.string(),
         nasPath: z.string().optional(),
         title: z.string().optional(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         imageType: z.enum(["main", "exterior", "interior", "floorplan", "map", "other"]).optional(),
         sortOrder: z.number().optional(),
       }))
@@ -1798,7 +1798,7 @@ Die Beschreibung soll:
         properties: z.array(z.object({
           externalId: z.string(),
           title: z.string(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           propertyType: z.enum(["apartment", "house", "commercial", "land", "parking", "other"]),
           status: z.enum(["acquisition", "preparation", "marketing", "reserved", "notary", "sold", "completed"]).optional(),
           price: z.number().optional(),
@@ -1812,8 +1812,8 @@ Die Beschreibung soll:
           livingSpace: z.number().optional(),
           plotSize: z.number().optional(),
           rooms: z.number().optional(),
-          bedrooms: z.number().optional(),
-          bathrooms: z.number().optional(),
+          bedrooms: z.number().nullable().optional(),
+          bathrooms: z.number().nullable().optional(),
           buildYear: z.number().optional(),
           features: z.string().optional(), // JSON array as string
           images: z.string().optional(), // JSON array as string
@@ -2054,7 +2054,7 @@ Die Beschreibung soll:
     create: publicProcedure
       .input(z.object({
         title: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         appointmentType: z.enum(["viewing", "meeting", "phone_call", "other"]).optional(),
         startTime: z.date(),
         endTime: z.date(),
@@ -2119,7 +2119,7 @@ Die Beschreibung soll:
         id: z.number(),
         data: z.object({
           title: z.string().optional(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           appointmentType: z.enum(["viewing", "meeting", "phone_call", "other"]).optional(),
           startTime: z.date().optional(),
           endTime: z.date().optional(),
@@ -2202,7 +2202,7 @@ Die Beschreibung soll:
     create: publicProcedure
       .input(z.object({
         title: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         documentType: z.enum(["contract", "expose", "floorplan", "energy_certificate", "other"]).optional(),
         fileUrl: z.string().optional(),
         nasPath: z.string().optional(),
@@ -2842,7 +2842,7 @@ Die Beschreibung soll:
         id: z.number(),
         propertyId: z.number().optional(),
         date: z.date().optional(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         cost: z.number().optional(),
         category: z.string().optional(),
         vendor: z.string().optional(),
@@ -3264,7 +3264,7 @@ Die Beschreibung soll:
     createBoard: publicProcedure
       .input(z.object({
         name: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         module: z.enum(["immobilienmakler", "versicherungen", "hausverwaltung", "general"]).optional(),
         sortOrder: z.number().optional(),
       }))
@@ -3278,7 +3278,7 @@ Die Beschreibung soll:
         id: z.number(),
         data: z.object({
           name: z.string().optional(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           isActive: z.boolean().optional(),
           sortOrder: z.number().optional(),
         }),
@@ -3350,7 +3350,7 @@ Die Beschreibung soll:
         boardId: z.number(),
         columnId: z.number(),
         title: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         contactId: z.number().optional(),
         propertyId: z.number().optional(),
         sortOrder: z.number().optional(),
@@ -3376,7 +3376,7 @@ Die Beschreibung soll:
         id: z.number(),
         data: z.object({
           title: z.string().optional(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           contactId: z.number().optional(),
           propertyId: z.number().optional(),
           sortOrder: z.number().optional(),
@@ -3504,7 +3504,7 @@ Die Beschreibung soll:
     create: publicProcedure
       .input(z.object({
         name: z.string(),
-        description: z.string().optional(),
+        description: z.string().nullable().optional(),
         category: z.enum(["contract", "invoice", "letter", "other"]).optional(),
         templateContent: z.string(),
         templateType: z.enum(["html", "markdown", "docx"]).optional(),
@@ -3520,7 +3520,7 @@ Die Beschreibung soll:
         id: z.number(),
         data: z.object({
           name: z.string().optional(),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           category: z.enum(["contract", "invoice", "letter", "other"]).optional(),
           templateContent: z.string().optional(),
           availablePlaceholders: z.string().optional(),
