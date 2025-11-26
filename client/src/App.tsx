@@ -16,12 +16,13 @@ import ContactForm from "./pages/dashboard/ContactForm";
 import Leads from "./pages/dashboard/Leads";
 import Insurances from "./pages/dashboard/Insurances";
 import InsuranceDetail from "./pages/dashboard/InsuranceDetail";
+import Kanban from "./pages/dashboard/Kanban";
 import PropertyManagement from "./pages/dashboard/PropertyManagement";
 import PropertyLanding from "./pages/PropertyLanding";
 import PropertyMedia from "./pages/dashboard/PropertyMedia";
 import NASTest from "./pages/dashboard/NASTest";
 import Settings from "./pages/Settings";
-import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench } from "lucide-react";
+import { Building2, Users, Mail, Calendar, FileText, Settings as SettingsIcon, Shield, Wrench, LayoutGrid } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const getAllNavItems = () => [
@@ -49,6 +50,11 @@ const getAllNavItems = () => [
     title: "Termine",
     href: "/dashboard/appointments",
     icon: Calendar,
+  },
+  {
+    title: "Kanban",
+    href: "/dashboard/kanban",
+    icon: LayoutGrid,
   },
   {
     title: "Dokumente",
@@ -183,6 +189,13 @@ function Router() {
               <h1 className="text-3xl font-bold">Dokumente</h1>
               <p className="text-muted-foreground">Dokumentenverwaltung kommt bald...</p>
             </div>
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/kanban">
+        {() => (
+          <DashboardLayout navItems={dashboardNavItems}>
+            <Kanban />
           </DashboardLayout>
         )}
       </Route>
