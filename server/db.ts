@@ -231,14 +231,20 @@ export async function getAllProperties(filters?: {
   return propertiesWithImages;
 }
 
-export async function updateProperty(id: number, updates: Partial<InsertProperty> & { availableFrom?: string | Date | null }) {
+export async function updateProperty(id: number, updates: Partial<InsertProperty> & { availableFrom?: string | Date | null, [key: string]: any }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   console.log('[Database] updateProperty called with:', JSON.stringify({ id, updates }, null, 2));
   
   // Convert string dates to Date objects
-  const processedUpdates: any = { ...updates };
+  // Filter out fields that are not in the Drizzle schema
+  const validKeys = Object.keys(properties);
+  const filteredUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([key]) => validKeys.includes(key))
+  );
+  
+  const processedUpdates: any = { ...filteredUpdates };
   if (updates.availableFrom && typeof updates.availableFrom === 'string') {
     processedUpdates.availableFrom = new Date(updates.availableFrom);
   }
