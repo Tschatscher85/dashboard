@@ -732,11 +732,15 @@ export const appRouter = router({
           heatingSystemYear: z.number().optional().nullable(),
           yearBuilt: z.number().optional().nullable(),
           lastModernization: z.number().optional().nullable(),
-          condition: z.enum([
-            "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
-            "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
-            "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
-          ]).optional().nullable(),
+          condition: z.union([
+            z.enum([
+              "erstbezug", "erstbezug_nach_sanierung", "neuwertig", "saniert", "teilsaniert",
+              "sanierungsbedürftig", "baufällig", "modernisiert", "vollständig_renoviert",
+              "teilweise_renoviert", "gepflegt", "renovierungsbedürftig", "nach_vereinbarung", "abbruchreif"
+            ]),
+            z.literal(""),
+            z.null()
+          ]).optional().transform(val => val === "" ? null : val),
           buildingPhase: z.string().optional().nullable(),
           equipmentQuality: z.string().optional().nullable(),
           isRented: z.boolean().optional().nullable(),
