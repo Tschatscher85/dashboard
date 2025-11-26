@@ -190,8 +190,9 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectValue placeholder="Kategorie wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Kauf">Kauf</SelectItem>
-                <SelectItem value="Miete">Miete</SelectItem>
+                <SelectItem value="sale">Kauf</SelectItem>
+                <SelectItem value="rent">Miete</SelectItem>
+                <SelectItem value="lease">Pacht</SelectItem>
               </SelectContent>
             </Select>
           </div>
