@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Pencil, Trash2, LayoutGrid, GripVertical } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function Kanban() {
   const [selectedBoardId, setSelectedBoardId] = useState<number | null>(null);
@@ -30,7 +30,7 @@ export default function Kanban() {
   const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<any>(null);
-  const { toast } = useToast();
+  // toast from sonner
   const queryClient = useQueryClient();
 
   // Fetch boards
@@ -55,7 +55,7 @@ export default function Kanban() {
   const createBoardMutation = trpc.kanban.createBoard.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listBoards"] });
-      toast({ title: "Board erstellt" });
+      toast.success("Board erstellt");
       setIsBoardDialogOpen(false);
     },
   });
@@ -63,7 +63,7 @@ export default function Kanban() {
   const deleteBoardMutation = trpc.kanban.deleteBoard.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listBoards"] });
-      toast({ title: "Board gelöscht" });
+      toast.success("Board gelöscht");
       setSelectedBoardId(null);
     },
   });
@@ -72,7 +72,7 @@ export default function Kanban() {
   const createColumnMutation = trpc.kanban.createColumn.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listColumns"] });
-      toast({ title: "Spalte erstellt" });
+      toast.success("Spalte erstellt");
       setIsColumnDialogOpen(false);
       setColumnForm({ name: "", color: "#3b82f6" });
     },
@@ -81,7 +81,7 @@ export default function Kanban() {
   const updateColumnMutation = trpc.kanban.updateColumn.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listColumns"] });
-      toast({ title: "Spalte aktualisiert" });
+      toast.success("Spalte aktualisiert");
       setIsColumnDialogOpen(false);
       setEditingColumn(null);
     },
@@ -91,7 +91,7 @@ export default function Kanban() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listColumns"] });
       queryClient.invalidateQueries({ queryKey: ["kanban", "listCards"] });
-      toast({ title: "Spalte gelöscht" });
+      toast.success("Spalte gelöscht");
     },
   });
 
@@ -99,7 +99,7 @@ export default function Kanban() {
   const createCardMutation = trpc.kanban.createCard.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listCards"] });
-      toast({ title: "Karte erstellt" });
+      toast.success("Karte erstellt");
       setIsCardDialogOpen(false);
       setCardForm({ columnId: 0, title: "", description: "", contactId: undefined });
     },
@@ -114,7 +114,7 @@ export default function Kanban() {
   const deleteCardMutation = trpc.kanban.deleteCard.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kanban", "listCards"] });
-      toast({ title: "Karte gelöscht" });
+      toast.success("Karte gelöscht");
     },
   });
 

@@ -30,14 +30,14 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Pencil, Trash2, FileText, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function DocumentTemplates() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [previewHtml, setPreviewHtml] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { toast } = useToast();
+  // toast from sonner
   const queryClient = useQueryClient();
 
   // Fetch templates
@@ -47,7 +47,7 @@ export default function DocumentTemplates() {
   const createMutation = trpc.documentTemplates.create.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentTemplates"] });
-      toast({ title: "Vorlage erstellt" });
+      toast.success("Vorlage erstellt");
       setIsDialogOpen(false);
       resetForm();
     },
@@ -56,7 +56,7 @@ export default function DocumentTemplates() {
   const updateMutation = trpc.documentTemplates.update.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentTemplates"] });
-      toast({ title: "Vorlage aktualisiert" });
+      toast.success("Vorlage aktualisiert");
       setIsDialogOpen(false);
       resetForm();
     },
@@ -65,7 +65,7 @@ export default function DocumentTemplates() {
   const deleteMutation = trpc.documentTemplates.delete.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentTemplates"] });
-      toast({ title: "Vorlage gelöscht" });
+      toast.success("Vorlage gelöscht");
     },
   });
 

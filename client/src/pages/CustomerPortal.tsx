@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Lock, FileText } from "lucide-react";
 
 export default function CustomerPortal() {
@@ -12,21 +12,17 @@ export default function CustomerPortal() {
   const [contactId, setContactId] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { toast } = useToast();
+  // toast from sonner
 
   // Login mutation
   const loginMutation = trpc.customerPortal.login.useMutation({
     onSuccess: (data) => {
       setIsLoggedIn(true);
       setContactId(data.contactId);
-      toast({ title: "Erfolgreich angemeldet" });
+      toast.success("Erfolgreich angemeldet");
     },
     onError: (error) => {
-      toast({
-        title: "Anmeldung fehlgeschlagen",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(`Anmeldung fehlgeschlagen: ${error.message}`);
     },
   });
 

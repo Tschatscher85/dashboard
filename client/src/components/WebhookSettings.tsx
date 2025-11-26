@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Webhook } from "lucide-react";
 
 export default function WebhookSettings() {
-  const { toast } = useToast();
+  // toast from sonner
   const [webhookUrl, setWebhookUrl] = useState("");
   const [webhookEnabled, setWebhookEnabled] = useState(false);
   const [webhookEvents, setWebhookEvents] = useState({
@@ -26,14 +26,10 @@ export default function WebhookSettings() {
   // Update mutation
   const updateMutation = trpc.webhooks.updateSettings.useMutation({
     onSuccess: () => {
-      toast({ title: "Webhook-Einstellungen gespeichert" });
+      toast.success("Webhook-Einstellungen gespeichert");
     },
     onError: (error) => {
-      toast({
-        title: "Fehler beim Speichern",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(`Fehler beim Speichern: ${error.message}`);
     },
   });
 
