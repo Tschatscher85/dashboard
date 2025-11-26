@@ -995,12 +995,20 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
                 <SelectValue placeholder="Zustand wählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="first_time_use">Erstbezug</SelectItem>
-                <SelectItem value="first_time_use_after_refurbishment">Erstbezug nach Sanierung</SelectItem>
-                <SelectItem value="mint_condition">Neuwertig</SelectItem>
-                <SelectItem value="refurbished">Saniert</SelectItem>
-                <SelectItem value="in_need_of_renovation">Sanierungsbedürftig</SelectItem>
-                <SelectItem value="by_arrangement">Nach Vereinbarung</SelectItem>
+                <SelectItem value="erstbezug">Erstbezug</SelectItem>
+                <SelectItem value="erstbezug_nach_sanierung">Erstbezug nach Sanierung</SelectItem>
+                <SelectItem value="neuwertig">Neuwertig</SelectItem>
+                <SelectItem value="saniert">Saniert</SelectItem>
+                <SelectItem value="teilsaniert">Teilsaniert</SelectItem>
+                <SelectItem value="sanierungsbedürftig">Sanierungsbedürftig</SelectItem>
+                <SelectItem value="baufällig">Baufällig</SelectItem>
+                <SelectItem value="modernisiert">Modernisiert</SelectItem>
+                <SelectItem value="vollständig_renoviert">Vollständig renoviert</SelectItem>
+                <SelectItem value="teilweise_renoviert">Teilweise renoviert</SelectItem>
+                <SelectItem value="gepflegt">Gepflegt</SelectItem>
+                <SelectItem value="renovierungsbedürftig">Renovierungsbedürftig</SelectItem>
+                <SelectItem value="nach_vereinbarung">Nach Vereinbarung</SelectItem>
+                <SelectItem value="abbruchreif">Abbruchreif</SelectItem>
               </SelectContent>
             </Select>
           </div>
