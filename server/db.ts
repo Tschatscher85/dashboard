@@ -215,7 +215,7 @@ export async function getAllProperties(filters?: {
     query = query.where(and(...conditions)) as any;
   }
   
-  const result = await query.orderBy(desc(properties.createdAt));
+  const result = await query.orderBy(sql`createdAt DESC`);
   
   // Load images for each property
   const propertiesWithImages = await Promise.all(
