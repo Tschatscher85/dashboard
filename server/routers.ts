@@ -2026,18 +2026,120 @@ Die Beschreibung soll:
       .input(z.object({
         id: z.number(),
         data: z.object({
+          // Module assignment
           moduleImmobilienmakler: z.boolean().optional(),
           moduleVersicherungen: z.boolean().optional(),
           moduleHausverwaltung: z.boolean().optional(),
+          
+          // Contact type & category
           contactType: z.enum(["kunde", "partner", "dienstleister", "sonstiges"]).optional(),
-          firstName: z.string().optional(),
-          lastName: z.string().optional(),
-          email: z.string().optional(),
-          phone: z.string().optional(),
+          contactCategory: z.string().optional().nullable(),
+          
+          // Type
+          type: z.enum(["person", "company"]).optional(),
+          
+          // Basic info (Person)
+          salutation: z.enum(["herr", "frau", "divers"]).optional().nullable(),
+          title: z.string().optional().nullable(),
+          firstName: z.string().optional().nullable(),
+          lastName: z.string().optional().nullable(),
+          language: z.string().optional().nullable(),
+          age: z.number().optional().nullable(),
+          birthDate: z.union([z.string(), z.date()]).optional().nullable(),
+          birthPlace: z.string().optional().nullable(),
+          birthCountry: z.string().optional().nullable(),
+          idType: z.string().optional().nullable(),
+          idNumber: z.string().optional().nullable(),
+          issuingAuthority: z.string().optional().nullable(),
+          taxId: z.string().optional().nullable(),
+          nationality: z.string().optional().nullable(),
+          
+          // Contact details
+          email: z.string().optional().nullable(),
+          alternativeEmail: z.string().optional().nullable(),
+          phone: z.string().optional().nullable(),
+          mobile: z.string().optional().nullable(),
+          fax: z.string().optional().nullable(),
+          website: z.string().optional().nullable(),
+          
+          // Address (Private)
+          street: z.string().optional().nullable(),
+          houseNumber: z.string().optional().nullable(),
+          zipCode: z.string().optional().nullable(),
+          city: z.string().optional().nullable(),
+          country: z.string().optional().nullable(),
+          
+          // Company info
+          companyName: z.string().optional().nullable(),
+          position: z.string().optional().nullable(),
+          companyStreet: z.string().optional().nullable(),
+          companyHouseNumber: z.string().optional().nullable(),
+          companyZipCode: z.string().optional().nullable(),
+          companyCity: z.string().optional().nullable(),
+          companyCountry: z.string().optional().nullable(),
+          companyWebsite: z.string().optional().nullable(),
+          companyPhone: z.string().optional().nullable(),
+          companyMobile: z.string().optional().nullable(),
+          companyFax: z.string().optional().nullable(),
+          isBusinessContact: z.boolean().optional().nullable(),
+          
+          // Attributes
+          advisor: z.string().optional().nullable(),
+          coAdvisor: z.string().optional().nullable(),
+          followUpDate: z.union([z.string(), z.date()]).optional().nullable(),
+          source: z.string().optional().nullable(),
+          status: z.string().optional().nullable(),
+          tags: z.string().optional().nullable(),
+          archived: z.boolean().optional().nullable(),
+          notes: z.string().optional().nullable(),
+          availability: z.string().optional().nullable(),
+          
+          // Billing
+          blockContact: z.boolean().optional().nullable(),
+          sharedWithTeams: z.string().optional().nullable(),
+          sharedWithUsers: z.string().optional().nullable(),
+          
+          // DSGVO
+          dsgvoStatus: z.string().optional().nullable(),
+          dsgvoConsentGranted: z.boolean().optional().nullable(),
+          dsgvoDeleteBy: z.union([z.string(), z.date()]).optional().nullable(),
+          dsgvoDeleteReason: z.string().optional().nullable(),
+          newsletterConsent: z.boolean().optional().nullable(),
+          propertyMailingConsent: z.boolean().optional().nullable(),
+          
+          // Sync with external systems
+          googleContactId: z.string().optional().nullable(),
+          googleSyncStatus: z.enum(["not_synced", "synced", "error"]).optional(),
+          googleLastSyncAt: z.union([z.string(), z.date()]).optional().nullable(),
+          brevoContactId: z.string().optional().nullable(),
+          brevoSyncStatus: z.enum(["not_synced", "synced", "error"]).optional(),
+          brevoLastSyncAt: z.union([z.string(), z.date()]).optional().nullable(),
         }),
       }))
       .mutation(async ({ input }) => {
-        return await db.updateContact(input.id, input.data);
+        console.log('[tRPC] contacts.update called with:', JSON.stringify(input, null, 2));
+        
+        // Convert string dates to Date objects
+        const processedData: any = { ...input.data };
+        if (input.data.birthDate && typeof input.data.birthDate === 'string') {
+          processedData.birthDate = new Date(input.data.birthDate);
+        }
+        if (input.data.followUpDate && typeof input.data.followUpDate === 'string') {
+          processedData.followUpDate = new Date(input.data.followUpDate);
+        }
+        if (input.data.dsgvoDeleteBy && typeof input.data.dsgvoDeleteBy === 'string') {
+          processedData.dsgvoDeleteBy = new Date(input.data.dsgvoDeleteBy);
+        }
+        if (input.data.googleLastSyncAt && typeof input.data.googleLastSyncAt === 'string') {
+          processedData.googleLastSyncAt = new Date(input.data.googleLastSyncAt);
+        }
+        if (input.data.brevoLastSyncAt && typeof input.data.brevoLastSyncAt === 'string') {
+          processedData.brevoLastSyncAt = new Date(input.data.brevoLastSyncAt);
+        }
+        
+        console.log('[tRPC] Processed contact data:', Object.keys(processedData));
+        
+        return await db.updateContact(input.id, processedData);
       }),
 
     delete: publicProcedure
