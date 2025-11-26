@@ -3123,5 +3123,529 @@ Die Beschreibung soll:
   
   // Note: Brevo router already exists above (line 1546)
   // New endpoints for Immobilienanfragen/Eigentümeranfragen will be added there
+  
+  // ============ INSURANCES ============
+  insurances: router({
+    list: publicProcedure
+      .input(z.object({
+        contactId: z.number().optional(),
+        status: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllInsurances(input);
+      }),
+
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getInsuranceById(input.id);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        contactId: z.number(),
+        policyNumber: z.string().optional(),
+        insuranceCompany: z.string().optional(),
+        insuranceType: z.string().optional(),
+        yearlyMeeting: z.date().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        premium: z.number().optional(),
+        paymentInterval: z.enum(["monthly", "quarterly", "yearly"]).optional(),
+        status: z.enum(["active", "expired", "cancelled"]).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createInsurance(input);
+        return { success: true, id };
+      }),
+
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          policyNumber: z.string().optional(),
+          insuranceCompany: z.string().optional(),
+          insuranceType: z.string().optional(),
+          yearlyMeeting: z.date().optional(),
+          startDate: z.date().optional(),
+          endDate: z.date().optional(),
+          premium: z.number().optional(),
+          paymentInterval: z.enum(["monthly", "quarterly", "yearly"]).optional(),
+          status: z.enum(["active", "expired", "cancelled"]).optional(),
+          notes: z.string().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateInsurance(input.id, input.data);
+        return { success: true };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteInsurance(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ============ CONTACT TAGS ============
+  contactTags: router({
+    list: publicProcedure
+      .input(z.object({
+        module: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllContactTags(input);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        color: z.string().optional(),
+        module: z.enum(["immobilienmakler", "versicherungen", "hausverwaltung", "general"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createContactTag(input);
+        return { success: true, id };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteContactTag(input.id);
+        return { success: true };
+      }),
+
+    assignToContact: publicProcedure
+      .input(z.object({
+        contactId: z.number(),
+        tagId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.assignTagToContact(input.contactId, input.tagId);
+        return { success: true };
+      }),
+
+    removeFromContact: publicProcedure
+      .input(z.object({
+        contactId: z.number(),
+        tagId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.removeTagFromContact(input.contactId, input.tagId);
+        return { success: true };
+      }),
+
+    getContactTags: publicProcedure
+      .input(z.object({ contactId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getContactTags(input.contactId);
+      }),
+  }),
+
+  // ============ KANBAN ============
+  kanban: router({
+    // Boards
+    listBoards: publicProcedure
+      .input(z.object({
+        module: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllKanbanBoards(input);
+      }),
+
+    getBoard: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getKanbanBoardById(input.id);
+      }),
+
+    createBoard: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        module: z.enum(["immobilienmakler", "versicherungen", "hausverwaltung", "general"]).optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createKanbanBoard(input);
+        return { success: true, id };
+      }),
+
+    updateBoard: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          name: z.string().optional(),
+          description: z.string().optional(),
+          isActive: z.boolean().optional(),
+          sortOrder: z.number().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateKanbanBoard(input.id, input.data);
+        return { success: true };
+      }),
+
+    deleteBoard: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteKanbanBoard(input.id);
+        return { success: true };
+      }),
+
+    // Columns
+    listColumns: publicProcedure
+      .input(z.object({ boardId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getKanbanColumns(input.boardId);
+      }),
+
+    createColumn: publicProcedure
+      .input(z.object({
+        boardId: z.number(),
+        name: z.string(),
+        color: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createKanbanColumn(input);
+        return { success: true, id };
+      }),
+
+    updateColumn: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          name: z.string().optional(),
+          color: z.string().optional(),
+          sortOrder: z.number().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateKanbanColumn(input.id, input.data);
+        return { success: true };
+      }),
+
+    deleteColumn: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteKanbanColumn(input.id);
+        return { success: true };
+      }),
+
+    // Cards
+    listCards: publicProcedure
+      .input(z.object({
+        boardId: z.number(),
+        columnId: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getKanbanCards(input.boardId, input.columnId);
+      }),
+
+    createCard: publicProcedure
+      .input(z.object({
+        boardId: z.number(),
+        columnId: z.number(),
+        title: z.string(),
+        description: z.string().optional(),
+        contactId: z.number().optional(),
+        propertyId: z.number().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createKanbanCard(input);
+        
+        // Trigger webhook if enabled
+        await triggerWebhook('deal_status_changed', {
+          cardId: id,
+          boardId: input.boardId,
+          columnId: input.columnId,
+          title: input.title,
+          contactId: input.contactId,
+          propertyId: input.propertyId,
+        });
+        
+        return { success: true, id };
+      }),
+
+    updateCard: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          title: z.string().optional(),
+          description: z.string().optional(),
+          contactId: z.number().optional(),
+          propertyId: z.number().optional(),
+          sortOrder: z.number().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateKanbanCard(input.id, input.data);
+        return { success: true };
+      }),
+
+    moveCard: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        columnId: z.number(),
+        sortOrder: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.moveKanbanCard(input.id, input.columnId, input.sortOrder);
+        
+        // Trigger webhook if enabled
+        const card = await db.getKanbanCards(0).then(cards => cards.find(c => c.id === input.id));
+        if (card) {
+          await triggerWebhook('deal_status_changed', {
+            cardId: input.id,
+            boardId: card.boardId,
+            columnId: input.columnId,
+            title: card.title,
+            contactId: card.contactId,
+            propertyId: card.propertyId,
+          });
+        }
+        
+        return { success: true };
+      }),
+
+    deleteCard: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteKanbanCard(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ============ CUSTOMER PORTAL ============
+  customerPortal: router({
+    createAccess: publicProcedure
+      .input(z.object({
+        contactId: z.number(),
+        email: z.string(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Hash password
+        const bcrypt = await import('bcryptjs');
+        const hashedPassword = await bcrypt.hash(input.password, 10);
+        
+        const id = await db.createCustomerUser({
+          contactId: input.contactId,
+          email: input.email,
+          password: hashedPassword,
+        });
+        
+        return { success: true, id };
+      }),
+
+    login: publicProcedure
+      .input(z.object({
+        email: z.string(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const user = await db.getCustomerUserByEmail(input.email);
+        
+        if (!user || !user.isActive) {
+          throw new Error('Invalid credentials');
+        }
+        
+        const bcrypt = await import('bcryptjs');
+        const isValid = await bcrypt.compare(input.password, user.password);
+        
+        if (!isValid) {
+          throw new Error('Invalid credentials');
+        }
+        
+        // Update last login
+        await db.updateCustomerUser(user.id, { lastLogin: new Date() });
+        
+        return {
+          success: true,
+          contactId: user.contactId,
+          email: user.email,
+        };
+      }),
+
+    getByContactId: publicProcedure
+      .input(z.object({ contactId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getCustomerUserByContactId(input.contactId);
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteCustomerUser(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ============ DOCUMENT TEMPLATES ============
+  documentTemplates: router({
+    list: publicProcedure
+      .input(z.object({
+        category: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllDocumentTemplates(input);
+      }),
+
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getDocumentTemplateById(input.id);
+      }),
+
+    create: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        category: z.enum(["contract", "invoice", "letter", "other"]).optional(),
+        templateContent: z.string(),
+        templateType: z.enum(["html", "markdown", "docx"]).optional(),
+        availablePlaceholders: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createDocumentTemplate(input);
+        return { success: true, id };
+      }),
+
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.object({
+          name: z.string().optional(),
+          description: z.string().optional(),
+          category: z.enum(["contract", "invoice", "letter", "other"]).optional(),
+          templateContent: z.string().optional(),
+          availablePlaceholders: z.string().optional(),
+          isActive: z.boolean().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateDocumentTemplate(input.id, input.data);
+        return { success: true };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteDocumentTemplate(input.id);
+        return { success: true };
+      }),
+
+    render: publicProcedure
+      .input(z.object({
+        templateId: z.number(),
+        propertyId: z.number().optional(),
+        contactId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const template = await db.getDocumentTemplateById(input.templateId);
+        if (!template) {
+          throw new Error('Template not found');
+        }
+        
+        // Get data for placeholders
+        let propertyData = null;
+        let contactData = null;
+        
+        if (input.propertyId) {
+          propertyData = await db.getPropertyById(input.propertyId);
+        }
+        
+        if (input.contactId) {
+          contactData = await db.getContactById(input.contactId);
+        }
+        
+        // Replace placeholders
+        let content = template.templateContent;
+        
+        if (propertyData) {
+          content = content.replace(/{{strasse}}/g, propertyData.street || '');
+          content = content.replace(/{{hausnummer}}/g, propertyData.houseNumber || '');
+          content = content.replace(/{{plz}}/g, propertyData.zipCode || '');
+          content = content.replace(/{{stadt}}/g, propertyData.city || '');
+          content = content.replace(/{{preis}}/g, propertyData.purchasePrice?.toString() || '');
+          content = content.replace(/{{titel}}/g, propertyData.title || '');
+        }
+        
+        if (contactData) {
+          content = content.replace(/{{kunde_name}}/g, `${contactData.firstName || ''} ${contactData.lastName || ''}`.trim());
+          content = content.replace(/{{kunde_email}}/g, contactData.email || '');
+          content = content.replace(/{{kunde_telefon}}/g, contactData.phone || '');
+        }
+        
+        return {
+          content,
+          filename: `${template.name.toLowerCase().replace(/\s+/g, '_')}.html`,
+        };
+      }),
+  }),
+
+  // ============ WEBHOOK SETTINGS ============
+  webhooks: router({
+    getSettings: publicProcedure
+      .query(async () => {
+        const config = await db.getAppConfig();
+        return {
+          url: config?.webhook_url || '',
+          enabled: config?.webhook_enabled === 'true',
+          events: JSON.parse(config?.webhook_events || '{}'),
+        };
+      }),
+
+    updateSettings: publicProcedure
+      .input(z.object({
+        url: z.string().optional(),
+        enabled: z.boolean().optional(),
+        events: z.record(z.boolean()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.url !== undefined) {
+          await db.setAppConfig('webhook_url', input.url);
+        }
+        if (input.enabled !== undefined) {
+          await db.setAppConfig('webhook_enabled', input.enabled.toString());
+        }
+        if (input.events !== undefined) {
+          await db.setAppConfig('webhook_events', JSON.stringify(input.events));
+        }
+        return { success: true };
+      }),
+  }),
+});
+
+// ============ WEBHOOK TRIGGER HELPER ============
+async function triggerWebhook(event: string, data: any) {
+  try {
+    const config = await db.getAppConfig();
+    const webhookUrl = config?.webhook_url;
+    const webhookEnabled = config?.webhook_enabled === 'true';
+    const webhookEvents = JSON.parse(config?.webhook_events || '{}');
+    
+    if (!webhookEnabled || !webhookUrl || !webhookEvents[event]) {
+      return;
+    }
+    
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event,
+        data,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  } catch (error) {
+    console.error('[Webhook] Failed to trigger:', error);
+  }
 });
 export type AppRouter = typeof appRouter;
