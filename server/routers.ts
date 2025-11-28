@@ -3093,46 +3093,7 @@ Die Beschreibung soll:
       }),
    }),
 
-  // ============ PROPERTY LINKS ============
-  propertyLinks: router({
-    getByProperty: publicProcedure
-      .input(z.object({ propertyId: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getPropertyLinksByProperty(input.propertyId);
-      }),
-
-    create: publicProcedure
-      .input(z.object({
-        propertyId: z.number(),
-        name: z.string(),
-        url: z.string(),
-        showOnLandingPage: z.boolean().optional(),
-        sortOrder: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.createPropertyLink(input);
-      }),
-
-    update: publicProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().optional(),
-        url: z.string().optional(),
-        showOnLandingPage: z.boolean().optional(),
-        sortOrder: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.updatePropertyLink(input.id, input);
-      }),
-
-    delete: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        return await db.deletePropertyLink(input.id);
-      }),
-  }),
-
-    // ============ DASHBOARD ============
+  // ============ DASHBOARD ============
   dashboard: router({
     stats: publicProcedure.query(async () => {
       return await db.getDashboardStats();
@@ -3250,70 +3211,6 @@ Die Beschreibung soll:
   // Note: Brevo router already exists above (line 1546)
   // New endpoints for Immobilienanfragen/Eigentümeranfragen will be added there
   
-  // ============ INSURANCES ============
-  insurances: router({
-    list: publicProcedure
-      .input(z.object({
-        contactId: z.number().optional(),
-        status: z.string().optional(),
-      }).optional())
-      .query(async ({ input }) => {
-        return await db.getAllInsurances(input);
-      }),
-
-    getById: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getInsuranceById(input.id);
-      }),
-
-    create: publicProcedure
-      .input(z.object({
-        contactId: z.number(),
-        policyNumber: z.string().optional(),
-        insuranceCompany: z.string().optional(),
-        insuranceType: z.string().optional(),
-        yearlyMeeting: z.date().optional(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-        premium: z.number().optional(),
-        paymentInterval: z.enum(["monthly", "quarterly", "yearly"]).optional(),
-        status: z.enum(["active", "expired", "cancelled"]).optional(),
-        notes: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const id = await db.createInsurance(input);
-        return { success: true, id };
-      }),
-
-    update: publicProcedure
-      .input(z.object({
-        id: z.number(),
-        data: z.object({
-          policyNumber: z.string().optional(),
-          insuranceCompany: z.string().optional(),
-          insuranceType: z.string().optional(),
-          yearlyMeeting: z.date().optional(),
-          startDate: z.date().optional(),
-          endDate: z.date().optional(),
-          premium: z.number().optional(),
-          paymentInterval: z.enum(["monthly", "quarterly", "yearly"]).optional(),
-          status: z.enum(["active", "expired", "cancelled"]).optional(),
-          notes: z.string().optional(),
-        }),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateInsurance(input.id, input.data);
-        return { success: true };
-      }),
-
-    delete: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        await db.deleteInsurance(input.id);
-        return { success: true };
-      }),
-  }),
 
   // ============ CONTACT TAGS ============
   contactTags: router({
