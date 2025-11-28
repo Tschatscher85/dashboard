@@ -671,7 +671,7 @@ export const appRouter = router({
           livingArea: z.number().optional().nullable(),
           plotArea: z.number().nullable().optional(),
           usableArea: z.number().nullable().optional(),
-          balconyArea: z.number().optional().nullable(),
+          balconyTerraceArea: z.number().optional().nullable(),
           gardenArea: z.number().nullable().optional(),
           rooms: z.number().optional().nullable(),
           bedrooms: z.number().nullable().optional(),
@@ -679,19 +679,19 @@ export const appRouter = router({
           floor: z.number().nullable().optional(),
           floorLevel: z.string().optional().nullable(),
           totalFloors: z.number().optional().nullable(),
-          price: z.number().optional().nullable(),
+          purchasePrice: z.number().optional().nullable(),
           priceOnRequest: z.boolean().optional().nullable(),
           priceByNegotiation: z.boolean().optional().nullable(),
-          coldRent: z.number().optional().nullable(),
-          warmRent: z.number().optional().nullable(),
+          baseRent: z.number().optional().nullable(),
+          totalRent: z.number().optional().nullable(),
           additionalCosts: z.number().optional().nullable(),
           heatingCosts: z.number().optional().nullable(),
-          heatingIncludedInAdditional: z.boolean().optional().nullable(),
+          heatingCostsInServiceCharge: z.boolean().optional().nullable(),
           nonRecoverableCosts: z.number().optional().nullable(),
           houseMoney: z.number().optional().nullable(),
           maintenanceReserve: z.number().optional().nullable(),
           parkingPrice: z.number().optional().nullable(),
-          monthlyRentalIncome: z.number().optional().nullable(),
+          rentalIncome: z.number().optional().nullable(),
           deposit: z.number().optional().nullable(),
           hasElevator: z.boolean().optional().nullable(),
           isBarrierFree: z.boolean().optional().nullable(),
@@ -712,10 +712,10 @@ export const appRouter = router({
           hasWinterGarden: z.boolean().optional().nullable(),
           hasAirConditioning: z.boolean().optional().nullable(),
           hasParking: z.boolean().optional().nullable(),
-          parkingCount: z.number().optional().nullable(),
+          parkingSpaces: z.number().optional().nullable(),
           parkingType: z.string().optional().nullable(),
           bathroomFeatures: z.string().optional().nullable(),
-          flooringTypes: z.string().optional().nullable(),
+          flooring: z.string().optional().nullable(),
           energyCertificateAvailability: z.string().optional().nullable(),
           energyCertificateCreationDate: z.string().optional().nullable(),
           energyCertificateIssueDate: z.string().optional().nullable(),
@@ -811,16 +811,8 @@ export const appRouter = router({
           }
         }
         
-        // *** CRITICAL FIX: Map router field names to database schema field names ***
-        console.log('[tRPC] Before field mapping:', Object.keys(processedData));
-        processedData = mapRouterFieldsToSchema(processedData);
-        console.log('[tRPC] After field mapping:', Object.keys(processedData));
-        
-        // Validate that all fields exist in schema (for debugging)
-        const unknownFields = validateSchemaFields(processedData);
-        if (unknownFields.length > 0) {
-          console.warn('[tRPC] WARNING: Unknown fields detected:', unknownFields);
-        }
+        // All field names now match database schema - no mapping needed
+        console.log('[tRPC] Processing update with fields:', Object.keys(processedData));
         
         await db.updateProperty(input.id, processedData);
         return { success: true };
