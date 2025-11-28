@@ -605,7 +605,7 @@ export const appRouter = router({
         bathrooms: z.number().nullable().optional(),
         floor: z.number().nullable().optional(),
         totalFloors: z.number().optional(),
-        price: z.number().optional(),
+        purchasePrice: z.number().optional(),
         additionalCosts: z.number().optional(),
         heatingCosts: z.number().optional(),
         deposit: z.number().optional(),

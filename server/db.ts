@@ -137,17 +137,12 @@ export async function deleteUser(id: number) {
 // ============ PROPERTY OPERATIONS ============
 
 export async function createProperty(property: InsertProperty) {
-  // Import field mapping function
-  const { mapRouterFieldsToSchema } = await import('./fieldMapping');
-  
-  // Apply field mapping FIRST
-  const mappedProperty = mapRouterFieldsToSchema(property);
-  console.log('[createProperty] Original fields:', Object.keys(property));
-  console.log('[createProperty] Mapped fields:', Object.keys(mappedProperty));
+  console.log('[createProperty] Received fields:', Object.keys(property));
+  console.log('[createProperty] Field values:', property);
   
   // Filter out undefined, null, and empty string values
   const cleanProperty = Object.fromEntries(
-    Object.entries(mappedProperty).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+    Object.entries(property).filter(([_, v]) => v !== undefined && v !== null && v !== '')
   );
   
   // Build dynamic SQL with only provided fields
