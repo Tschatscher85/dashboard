@@ -6,7 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { getDb } from "./db";
-import { mapRouterFieldsToSchema, validateSchemaFields } from "./fieldMapping";
+// Field mapping removed - router now uses database field names directly
 import { generateExpose } from "./exposeGenerator";
 import { getBrevoClient } from "./brevoClient";
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "./googleCalendar";
