@@ -1,76 +1,30 @@
-# ⚡ Quick Start - Dashboard Deployment
+# QUICK START - Deploy jetzt!
 
-## 🎯 Für den schnellen Einstieg
+## Was wurde gefixt?
+16 fehlende Felder im properties UPDATE Router hinzugefügt.
+Jetzt werden ALLE Daten persistent gespeichert!
 
-### 1️⃣ SSH Verbinden
-```bash
-ssh tschatscher@109.90.44.221 -p 2222
-```
-
-### 2️⃣ Ins Dashboard Verzeichnis
-```bash
-cd /home/tschatscher/dashboard
-```
-
-### 3️⃣ Deployment Script ausführen
-```bash
-./deploy.sh
-```
-
-**Das war's!** 🎉
-
----
-
-## ❓ Falls deploy.sh nicht existiert
-
-### Manuelles Deployment:
+## Deployment (3 Befehle)
 
 ```bash
-# 1. Code holen
+cd /path/to/dashboard
 git pull origin main
-
-# 2. .env prüfen
-cat .env | grep DATABASE_URL
-
-# Falls leer:
-nano .env
-# DATABASE_URL=mysql://immojaeger:Survive1985%23@localhost:3306/dashboard
-# CTRL+O, Enter, CTRL+X
-
-# 3. Dependencies
-pnpm install
-
-# 4. Migration (NUR EINMAL!)
-mysql -u root -p dashboard < migration_fix_all_enums.sql
-# Passwort eingeben
-
-# 5. Build
-pnpm run build
-
-# 6. Restart
-pm2 restart dashboard --update-env
+npm run build
+pm2 restart dashboard
 ```
 
----
+## Testen
 
-## ✅ Testen
+1. Öffne: https://dashboard.tschatscher.eu
+2. Gehe zu einer Immobilie
+3. Fülle Kaufpreis aus: 500.000 €
+4. Klicke "Speichern"
+5. Drücke F5
+6. Kaufpreis ist noch da! ✅
 
-**Browser:** https://dashboard.tschatscher.eu
+## Fertig!
 
-1. Immobilie erstellen → Sollte in Liste erscheinen ✅
-2. Kontakt erstellen → Sollte funktionieren ✅
-3. Schnell laden → Keine 30 Sekunden mehr ✅
+Mehr Details in:
+- DEPLOYMENT_GUIDE_DATA_PERSISTENCE_FIX.md
+- TEST_REPORT.md
 
----
-
-## 🐛 Fehler?
-
-```bash
-# Logs ansehen
-pm2 logs dashboard --lines 30
-
-# Status prüfen
-pm2 status
-```
-
-**Siehe:** `DEPLOYMENT_COMPLETE.md` für Details
