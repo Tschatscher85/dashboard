@@ -126,7 +126,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
 
     const numberFields = [
       'latitude', 'longitude', 'price', 'baseRent', 'totalRent', 'heatingCosts', 'additionalCosts',
-      'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome',
+      'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome', 'houseMoney',
       'livingSpace', 'livingArea', 'plotSize', 'plotArea', 'usableSpace', 'usableArea', 'balconyArea', 'balconyTerraceArea', 'gardenArea', 'rooms', 'bedrooms', 'bathrooms',
       'floor', 'floors', 'totalFloors', 'parkingCount', 'parkingSpaces', 'yearBuilt', 'lastModernization', 'heatingSystemYear',
       'energyConsumption', 'energyConsumptionElectricity', 'energyConsumptionHeat', 'co2Emissions',
