@@ -152,8 +152,13 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
         if (numberFields.includes(key)) {
           if (typeof value === 'string' && value.trim() === '') {
             cleanedData[key] = null;
+          } else if (typeof value === 'number') {
+            // Already a number, use as-is
+            cleanedData[key] = value;
           } else {
-            const numValue = parseFloat(String(value));
+            // Convert string to number
+            const strValue = String(value).trim();
+            const numValue = strValue.includes('.') ? parseFloat(strValue) : parseInt(strValue, 10);
             cleanedData[key] = isNaN(numValue) ? null : numValue;
           }
         } else if (dateFields.includes(key)) {
