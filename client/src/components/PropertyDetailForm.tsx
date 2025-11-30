@@ -133,7 +133,11 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
       'walkingTimeToPublicTransport', 'distanceToPublicTransport', 'drivingTimeToHighway', 'distanceToHighway',
       'drivingTimeToMainStation', 'distanceToMainStation', 'drivingTimeToAirport', 'distanceToAirport',
       'supervisorId', 'ownerId', 'buyerId', 'notaryId', 'propertyManagementId', 'tenantId', 'totalCommission',
-      'headlineScore', 'purchasePrice', 'baseRent', 'totalRent', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea'
+      'headlineScore', 'purchasePrice', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea'
+    ];
+
+    const dateFields = [
+      'assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil'
     ];
 
     for (const key in formData) {
@@ -151,6 +155,16 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
           } else {
             const numValue = parseFloat(String(value));
             cleanedData[key] = isNaN(numValue) ? null : numValue;
+          }
+        } else if (dateFields.includes(key)) {
+          // Convert Date objects to ISO string, handle invalid dates
+          if (value instanceof Date && !isNaN(value.getTime())) {
+            cleanedData[key] = value.toISOString();
+          } else if (typeof value === 'string' && value.trim() !== '') {
+            const dateObj = new Date(value);
+            cleanedData[key] = !isNaN(dateObj.getTime()) ? dateObj.toISOString() : null;
+          } else {
+            cleanedData[key] = null;
           }
         } else if (typeof value === 'string' && value.trim() === '') {
           cleanedData[key] = null;
