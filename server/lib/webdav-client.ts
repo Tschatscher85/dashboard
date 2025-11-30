@@ -283,12 +283,13 @@ export async function listFiles(
   propertyFolderName: string,
   category: string
 ): Promise<Array<{ filename: string; basename: string; size: number; type: string }>> {
-  const client = await getWebDAVClient();
-  const categoryPath = getCategoryPath(propertyFolderName, category);
-
   try {
+    const client = await getWebDAVClient();
+    const categoryPath = getCategoryPath(propertyFolderName, category);
+
     const exists = await client.exists(categoryPath);
     if (!exists) {
+      console.log(`[WebDAV] Category folder does not exist: ${categoryPath}`);
       return [];
     }
 
@@ -299,8 +300,10 @@ export async function listFiles(
       size: item.size,
       type: item.type,
     }));
-  } catch (error) {
-    console.error('[WebDAV] Error listing files:', error);
+  } catch (error: any) {
+    // Silently handle WebDAV errors (401, connection issues, etc.)
+    // This prevents WebDAV failures from breaking property operations
+    console.warn(`[WebDAV] Could not list files in ${category}:`, error.message || error);
     return [];
   }
 }
