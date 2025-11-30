@@ -3,13 +3,13 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "path";
-import { defineConfig } from "vite";
+import type { UserConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
-export default defineConfig({
+const config: UserConfig = {
   plugins,
   resolve: {
     alias: {
@@ -41,4 +41,6 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+};
+
+export default config;
