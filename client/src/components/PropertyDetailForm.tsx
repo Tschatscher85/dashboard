@@ -125,7 +125,7 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     const cleanedData: { [key: string]: any } = {};
 
     const numberFields = [
-      'latitude', 'longitude', 'price', 'coldRent', 'warmRent', 'heatingCosts', 'additionalCosts',
+      'latitude', 'longitude', 'price', 'baseRent', 'totalRent', 'heatingCosts', 'additionalCosts',
       'nonRecoverableCosts', 'monthlyHOAFee', 'maintenanceReserve', 'parkingPrice', 'monthlyRentalIncome',
       'livingSpace', 'livingArea', 'plotSize', 'plotArea', 'usableSpace', 'usableArea', 'balconyArea', 'balconyTerraceArea', 'gardenArea', 'rooms', 'bedrooms', 'bathrooms',
       'floor', 'floors', 'totalFloors', 'parkingCount', 'parkingSpaces', 'yearBuilt', 'lastModernization', 'heatingSystemYear',
@@ -666,13 +666,13 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             {isEditing ? (
               <Input
                 type="number"
-                value={formData.coldRent ? formData.coldRent / 100 : ""}
-                onChange={(e) => handleChange("coldRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                value={formData.baseRent ? formData.baseRent / 100 : ""}
+                onChange={(e) => handleChange("baseRent", Math.round(parseFloat(e.target.value || "0") * 100))}
                 className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
-                {formatPrice(formData.coldRent) || "-"}
+                {formatPrice(formData.baseRent) || "-"}
               </div>
             )}
           </div>
@@ -682,13 +682,13 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
             {isEditing ? (
               <Input
                 type="number"
-                value={formData.warmRent ? formData.warmRent / 100 : ""}
-                onChange={(e) => handleChange("warmRent", Math.round(parseFloat(e.target.value || "0") * 100))}
+                value={formData.totalRent ? formData.totalRent / 100 : ""}
+                onChange={(e) => handleChange("totalRent", Math.round(parseFloat(e.target.value || "0") * 100))}
                 className="bg-muted"
               />
             ) : (
               <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 flex items-center">
-                {formatPrice(formData.warmRent) || "-"}
+                {formatPrice(formData.totalRent) || "-"}
               </div>
             )}
           </div>
