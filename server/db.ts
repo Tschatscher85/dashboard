@@ -248,55 +248,77 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   
   console.log('[Database] updateProperty called with:', JSON.stringify({ id, updates }, null, 2));
   
-  // Process updates: convert ISO date strings to MySQL datetime format
-  const processedUpdates: any = { ...updates };
+  // COMPREHENSIVE DATA VALIDATION AND TRANSFORMATION
+  const processedUpdates: any = {};
   
-  // Map German ENUM values to English database values
-  const enumMappings: { [key: string]: { [key: string]: string } } = {
-    energyCertificateAvailability: {
-      'nicht_benoetigt': 'not_required',
-      'vorhanden': 'available',
-      'nicht_vorhanden': 'not_available'
+  // All ENUM fields that need special handling
+  const enumFields = [
+    'energyCertificateAvailability', 'energyCertificateType', 'heatingType', 
+    'mainEnergySource', 'energyClass', 'condition', 'assignmentType', 
+    'assignmentDuration', 'furnishingQuality', 'developmentStatus'
+  ];
+  
+  // All date fields
+  const dateFields = [
+    'assignmentFrom', 'assignmentTo', 'availableFrom', 
+    'energyCertificateIssueDate', 'energyCertificateValidUntil', 
+    'energyCertificateCreationDate'
+  ];
+  
+  // Process each field
+  for (const [key, value] of Object.entries(updates)) {
+    // Skip undefined
+    if (value === undefined) continue;
+    
+    // Handle empty strings - convert to NULL
+    if (value === '' || (typeof value === 'string' && value.trim() === '')) {
+      processedUpdates[key] = null;
+      continue;
     }
-  };
-  
-  // Apply mappings
-  Object.keys(enumMappings).forEach(field => {
-    if (processedUpdates[field] && enumMappings[field][processedUpdates[field]]) {
-      processedUpdates[field] = enumMappings[field][processedUpdates[field]];
+    
+    // Handle NULL
+    if (value === null) {
+      processedUpdates[key] = null;
+      continue;
     }
-  });
-  
-  const dateFields = ['assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil', 'energyCertificateCreationDate'];
-  
-  dateFields.forEach(field => {
-    if (processedUpdates[field]) {
-      if (typeof processedUpdates[field] === 'string') {
-        // Check if it's a valid date string (not an ENUM-like value)
-        if (processedUpdates[field].match(/^\d{4}-\d{2}-\d{2}/)) {
-          // Convert ISO string to MySQL datetime format: YYYY-MM-DD HH:MM:SS
-          const date = new Date(processedUpdates[field]);
+    
+    // Handle ENUM fields - set empty/invalid to NULL
+    if (enumFields.includes(key)) {
+      if (typeof value === 'string' && value.trim()) {
+        processedUpdates[key] = value.trim();
+      } else {
+        processedUpdates[key] = null;
+      }
+      continue;
+    }
+    
+    // Handle date fields
+    if (dateFields.includes(key)) {
+      if (typeof value === 'string') {
+        // Check if it's a valid ISO date
+        if (value.match(/^\d{4}-\d{2}-\d{2}/)) {
+          const date = new Date(value);
           if (!isNaN(date.getTime())) {
-            processedUpdates[field] = date.toISOString().slice(0, 19).replace('T', ' ');
+            // Convert to MySQL datetime format
+            processedUpdates[key] = date.toISOString().slice(0, 19).replace('T', ' ');
           } else {
-            processedUpdates[field] = null;
+            processedUpdates[key] = null;
           }
         } else {
-          // Invalid date format (like 'ab_2014'), set to null
-          processedUpdates[field] = null;
+          // Invalid format (like 'ab_2014'), set to NULL
+          processedUpdates[key] = null;
         }
-      } else if (processedUpdates[field] instanceof Date) {
-        processedUpdates[field] = processedUpdates[field].toISOString().slice(0, 19).replace('T', ' ');
+      } else if (value instanceof Date) {
+        processedUpdates[key] = value.toISOString().slice(0, 19).replace('T', ' ');
+      } else {
+        processedUpdates[key] = null;
       }
+      continue;
     }
-  });
-  
-  // Remove any undefined values
-  Object.keys(processedUpdates).forEach(key => {
-    if (processedUpdates[key] === undefined) {
-      delete processedUpdates[key];
-    }
-  });
+    
+    // All other fields - pass through
+    processedUpdates[key] = value;
+  }
   
   console.log('[Database] Processed updates:', JSON.stringify(processedUpdates, null, 2));
   
