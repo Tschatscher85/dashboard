@@ -263,11 +263,16 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   
   console.log('[Database] Processed updates:', JSON.stringify(processedUpdates, null, 2));
   
-  const result = await db.update(properties).set(processedUpdates as Partial<InsertProperty>).where(eq(properties.id, id));
-  
-  console.log('[Database] Update result:', result);
-  
-  return result;
+  try {
+    const result = await db.update(properties).set(processedUpdates as Partial<InsertProperty>).where(eq(properties.id, id));
+    
+    console.log('[Database] Update result:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('[Database] Update error:', error);
+    throw error;
+  }
 }
 
 export async function deleteProperty(id: number) {
