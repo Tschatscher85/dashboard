@@ -251,6 +251,22 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   // Process updates: convert ISO date strings to MySQL datetime format
   const processedUpdates: any = { ...updates };
   
+  // Map German ENUM values to English database values
+  const enumMappings: { [key: string]: { [key: string]: string } } = {
+    energyCertificateAvailability: {
+      'nicht_benoetigt': 'not_required',
+      'vorhanden': 'available',
+      'nicht_vorhanden': 'not_available'
+    }
+  };
+  
+  // Apply mappings
+  Object.keys(enumMappings).forEach(field => {
+    if (processedUpdates[field] && enumMappings[field][processedUpdates[field]]) {
+      processedUpdates[field] = enumMappings[field][processedUpdates[field]];
+    }
+  });
+  
   const dateFields = ['assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil'];
   
   dateFields.forEach(field => {
