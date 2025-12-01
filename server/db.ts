@@ -267,15 +267,23 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
     }
   });
   
-  const dateFields = ['assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil'];
+  const dateFields = ['assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil', 'energyCertificateCreationDate'];
   
   dateFields.forEach(field => {
     if (processedUpdates[field]) {
       if (typeof processedUpdates[field] === 'string') {
-        // Convert ISO string to MySQL datetime format: YYYY-MM-DD HH:MM:SS
-        const date = new Date(processedUpdates[field]);
-        if (!isNaN(date.getTime())) {
-          processedUpdates[field] = date.toISOString().slice(0, 19).replace('T', ' ');
+        // Check if it's a valid date string (not an ENUM-like value)
+        if (processedUpdates[field].match(/^\d{4}-\d{2}-\d{2}/)) {
+          // Convert ISO string to MySQL datetime format: YYYY-MM-DD HH:MM:SS
+          const date = new Date(processedUpdates[field]);
+          if (!isNaN(date.getTime())) {
+            processedUpdates[field] = date.toISOString().slice(0, 19).replace('T', ' ');
+          } else {
+            processedUpdates[field] = null;
+          }
+        } else {
+          // Invalid date format (like 'ab_2014'), set to null
+          processedUpdates[field] = null;
         }
       } else if (processedUpdates[field] instanceof Date) {
         processedUpdates[field] = processedUpdates[field].toISOString().slice(0, 19).replace('T', ' ');
