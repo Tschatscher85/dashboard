@@ -248,11 +248,24 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   
   console.log('[Database] updateProperty called with:', JSON.stringify({ id, updates }, null, 2));
   
-  // Process updates: convert string dates to Date objects
+  // Process updates: convert ISO date strings to MySQL datetime format
   const processedUpdates: any = { ...updates };
-  if (updates.availableFrom && typeof updates.availableFrom === 'string') {
-    processedUpdates.availableFrom = new Date(updates.availableFrom);
-  }
+  
+  const dateFields = ['assignmentFrom', 'assignmentTo', 'availableFrom', 'energyCertificateIssueDate', 'energyCertificateValidUntil'];
+  
+  dateFields.forEach(field => {
+    if (processedUpdates[field]) {
+      if (typeof processedUpdates[field] === 'string') {
+        // Convert ISO string to MySQL datetime format: YYYY-MM-DD HH:MM:SS
+        const date = new Date(processedUpdates[field]);
+        if (!isNaN(date.getTime())) {
+          processedUpdates[field] = date.toISOString().slice(0, 19).replace('T', ' ');
+        }
+      } else if (processedUpdates[field] instanceof Date) {
+        processedUpdates[field] = processedUpdates[field].toISOString().slice(0, 19).replace('T', ' ');
+      }
+    }
+  });
   
   // Remove any undefined values
   Object.keys(processedUpdates).forEach(key => {
