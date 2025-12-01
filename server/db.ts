@@ -265,6 +265,17 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
     'energyCertificateCreationDate'
   ];
   
+  // German to English ENUM value mappings
+  const enumValueMappings: { [key: string]: { [key: string]: string } } = {
+    energyCertificateAvailability: {
+      'liegt_vor': 'available',
+      'vorhanden': 'available',
+      'nicht_vorhanden': 'not_available',
+      'nicht_benoetigt': 'not_required',
+      'wird_nicht_benoetigt': 'not_required'
+    }
+  };
+  
   // Process each field
   for (const [key, value] of Object.entries(updates)) {
     // Skip undefined
@@ -285,7 +296,13 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
     // Handle ENUM fields - set empty/invalid to NULL
     if (enumFields.includes(key)) {
       if (typeof value === 'string' && value.trim()) {
-        processedUpdates[key] = value.trim();
+        const trimmedValue = value.trim();
+        // Check if we need to map German to English
+        if (enumValueMappings[key] && enumValueMappings[key][trimmedValue]) {
+          processedUpdates[key] = enumValueMappings[key][trimmedValue];
+        } else {
+          processedUpdates[key] = trimmedValue;
+        }
       } else {
         processedUpdates[key] = null;
       }
