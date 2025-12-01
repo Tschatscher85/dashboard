@@ -263,15 +263,37 @@ export async function updateProperty(id: number, updates: Partial<InsertProperty
   
   console.log('[Database] Processed updates:', JSON.stringify(processedUpdates, null, 2));
   
+  // Build dynamic SQL with only provided fields to avoid Drizzle ORM issues
+  const fields = Object.keys(processedUpdates);
+  const values = Object.values(processedUpdates);
+  
+  if (fields.length === 0) {
+    console.log('[Database] No fields to update');
+    return { success: true };
+  }
+  
+  const setClause = fields.map(f => `\`${f}\` = ?`).join(', ');
+  const sql = `UPDATE properties SET ${setClause} WHERE id = ?`;
+  
+  // Add id to the end of values array
+  const allValues = [...values, id];
+  
+  console.log('[Database] Executing SQL:', sql);
+  console.log('[Database] With values:', allValues);
+  
+  // Use mysql2 directly for more control
+  const mysql2 = await import('mysql2/promise');
+  const connection = await mysql2.createConnection(process.env.DATABASE_URL!);
+  
   try {
-    const result = await db.update(properties).set(processedUpdates as Partial<InsertProperty>).where(eq(properties.id, id));
-    
+    const [result] = await connection.execute(sql, allValues);
     console.log('[Database] Update result:', result);
-    
     return result;
   } catch (error) {
     console.error('[Database] Update error:', error);
     throw error;
+  } finally {
+    await connection.end();
   }
 }
 
