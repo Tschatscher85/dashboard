@@ -133,7 +133,8 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
       'walkingTimeToPublicTransport', 'distanceToPublicTransport', 'drivingTimeToHighway', 'distanceToHighway',
       'drivingTimeToMainStation', 'distanceToMainStation', 'drivingTimeToAirport', 'distanceToAirport',
       'supervisorId', 'ownerId', 'buyerId', 'notaryId', 'propertyManagementId', 'tenantId', 'totalCommission',
-      'headlineScore', 'purchasePrice', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea'
+      'headlineScore', 'purchasePrice', 'deposit', 'rentalIncome', 'parkingPrice', 'siteArea',
+      'internalCommissionPercent', 'externalCommissionInternalPercent'
     ];
 
     const dateFields = [
