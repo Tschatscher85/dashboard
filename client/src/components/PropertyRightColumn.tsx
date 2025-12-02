@@ -730,9 +730,9 @@ export function PropertyRightColumn({
                     <SelectValue placeholder="Auswählen..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nicht_benoetigt">wird nicht benötigt</SelectItem>
-                    <SelectItem value="liegt_vor">liegt vor</SelectItem>
-                    <SelectItem value="zur_besichtigung">liegt zur Besichtigung vor</SelectItem>
+                    <SelectItem value="not_required">wird nicht benötigt</SelectItem>
+                    <SelectItem value="available">liegt vor / liegt zur Besichtigung vor</SelectItem>
+                    <SelectItem value="not_available">nicht vorhanden</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
