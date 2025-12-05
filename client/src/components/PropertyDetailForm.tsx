@@ -56,6 +56,17 @@ export const PropertyDetailForm = forwardRef<PropertyDetailFormHandle, PropertyD
     propertyWithoutTitle.availableFrom = propertyWithoutTitle.availableFrom.toISOString().split('T')[0];
   }
   const [formData, setFormData] = useState<Partial<Property>>(propertyWithoutTitle);
+  
+  // Update formData when property changes (e.g., after refetch)
+  useEffect(() => {
+    const propertyWithoutTitle: any = { ...property };
+    delete propertyWithoutTitle.title;
+    if (propertyWithoutTitle.availableFrom instanceof Date) {
+      propertyWithoutTitle.availableFrom = propertyWithoutTitle.availableFrom.toISOString().split('T')[0];
+    }
+    setFormData(propertyWithoutTitle);
+  }, [property]);
+  
   // Handle Google Places autocomplete
   const handlePlaceSelected = (place: any) => {
     if (!place.address_components) return;
